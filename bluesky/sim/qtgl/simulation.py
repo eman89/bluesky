@@ -64,7 +64,7 @@ class Simulation(QObject):
         self.traf        = Traffic(self.navdb)
 
         # Additional modules
-        self.metric      = Metric()
+#        self.metric      = Metric()
         self.beastfeed   = Modesbeast(self.traf)
 
         # Initialize the stack module once
@@ -103,7 +103,7 @@ class Simulation(QObject):
                 self.traf.update(self.simt, self.simdt)
 
                 # Update metrics
-                self.metric.update(self)
+#                self.metric.update(self)
 
                 # Update loggers
                 datalog.postupdate()
