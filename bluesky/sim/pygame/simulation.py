@@ -1,5 +1,5 @@
 import time
-from ...tools import datalog, areafilter
+from ...tools import datalog
 from ...traf import Traffic
 from ... import stack
 from ...traf.metric import Metric
@@ -181,4 +181,3 @@ class Simulation:
         self.mode = self.init
         self.traf.reset(self.navdb)
         datalog.reset()
-        areafilter.reset()

@@ -143,16 +143,18 @@ class ScreenIO(QObject):
         if data_in is None:
             # This is an object delete event
             data = None
-        elif objtype == 'LINE' or objtype[:4] == 'POLY':
+        elif objtype == 1 or objtype == 4:
+            # LINE(1) or POLY(4)
             data = np.array(data_in, dtype=np.float32)
-        elif objtype == 'BOX':
+        elif objtype == 2:
             # BOX
             data = np.array([data_in[0], data_in[1],
                              data_in[0], data_in[3],
                              data_in[2], data_in[3],
                              data_in[2], data_in[1]], dtype=np.float32)
 
-        elif objtype == 'CIRCLE':
+        elif objtype == 3:
+            # CIRCLE
             # parameters
             Rearth = 6371000.0             # radius of the Earth [m]
             numPoints = 72                 # number of straight line segments that make up the circrle
