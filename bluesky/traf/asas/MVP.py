@@ -145,7 +145,7 @@ def resolve(dbconf, traf):
     
     # If resolutions are limited in the horizontal direction, then asasalt should
     # be equal to auto pilot alt (aalt). This is to prevent a new asasalt being computed 
-    # using the auto pilot vertical speed (traf.avs) using the code in line 106 (asasalttemp) when only
+    # using the auto pilot vertical speed (traf.avs) using the code in line 143 (asasalttemp) when only
     # horizontal resolutions are allowed.
     dbconf.asasalt = dbconf.asasalt*(1-dbconf.swresohoriz) + traf.apalt*dbconf.swresohoriz
     
@@ -173,7 +173,7 @@ def MVP(traf, dbconf, id1, id2):
     v2 = np.array([traf.gseast[id2], traf.gsnorth[id2], traf.vs[id2]])
     vrel = np.array(v2-v1) 
     
-    # Find tcpa (or should it be tinconf, since tinconf decided whether its a conflict?)
+    # Find tcpa 
     tcpa = dbconf.tcpa[id1,id2] # dbconf.tinconf[id1,id2]
     
     # Find horizontal and vertical distances at the tcpa
