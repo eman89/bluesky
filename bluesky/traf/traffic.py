@@ -1222,7 +1222,7 @@ class Traffic:
                 return True, "Area is switched OFF"  
             else: 
                 # shape name is unknown
-                return False, "Shapename unknown. Please create shapename first and then the call Area command, or it shapename misspelled!"
+                return False, "Shapename unknown. Please create shapename first or shapename is misspelled!"
         # if first argument is a float -> then make a box with the arguments
         elif (isinstance(args[0],float) or isinstance(args[0],int)) and 4<=len(args)<=6:
             self.swarea   = True
