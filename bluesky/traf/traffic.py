@@ -1,7 +1,7 @@
 import numpy as np
 from math import *
 from random import random, randint
-from ..tools import datalog
+from ..tools import datalog,areafilter
 from ..tools import geo
 from ..tools.aero import fpm, kts, ft, nm, g0, tas2eas, tas2mach, tas2cas, mach2tas,  \
                          mach2cas, cas2tas, cas2mach, Rearth, vatmos, \
@@ -199,6 +199,7 @@ class Traffic:
 
         # Traffic area: delete traffic when it leaves this area (so not when outside)
         self.swarea     = False
+        self.areaname   = None
         self.arealat0   = 0.0  # [deg] lower latitude defining area
         self.arealat1   = 0.0  # [deg] upper latitude defining area
         self.arealon0   = 0.0  # [deg] lower longitude defining area
@@ -1196,76 +1197,112 @@ class Traffic:
                 line += " to " + self.dest[idx]
 
         return line
+        
+    def setArea(self, scr, args):
+        ''' Set Experiment Area. Aicraft leaving the experiment area are deleted.
+        Input can be exisiting shape name, or a box with optional altitude constrainsts.'''        
+        
+        # if all args are empty, then print out the current area status
+        if len(args)==0:
+            return True, "Area is currently " + ("ON" if self.swarea else "OFF") + \
+                         "\nCurrent Area name is: " + str(self.areaname)   
+        
+        # start by checking if the first argument is a string -> then it is an area name
+        if isinstance(args[0], str) and len(args)==1:
+            if args[0] in areafilter.areas:
+                # switch on Area, set it to the shape name
+                self.areaname = args[0]
+                self.swarea   = True
+                return True, "Area is set to " + str(self.areaname)
+            elif args[0]=='OFF' or args[0]=='OF':
+                # switch off the area                 
+                areafilter.deleteArea(scr, self.areaname)
+                self.swarea   = False
+                self.areaname = None
+                return True, "Area is switched OFF"  
+            else: 
+                # shape name is unknown
+                return False, "Shapename unknown. Please create shapename first and then the call Area command, or it shapename misspelled!"
+        # if first argument is a float -> then make a box with the arguments
+        elif (isinstance(args[0],float) or isinstance(args[0],int)) and 4<=len(args)<=6:
+            self.swarea   = True
+            self.areaname = 'ExptArea'
+            areafilter.defineArea(scr, self.areaname, 'BOX', args)
+            return True, "Area is ON. Area name is: " + str(self.areaname)
+        else:
+            return False,  "Incorrect arguments" + \
+                           "\nAREA Shapename/OFF or\n Area lat,lon,lat,lon,[top,bottom]"             
 
-    def setArea(self, scr, metric, *args):
-        if args[0] == 'OFF':
-            self.swarea = False
-            self.area   = ""
-            scr.objappend(2, "AREA", None)  # delete square areas
-            scr.objappend(3, "AREA", None)  # delete circle areas
-            return True
-
-        if type(args[0]) == float and len(args) >= 4:
-            # This is a square area
-            self.arealat0 = min(args[0], args[2])
-            self.arealat1 = max(args[0], args[2])
-            self.arealon0 = min(args[1], args[3])
-            self.arealon1 = max(args[1], args[3])
-
-            if len(args) == 5:
-                self.areafloor = args[4] * ft
-            else:
-                self.areafloor = -9999999.
-
-            self.area = "Square"
-            self.swarea = True
-            scr.objappend(2, "AREA", [args[0], args[1], args[2], args[3]])
-
-            # Avoid mass delete due to redefinition of area
-            self.inside = self.ntraf * [False]
-            return True
-        elif args[0] == "FIR" and len(args) <= 3:
-            for i in range(0, len(self.navdb.fir)):
-                if args[1] == self.navdb.fir[i][0]:
-                    break
-            if args[1] != self.navdb.fir[i][0]:
-                return False, "Unknown FIR, try again"
-
-            metric.fir_number        = i
-            metric.fir_circle_point  = metric.metric_Area.FIR_circle(self.navdb, metric.fir_number)
-            metric.fir_circle_radius = float(args[1])
-
-            if len(args) == 3:
-                self.areafloor = args[2] * ft
-            else:
-                self.areafloor = -9999999.
-
-            self.area   = "Circle"
-            self.swarea = True
-            self.inside = self.ntraf * [False]
-            scr.objappend(3, "AREA", [metric.fir_circle_point[0] , metric.fir_circle_point[1], metric.fir_circle_radius])
-            return True
-        elif args[0] == "CIRCLE" and len(args) in [4, 5]:
-            # draw circular experiment area
-            self.arealat0 = args[1]    # Latitude of circle center [deg]
-            self.arealon0 = args[2]    # Longitude of circle center [deg]
-            self.arearadius = args[3]  # Radius of circle Center [NM]
-
-            # Deleting traffic flying out of experiment area
-            self.area = "Circle"
-            self.swarea = True
-
-            if len(args) == 5:
-                self.areafloor = args[4] * ft  # [m]
-            else:
-                self.areafloor = -9999999.  # [m]
-
-            # draw the circular experiment area on the radar gui
-            scr.objappend(3, "AREA", [self.arealat0, self.arealon0, self.arearadius])
-
-            # Avoid mass delete due to redefinition of area
-            self.inside = self.ntraf * [False]
-
-            return True
-
-        return False
+# WHAT TO DO WITH THE FIR?
+#    def setArea(self, scr, metric, *args):
+#        if args[0] == 'OFF':
+#            self.swarea = False
+#            self.area   = ""
+#            scr.objappend(2, "AREA", None)  # delete square areas
+#            scr.objappend(3, "AREA", None)  # delete circle areas
+#            return True
+#
+#        if type(args[0]) == float and len(args) >= 4:
+#            # This is a square area
+#            self.arealat0 = min(args[0], args[2])
+#            self.arealat1 = max(args[0], args[2])
+#            self.arealon0 = min(args[1], args[3])
+#            self.arealon1 = max(args[1], args[3])
+#
+#            if len(args) == 5:
+#                self.areafloor = args[4] * ft
+#            else:
+#                self.areafloor = -9999999.
+#
+#            self.area = "Square"
+#            self.swarea = True
+#            scr.objappend(2, "AREA", [args[0], args[1], args[2], args[3]])
+#
+#            # Avoid mass delete due to redefinition of area
+#            self.inside = self.ntraf * [False]
+#            return True
+#        elif args[0] == "FIR" and len(args) <= 3:
+#            for i in range(0, len(self.navdb.fir)):
+#                if args[1] == self.navdb.fir[i][0]:
+#                    break
+#            if args[1] != self.navdb.fir[i][0]:
+#                return False, "Unknown FIR, try again"
+#
+#            metric.fir_number        = i
+#            metric.fir_circle_point  = metric.metric_Area.FIR_circle(self.navdb, metric.fir_number)
+#            metric.fir_circle_radius = float(args[1])
+#
+#            if len(args) == 3:
+#                self.areafloor = args[2] * ft
+#            else:
+#                self.areafloor = -9999999.
+#
+#            self.area   = "Circle"
+#            self.swarea = True
+#            self.inside = self.ntraf * [False]
+#            scr.objappend(3, "AREA", [metric.fir_circle_point[0] , metric.fir_circle_point[1], metric.fir_circle_radius])
+#            return True
+#        elif args[0] == "CIRCLE" and len(args) in [4, 5]:
+#            # draw circular experiment area
+#            self.arealat0 = args[1]    # Latitude of circle center [deg]
+#            self.arealon0 = args[2]    # Longitude of circle center [deg]
+#            self.arearadius = args[3]  # Radius of circle Center [NM]
+#
+#            # Deleting traffic flying out of experiment area
+#            self.area = "Circle"
+#            self.swarea = True
+#
+#            if len(args) == 5:
+#                self.areafloor = args[4] * ft  # [m]
+#            else:
+#                self.areafloor = -9999999.  # [m]
+#
+#            # draw the circular experiment area on the radar gui
+#            scr.objappend(3, "AREA", [self.arealat0, self.arealon0, self.arearadius])
+#
+#            # Avoid mass delete due to redefinition of area
+#            self.inside = self.ntraf * [False]
+#
+#            return True
+#
+#        return False

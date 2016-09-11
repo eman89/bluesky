@@ -45,8 +45,7 @@ def defineArea(scr, areaname, areatype, coordinates):
 def deleteArea(scr, areaname):
     if areaname in areas:
         areas.pop(areaname)
-        scr.objappend('', areaname, None)
-    pass
+        scr.objappend('', areaname, None)    
 
 
 def reset():
