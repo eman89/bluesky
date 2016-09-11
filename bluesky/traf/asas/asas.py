@@ -80,6 +80,10 @@ class ASAS():
         
         self.resoFacH     = 1.0                        # [-] set horizontal resolution factor (1.0 = 100%)
         self.resoFacV     = 1.0                        # [-] set horizontal resolution factor (1.0 = 100%)
+        
+        self.swconfareafilt  = False                   # [-] swtich to activate the CONFAREAFILT command. This conflict filter is area based.
+        self.areafiltercode  = None                    # [-] Code for the conflict area filter that should be used (OPTION1, OPTION2, OPTION3) 
+        self.areafiltershape = None                    # [-] Name of shape where area conflict filter is active 
 
         self.confpairs    = []                         # Start with emtpy database: no conflicts
         self.nconf        = 0                          # Number of detected conflicts
