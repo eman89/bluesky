@@ -109,6 +109,11 @@ def init(sim, traf, scr):
             "txt,latlon,float,[alt,alt]",
             lambda name, *coords: areafilter.defineArea(scr, name, 'CIRCLE', coords)
         ],
+        "CONFAREAFILTER": [
+            "CONFAREAFILTER [ON/OFF, filtercode, shapename]",
+            "[onoff, txt, txt]",
+            traf.asas.SetConfAreaFilter
+        ],
         "CRE": [
             "CRE acid,type,lat,lon,hdg,alt,spd",
             "txt,txt,latlon,hdg,alt,spd",

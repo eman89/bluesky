@@ -1,6 +1,7 @@
 import numpy as np
 from ... import settings
 from ...tools.aero import ft, nm
+from ...tools import areafilter
 
 # Import default CD methods
 try:
@@ -316,6 +317,33 @@ class ASAS():
         
         # active the switch, if there are acids in the list
         self.swresooff = len(self.resoofflst)>0  
+    
+    def SetConfAreaFilter(self, flag=None, filtercode=None, shapename=None):
+        '''Set the area conflict filter switch, the type of filter, and the shape where it should act'''
+        options = ["OPTION1","OPTION2","OPTION3"]       
+        if flag is None and filtercode is None and shapename is None:
+            return True , "CONFAREAFILTER ON/OFF, FILTERCODE, SHAPENAME" + \
+                          "\nAvialable filter codes:" + \
+                          "\n     OPTION1: CPA in shapename" + \
+                          "\n     OPTION2: CPA and 1 aircraft in conflict pair in shapename" + \
+                          "\n     OPTION3: CPA and both aircraft in conflict pair in shapename" + \
+                          "\nConflictAreaFilter is currently " + ("ON" if self.swconfareafilt else "OFF") + \
+                          "\nFiltercode is currently " + str(self.areafiltercode) + \
+                          "\nShapename  is currently " + str(self.areafiltershape)         
+        if not flag:
+            self.swconfareafilt  = flag
+            self.areafiltercode  = None
+            self.areafiltershape = None
+            return True
+        else:
+            if filtercode not in options:
+                return False, "Filter code not understood. Available Options: " + str(options) 
+            elif shapename not in areafilter.areas:
+                return False, "Shape does not exist (please create shape first) or incorrectly spelt."
+            self.swconfareafilt  = flag
+            self.areafiltercode  = filtercode
+            self.areafiltershape = shapename 
+            return True       
 
     def create(self, trk, spd, alt):
         # ASAS info: no conflict => empty list
