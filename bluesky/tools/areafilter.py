@@ -1,5 +1,5 @@
 """Area filter module"""
-from geo import kwikdist
+from geo import kwikdist, kwikdist_matrix
 from matplotlib.path import Path
 import numpy as np
 
@@ -21,7 +21,14 @@ def listACInside(self, areaname, traf, acids=None):
 
 def listACOutside(areaname, traf, acids=None):
     acinside = listACInside(areaname, traf, acids)
-    return set(range(traf.ntraf)) - acinside
+    return set(range(traf.ntraf)) - acinside    
+    
+
+def checkInside(areaname, traflat, traflon, trafalt):
+    if areaname not in areas:
+        return []
+    area = areas[areaname]
+    return area.checkInside(traflat, traflon, trafalt)
 
 
 def defineArea(scr, areaname, areatype, coordinates):
@@ -57,6 +64,12 @@ class Box:
         self.lat0, self.lon0, self.lat1, self.lon1 = coordinates
         self.top    = top
         self.bottom = bottom
+        
+        # Sort the order of the corner points 
+        self.lat0 = min(self.lat0, self.lat1)
+        self.lat1 = max(self.lat0, self.lat1)
+        self.lon0 = min(self.lon0, self.lon1)
+        self.lon1 = max(self.lon0, self.lon1)
 
     def inside(self, traf, acidx):
         ret = []
@@ -65,10 +78,16 @@ class Box:
                self.lon0 <= traf.lon[i] <= self.lon1 and \
                self.bottom <= traf.alt[i] <= self.top:
                 ret.append(i)
-
+                # What to do with swtaxi?
+                # (traf.alt[i] >= 0.5*ft or traf.swtaxi)
         return ret
-        # What to do with swtaxi?
-        # (traf.alt[i] >= 0.5*ft or traf.swtaxi)
+        
+    def checkInside(self,traflat, traflon, trafalt):       
+        inside = ((self.lat0 <= traflat) & (traflat <= self.lat1)) & \
+                 ((self.lon0 <= traflon) & (traflon <= self.lon1)) & \
+                 ((self.bottom <= trafalt) & (trafalt <= self.top))      
+        return inside
+        
 
 
 class Circle:
@@ -83,10 +102,19 @@ class Circle:
         ret = []
         # delete aircraft if it is too far from the center of the circular area, or if has decended below the minimum altitude
         for i in acidx:
-            distance = kwikdist(self.clat0, self.clon0, traf.lat[i], traf.lon[i])  # [NM]
+            distance = kwikdist(self.clat, self.clon, traf.lat[i], traf.lon[i])  # [NM]
             if distance <= self.r and self.bottom <= traf.alt[i] <= self.top:
                 ret.append(i)
         return ret
+    
+    def checkInside(self, traflat, traflon, trafalt): 
+        clat     = np.array([self.clat]*len(traflat))
+        clon     = np.array([self.clon]*len(traflat))
+        r        = np.array([self.r]*len(traflat))        
+        distance = kwikdist_matrix(clat, clon, traflat, traflon)  # [NM]        
+        inside   = (distance <= r) & (self.bottom <= trafalt) & (trafalt <= self.top)
+        return inside
+        
 
 
 class Poly:
@@ -102,3 +130,15 @@ class Poly:
                self.bottom <= traf.alt[i] <= self.top:
                 ret.append(i)
         return ret
+    
+    def checkInside(self, traflat, traflon, trafalt):
+        inside = []
+        for i in range (traflat):
+            if self.border.contains_point([traflat[i], traflon[i]]) and \
+               self.bottom <= trafalt[i] <= self.top:
+                   inside.append(True)
+            else:
+                   inside.append(False)
+        return np.array(inside)
+            
+        

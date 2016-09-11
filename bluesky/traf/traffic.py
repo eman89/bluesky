@@ -209,7 +209,7 @@ class Traffic:
         self.areat0     = -100.  # last time checked
         self.arearadius = 100.0  # [NM] radius of experiment area if it is a circle
 
-        self.inside = []
+        self.inside = np.array([])
         self.fir_circle_point = (0.0, 0.0)
         self.fir_circle_radius = 1.0
 
@@ -374,7 +374,7 @@ class Traffic:
         self.destrk  = np.append(self.destrk, self.trk[-1])
 
         # Area variable set to False to avoid deletion upon creation outside
-        self.inside.append(False)
+        self.inside = np.append(self.inside, False)
 
         # Display information on label
         self.label.append(['', '', '', 0])
@@ -498,7 +498,7 @@ class Traffic:
         self.destrk     = np.delete(self.destrk, idx)
 
         # Metrics, area
-        del self.inside[idx]
+        self.inside = np.delete(self.inside, idx)
 
         # Traffic display data: label
         del self.label[idx]
@@ -910,30 +910,19 @@ class Traffic:
         if self.swarea and abs(simt - self.areat0) > self.areadt:
             # Update loop timer
             self.areat0 = simt
-            # Check all aircraft
-            i = 0
-            while (i < self.ntraf):
-                # Current status
-                if self.area == "Square":
-                    inside = self.arealat0 <= self.lat[i] <= self.arealat1 and \
-                             self.arealon0 <= self.lon[i] <= self.arealon1 and \
-                             self.alt[i] >= self.areafloor and \
-                             (self.alt[i] >= 0.5*ft or self.swtaxi)
 
-                elif self.area == "Circle":
-
-                    # delete aircraft if it is too far from the center of the circular area, or if has decended below the minimum altitude
-                    distance = geo.kwikdist(self.arealat0, self.arealon0, self.lat[i], self.lon[i])  # [NM]
-                    inside = distance < self.arearadius and self.alt[i] >= self.areafloor
-
-                # Compare with previous: when leaving area: delete command
-                if self.inside[i] and not inside:
-                    self.delete(self.id[i])
-
-                else:
-                    # Update area status
-                    self.inside[i] = inside
-                    i = i + 1
+            # Find out where all the aircraft are
+            inside = areafilter.checkInside(self.areaname, self.lat, self.lon, self.alt)
+            
+            # Determine the aircraft indexes that should be deleted
+            delAircraftidx = np.intersect1d(np.where(np.array(self.inside)==True), np.where(np.array(inside)==False))
+            
+            # Update self.inside with the new inside
+            self.inside = inside
+            
+            # delete all aicraft in delAircraftidx
+            for idx in delAircraftidx:
+                self.delete(self.id[idx])
 
         return
 
