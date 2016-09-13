@@ -373,12 +373,7 @@ class ASAS():
         elif self.areafiltercode == "OPTION2":
             acoInside = areafilter.checkInside(self.areafiltershape, traf.lat[i], traf.lon[i], traf.alt[i])
             aciInside = areafilter.checkInside(self.areafiltershape, traf.lat[j], traf.lon[j], traf.alt[j])
-            confInArea = (cpaiInside and cpaoInside) and (acoInside or aciInside)   
-            
-            if not confInArea:
-                print "OPTION2: " + str(traf.id[i]) + ", "+ str(traf.id[j])
-                print cpalato, cpalati, cpalono, cpaloni
-                print
+            confInArea = (cpaiInside and cpaoInside) and (acoInside or aciInside)
             
         # OPTION3: CPA and both aircraft inside selected shape
         elif self.areafiltercode == "OPTION3":

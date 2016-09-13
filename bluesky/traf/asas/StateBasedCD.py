@@ -138,13 +138,16 @@ def detect(dbconf, traf, simt):
     # Store result. Note: not all these conflicts may satisfy the conflcit-area-filter
     dbconf.nconf = len(confidxs[0]) 
     
-    for idx in range(dbconf.nconf):
+    # number of filtered conflicts
+    numfiltconf = 0
+    
+    for idx in range(dbconf.nconf):        
+        
+        # Determine idx of conflciting aircaft
         i = iown[idx]
         j = ioth[idx]
         if i == j:
-            continue
-        
-        dbconf.iconf[i].append(idx)
+            continue           
         
         # Determine if the conflict pair satisfies the conflict-area-filter settings
         if dbconf.swconfareafilt:
@@ -153,13 +156,13 @@ def detect(dbconf, traf, simt):
             rng        = dbconf.tcpa[i, j] * traf.gs[i] / nm
             lato, lono = geo.qdrpos(traf.lat[i], traf.lon[i], traf.trk[i], rng)
             alto       = traf.alt[i] + dbconf.tcpa[i, j] * traf.vs[i]
-            confInArea = True
+            confInArea = True        
         
         # If conflict satisfies the conflict-area-filter settings, update all 
         # relevant conflict and intrusion lists
         if confInArea:
             
-            
+            dbconf.iconf[i].append(numfiltconf)
             dbconf.confpairs.append((traf.id[i], traf.id[j]))        
     
             dbconf.latowncpa.append(lato)
@@ -213,6 +216,9 @@ def detect(dbconf, traf, simt):
                         dbconf.LOSmaxsev[idx]  = severity
                         dbconf.LOShmaxsev[idx] = Ih
                         dbconf.LOSvmaxsev[idx] = Iv  
+            
+            # update the number of filtered conflicts
+            numfiltconf = numfiltconf + 1
 
     # Convert to numpy arrays for vectorisation
     dbconf.latowncpa = np.array(dbconf.latowncpa)
