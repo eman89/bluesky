@@ -144,6 +144,8 @@ def detect(dbconf, traf, simt):
         if i == j:
             continue
         
+        dbconf.iconf[i].append(idx)
+        
         # Determine if the conflict pair satisfies the conflict-area-filter settings
         if dbconf.swconfareafilt:
             lato, lono, alto, confInArea = dbconf.ConfAreaFilter(traf, i, j)
@@ -157,7 +159,7 @@ def detect(dbconf, traf, simt):
         # relevant conflict and intrusion lists
         if confInArea:
             
-            dbconf.iconf[i].append(idx)
+            
             dbconf.confpairs.append((traf.id[i], traf.id[j]))        
     
             dbconf.latowncpa.append(lato)
