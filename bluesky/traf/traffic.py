@@ -901,8 +901,7 @@ class Traffic:
 
         # ----------------AREA check----------------
         # Update area once per areadt seconds:
-        if self.swarea and abs(simt - self.areat0) > self.areadt and self.ntraf > 0:
-            # Update loop timer
+        if self.swarea and abs(simt - self.areat0) > self.areadt:
             self.areat0 = simt
             
             # Find out which aircraft are inside the experiment area
@@ -1209,7 +1208,7 @@ class Traffic:
         # if first argument is a float -> then make a box with the arguments
         elif (isinstance(args[0],float) or isinstance(args[0],int)) and 4<=len(args)<=6:
             self.swarea   = True
-            self.areaname = 'ExptArea'
+            self.areaname = 'DELAREA'
             areafilter.defineArea(scr, self.areaname, 'BOX', args)
             return True, "Area is ON. Area name is: " + str(self.areaname)
         else:

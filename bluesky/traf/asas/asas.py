@@ -1,7 +1,7 @@
 import numpy as np
 from ... import settings
 from ...tools.aero import ft, nm
-from ...tools import areafilter
+from ...tools import areafilter, geo
 
 # Import default CD methods
 try:
@@ -321,7 +321,7 @@ class ASAS():
         self.swresooff = len(self.resoofflst)>0  
     
     def SetConfAreaFilter(self, flag=None, filtercode=None, shapename=None):
-        '''Set the area conflict filter switch, the type of filter, and the shape where it should act'''
+        '''Set the conflict-area-filter switch, the type of filter, and the shape where it should act'''
         options = ["OPTION1","OPTION2","OPTION3"]       
         if flag is None and filtercode is None and shapename is None:
             return True , "CONFAREAFILTER ON/OFF, FILTERCODE, SHAPENAME" + \
@@ -345,7 +345,43 @@ class ASAS():
             self.swconfareafilt  = flag
             self.areafiltercode  = filtercode
             self.areafiltershape = shapename 
-            return True       
+            return True
+    
+    def ConfAreaFilter(self, traf, i, j):
+        '''Checks if the conflict between ownship and intruder matches the 
+        Conflict-Area-Filter settings'''
+        
+        # Determine CPA of Ownship (What to do when ADSB is ON?)
+        rng              = self.tcpa[i, j] * traf.gs[i] / nm
+        cpalato, cpalono = geo.qdrpos(traf.lat[i], traf.lon[i], traf.trk[i], rng)
+        cpaalto          = traf.alt[i] + self.tcpa[i, j] * traf.vs[i]
+
+        # Determine CPA of Intruder (What to do when ADSB is ON?)
+        rng              = self.tcpa[i, j] * traf.gs[j] / nm
+        cpalati, cpaloni = geo.qdrpos(traf.lat[j], traf.lon[j], traf.trk[j], rng)
+        cpaalti          = traf.alt[j] + self.tcpa[i, j] * traf.vs[j]       
+        
+        # Check if CPAs are inside selected shape
+        cpaoInside = areafilter.checkInside(self.areafiltershape, cpalato, cpalono, cpaalto)
+        cpaiInside = areafilter.checkInside(self.areafiltershape, cpalati, cpaloni, cpaalti)
+        
+        # OPTION1: CPA inside selected shape 
+        if self.areafiltercode == "OPTION1":            
+            confInArea = cpaiInside and cpaoInside           
+            
+        # OPTION2: CPA and 1 aircraft inside selected shape
+        elif self.areafiltercode == "OPTION2":
+            acoInside = areafilter.checkInside(self.areafiltershape, traf.lat[i], traf.lon[i], traf.alt[i])
+            aciInside = areafilter.checkInside(self.areafiltershape, traf.lat[j], traf.lon[j], traf.alt[j])
+            confInArea = (cpaiInside and cpaoInside) and (acoInside or aciInside)         
+            
+        # OPTION3: CPA and both aircraft inside selected shape
+        elif self.areafiltercode == "OPTION3":
+            acoInside = areafilter.checkInside(self.areafiltershape, traf.lat[i], traf.lon[i], traf.alt[i])
+            aciInside = areafilter.checkInside(self.areafiltershape, traf.lat[j], traf.lon[j], traf.alt[j])
+            confInArea = (cpaiInside and cpaoInside) and (acoInside and aciInside)          
+        
+        return cpalato, cpalono, cpaalto, confInArea
     
     def APorASAS(self, traf):
         """ Decide for each aircraft in the conflict list whether the ASAS
@@ -430,8 +466,7 @@ class ASAS():
             # if both ids are unknown, then delete this conflict, because both aircraft
             # have completed their flights (and have been deleted)
             else:
-                self.conflist_all.remove(conflict)        
-            
+                self.conflist_all.remove(conflict)      
 
     def create(self, trk, spd, alt):
         # ASAS info: no conflict => empty list

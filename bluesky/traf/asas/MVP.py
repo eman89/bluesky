@@ -174,7 +174,7 @@ def MVP(traf, dbconf, id1, id2):
     vrel = np.array(v2-v1) 
     
     # Find tcpa 
-    tcpa = dbconf.tcpa[id1,id2] # dbconf.tinconf[id1,id2]
+    tcpa = dbconf.tcpa[id1,id2] 
     
     # Find horizontal and vertical distances at the tcpa
     dcpa  = drel + vrel*tcpa

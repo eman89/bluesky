@@ -129,80 +129,88 @@ def detect(dbconf, traf, simt):
     # ----------------------------------------------------------------------
     if len(swconfl) == 0:
         return
-    # Calculate CPA positions of traffic in lat/lon?
-
+    
     # Select conflicting pairs: each a/c gets their own record
-    confidxs            = np.where(swconfl)
-    iown                = confidxs[0]
-    ioth                = confidxs[1]
+    confidxs = np.where(swconfl)
+    iown     = confidxs[0]
+    ioth     = confidxs[1]
 
-    # Store result
-    dbconf.nconf        = len(confidxs[0])
-
+    # Store result. Note: not all these conflicts may satisfy the conflcit-area-filter
+    dbconf.nconf = len(confidxs[0]) 
+    
     for idx in range(dbconf.nconf):
         i = iown[idx]
         j = ioth[idx]
         if i == j:
             continue
-
-        dbconf.iconf[i].append(idx)
-        dbconf.confpairs.append((traf.id[i], traf.id[j]))
-
-        rng        = dbconf.tcpa[i, j] * traf.gs[i] / nm
-        lato, lono = geo.qdrpos(traf.lat[i], traf.lon[i], traf.trk[i], rng)
-        alto       = traf.alt[i] + dbconf.tcpa[i, j] * traf.vs[i]
-
-        dbconf.latowncpa.append(lato)
-        dbconf.lonowncpa.append(lono)
-        dbconf.altowncpa.append(alto)
-
-        dx = (traf.lat[i] - traf.lat[j]) * 111319.
-        dy = (traf.lon[i] - traf.lon[j]) * 111319.
-
-        hdist2 = dx**2 + dy**2
-        hLOS   = hdist2 < dbconf.R**2
-        vdist  = abs(traf.alt[i] - traf.alt[j])
-        vLOS   = vdist < dbconf.dh
-        LOS    = (hLOS & vLOS)
-
-        # Add to Conflict and LOSlist, to count total conflicts and LOS
-
-        # NB: if only one A/C detects a conflict, it is also added to these lists
-        combi = str(traf.id[i]) + " " + str(traf.id[j])
-        combi2 = str(traf.id[j]) + " " + str(traf.id[i])
-
-        # Make conflict and LOS lists
-        if combi not in dbconf.conflist_all and combi2 not in dbconf.conflist_all:
-            dbconf.conflist_all.append(combi)
+        
+        # Determine if the conflict pair satisfies the conflict-area-filter settings
+        if dbconf.swconfareafilt:
+            lato, lono, alto, confInArea = dbconf.ConfAreaFilter(traf, i, j)
+        else:
+            rng        = dbconf.tcpa[i, j] * traf.gs[i] / nm
+            lato, lono = geo.qdrpos(traf.lat[i], traf.lon[i], traf.trk[i], rng)
+            alto       = traf.alt[i] + dbconf.tcpa[i, j] * traf.vs[i]
+            confInArea = True
+        
+        # If conflict satisfies the conflict-area-filter settings, update all 
+        # relevant conflict and intrusion lists
+        if confInArea:
             
-        if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
-            dbconf.conflist_now.append(combi)
-            
-        if LOS:
-            if combi not in dbconf.LOSlist_all and combi2 not in dbconf.LOSlist_all:
-                dbconf.LOSlist_all.append(combi)
-                dbconf.LOSmaxsev.append(0.)
-                dbconf.LOShmaxsev.append(0.)
-                dbconf.LOSvmaxsev.append(0.)
-
-            if combi not in dbconf.LOSlist_now and combi2 not in dbconf.LOSlist_now:
-                dbconf.LOSlist_now.append(combi)
-
-            # Now, we measure intrusion and store it if it is the most severe
-            Ih = 1.0 - np.sqrt(hdist2) / dbconf.R
-            Iv = 1.0 - vdist / dbconf.dh
-            severity = min(Ih, Iv)
-
-            try:  # Only continue if combi is found in LOSlist (and not combi2)
-                idx = dbconf.LOSlist_all.index(combi)
-            except:
-                idx = -1
-
-            if idx >= 0:
-                if severity > dbconf.LOSmaxsev[idx]:
-                    dbconf.LOSmaxsev[idx]  = severity
-                    dbconf.LOShmaxsev[idx] = Ih
-                    dbconf.LOSvmaxsev[idx] = Iv  
+            dbconf.iconf[i].append(idx)
+            dbconf.confpairs.append((traf.id[i], traf.id[j]))        
+    
+            dbconf.latowncpa.append(lato)
+            dbconf.lonowncpa.append(lono)
+            dbconf.altowncpa.append(alto)
+    
+            dx = (traf.lat[i] - traf.lat[j]) * 111319.
+            dy = (traf.lon[i] - traf.lon[j]) * 111319.
+    
+            hdist2 = dx**2 + dy**2
+            hLOS   = hdist2 < dbconf.R**2
+            vdist  = abs(traf.alt[i] - traf.alt[j])
+            vLOS   = vdist < dbconf.dh
+            LOS    = (hLOS & vLOS)
+    
+            # Add to Conflict and LOSlist, to count total conflicts and LOS
+    
+            # NB: if only one A/C detects a conflict, it is also added to these lists
+            combi = str(traf.id[i]) + " " + str(traf.id[j])
+            combi2 = str(traf.id[j]) + " " + str(traf.id[i])
+    
+            # Make conflict and LOS lists
+            if combi not in dbconf.conflist_all and combi2 not in dbconf.conflist_all:
+                dbconf.conflist_all.append(combi)
+                
+            if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
+                dbconf.conflist_now.append(combi)
+                
+            if LOS:
+                if combi not in dbconf.LOSlist_all and combi2 not in dbconf.LOSlist_all:
+                    dbconf.LOSlist_all.append(combi)
+                    dbconf.LOSmaxsev.append(0.)
+                    dbconf.LOShmaxsev.append(0.)
+                    dbconf.LOSvmaxsev.append(0.)
+    
+                if combi not in dbconf.LOSlist_now and combi2 not in dbconf.LOSlist_now:
+                    dbconf.LOSlist_now.append(combi)
+    
+                # Now, we measure intrusion and store it if it is the most severe
+                Ih = 1.0 - np.sqrt(hdist2) / dbconf.R
+                Iv = 1.0 - vdist / dbconf.dh
+                severity = min(Ih, Iv)
+    
+                try:  # Only continue if combi is found in LOSlist (and not combi2)
+                    idx = dbconf.LOSlist_all.index(combi)
+                except:
+                    idx = -1
+    
+                if idx >= 0:
+                    if severity > dbconf.LOSmaxsev[idx]:
+                        dbconf.LOSmaxsev[idx]  = severity
+                        dbconf.LOShmaxsev[idx] = Ih
+                        dbconf.LOSvmaxsev[idx] = Iv  
 
     # Convert to numpy arrays for vectorisation
     dbconf.latowncpa = np.array(dbconf.latowncpa)

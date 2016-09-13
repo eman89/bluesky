@@ -309,7 +309,7 @@ class Route():
                 # Set target altitude for autopilot
                 if self.wpalt[wpidx] > 0:
 
-                    if traf.alt[i] < self.wptoalt[i]-10.*ft:
+                    if traf.alt[i] < self.wptoalt[wpidx]-10.*ft:
                         traf.actwpalt[i] = self.wptoalt[wpidx]
                         traf.dist2vs[i] = 9999.
                     else:
