@@ -1,5 +1,5 @@
 """Area filter module"""
-from geo import kwikdist, kwikdist_matrix
+from geo import kwikdist_matrix
 from matplotlib.path import Path
 import numpy as np
 
@@ -42,16 +42,15 @@ def reset():
 
 class Box:
     def __init__(self, coordinates, top=1e9, bottom=-1e9):
-        self.lat0, self.lon0, self.lat1, self.lon1 = coordinates
         self.top    = top
         self.bottom = bottom        
         # Sort the order of the corner points 
-        self.lat0 = min(self.lat0, self.lat1)
-        self.lat1 = max(self.lat0, self.lat1)
-        self.lon0 = min(self.lon0, self.lon1)
-        self.lon1 = max(self.lon0, self.lon1)
+        self.lat0 = min(coordinates[0],coordinates[2])
+        self.lon0 = min(coordinates[1],coordinates[3])
+        self.lat1 = max(coordinates[0],coordinates[2])
+        self.lon1 = max(coordinates[1],coordinates[3])
         
-    def checkInside(self, lat, lon, alt):       
+    def checkInside(self, lat, lon, alt):     
         inside = ((self.lat0 <=  lat) & ( lat <= self.lat1)) & \
                  ((self.lon0 <= lon) & (lon <= self.lon1)) & \
                  ((self.bottom <= alt) & (alt <= self.top))      

@@ -200,18 +200,12 @@ class Traffic:
         # Traffic area: delete traffic when it leaves this area (so not when outside)
         self.swarea     = False
         self.areaname   = None
-        self.arealat0   = 0.0  # [deg] lower latitude defining area
-        self.arealat1   = 0.0  # [deg] upper latitude defining area
-        self.arealon0   = 0.0  # [deg] lower longitude defining area
-        self.arealon1   = 0.0  # [deg] upper longitude defining area
-        self.areafloor  = -999999.0  # [m] Delete when descending through this h
         self.areadt     = 5.0  # [s] frequency of area check (simtime)
         self.areat0     = -100.  # last time checked
-        self.arearadius = 100.0  # [NM] radius of experiment area if it is a circle
-
         self.inside = np.array([])
-        self.fir_circle_point = (0.0, 0.0)
-        self.fir_circle_radius = 1.0
+        # What to do with FIR?
+#        self.fir_circle_point = (0.0, 0.0)
+#        self.fir_circle_radius = 1.0
 
         # Taxi switch
         self.swtaxi = False  # Default OFF: delete traffic below 1500 ft
@@ -602,7 +596,7 @@ class Traffic:
             next_qdr = np.where(self.next_qdr < -900., qdr, self.next_qdr)
 
             # distance to turn initialisation point
-            self.actwpturn = np.maximum(0.1, np.abs(turnrad*np.tan(np.radians(0.5*degto180(np.abs(qdr -    \
+            self.actwpturn = np.maximum(10.0, np.abs(turnrad*np.tan(np.radians(0.5*degto180(np.abs(qdr -    \
                  next_qdr))))))
 
             # Check whether shift based dist [nm] is required, set closer than WP turn distanc
@@ -907,16 +901,16 @@ class Traffic:
 
         # ----------------AREA check----------------
         # Update area once per areadt seconds:
-        if self.swarea and abs(simt - self.areat0) > self.areadt:
+        if self.swarea and abs(simt - self.areat0) > self.areadt and self.ntraf > 0:
             # Update loop timer
             self.areat0 = simt
-
+            
             # Find out which aircraft are inside the experiment area
             inside = areafilter.checkInside(self.areaname, self.lat, self.lon, self.alt)
             
             # Determine the aircraft indexes that should be deleted
             delAircraftidx = np.intersect1d(np.where(np.array(self.inside)==True), np.where(np.array(inside)==False))
-            
+
             # Update self.inside with the new inside
             self.inside = inside
             
