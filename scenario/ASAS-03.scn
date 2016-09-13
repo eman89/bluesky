@@ -22,8 +22,11 @@
 00:00:00.00>CRE HV296 B744 1.5 1.485 270 FL100 350
 
 00:00:00.00>ECHO Conflict between CX52 and HV296 occurs at 7min 41sec
+00:00:00.00> ECHO Performance limits change speed to 354 at FL300
 
 00:00:00.00>FF 451
 
 00:06:00.00>ALT HV296 FL300
 00:06:00.00>ALT CX520 FL300
+
+

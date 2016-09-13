@@ -91,13 +91,11 @@ class ASAS():
         self.lonowncpa    = np.array([])
         self.altowncpa    = np.array([])
 
-        self.conflist_all = []  # List of all Conflicts
-        self.LOSlist_all  = []  # List of all Losses Of Separation
-        self.conflist_exp = []  # List of all Conflicts in experiment time
-        self.LOSlist_exp  = []  # List of all Losses Of Separation in experiment time
-        self.conflist_now = []  # List of current Conflicts
-        self.LOSlist_now  = []  # List of current Losses Of Separation
-
+        self.conflist_all  = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from list once past CPA
+        self.LOSlist_all   = []  # List of all Losses Of Separation till now.
+        self.conflist_now  = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
+        self.LOSlist_now   = []  # List of Losses Of Separations in the current ASAS cycle. 
+        
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
         self.LOShmaxsev   = []
@@ -348,6 +346,92 @@ class ASAS():
             self.areafiltercode  = filtercode
             self.areafiltershape = shapename 
             return True       
+    
+    def APorASAS(self, traf):
+        """ Decide for each aircraft in the conflict list whether the ASAS
+        should be followed or not, based on if the aircraft pairs passed
+        their CPA. """
+        
+        self.asasactive.fill(False)
+    
+        # Look at all conflicts, also the ones that are solved but CPA is yet to come
+        for conflict in self.conflist_all:
+            ac1, ac2 = conflict.split(" ")
+            id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
+            if id1 >= 0 and id2 >= 0:
+                # Check if conflict is past CPA
+                d = np.array([traf.lon[id2] - traf.lon[id1], traf.lat[id2] - traf.lat[id1]])
+    
+                # write velocities as vectors
+                v1 = np.array([traf.gseast[id1], traf.gsnorth[id1]])
+                v2 = np.array([traf.gseast[id2], traf.gsnorth[id2]])
+                
+                # Compute pastCPA
+                pastCPA = np.dot(d,v2-v1)>0.
+                
+                # hLOS:
+                # Aircraft should continue to resolve until there is no horizontal 
+                # LOS. This is particularly relevant when vertical resolutions
+                # are used. 
+                dx = (traf.lat[id1] - traf.lat[id2]) * 111319.
+                dy = (traf.lon[id1] - traf.lon[id2]) * 111319.    
+                hdist2 = dx**2 + dy**2
+                hLOS   = hdist2 < self.R**2          
+                
+                # Bouncing conflicts:
+                # If two aircraft are getting in and out of conflict continously, 
+                # then they it is a bouncing conflict. ASAS should stay active until 
+                # the bouncing stops.
+                bouncingConflict = (abs(traf.trk[id1] - traf.trk[id2]) < 30.) & (hdist2<self.Rm**2)         
+                
+                # Decide if conflict is over or not. 
+                # If not over, turn asasactive to true. 
+                # If over, then initiate recovery
+                if not pastCPA or hLOS or bouncingConflict:
+                    # Aircraft haven't passed their CPA: must follow their ASAS
+                    self.asasactive[id1] = True
+                    self.asasactive[id2] = True
+                
+                else:
+                    # Waypoint recovery after conflict
+                    # Find the next active waypoint and send the aircraft to that 
+                    # waypoint.             
+                    iwpid1 = traf.route[id1].findact(traf,id1)
+                    if iwpid1 != -1: # To avoid problems if there are no waypoints
+                        traf.route[id1].direct(traf, id1, traf.route[id1].wpname[iwpid1])
+                    iwpid2 = traf.route[id2].findact(traf,id2)
+                    if iwpid2 != -1: # To avoid problems if there are no waypoints
+                        traf.route[id2].direct(traf, id2, traf.route[id2].wpname[iwpid2])
+                    
+                    # If conflict is solved, remove it from conflist_all list
+                    # This is so that if a conflict between this pair of aircraft 
+                    # occurs again, then that new conflict should be detected, logged
+                    # and solved (if reso is on)
+                    self.conflist_all.remove(conflict)
+            
+            # If aircraft id1 cannot be found in traffic because it has finished its
+            # flight (and has been deleted), start trajectory recovery for aircraft id2
+            # And remove the conflict from the conflict_all list
+            elif id1 < 0 and id2 >= 0:
+                 iwpid2 = traf.route[id2].findact(traf,id2)
+                 if iwpid2 != -1: # To avoid problems if there are no waypoints
+                     traf.route[id2].direct(traf, id2, traf.route[id2].wpname[iwpid2])
+                 self.conflist_all.remove(conflict)
+    
+            # If aircraft id2 cannot be found in traffic because it has finished its
+            # flight (and has been deleted) start trajectory recovery for aircraft id1
+            # And remove the conflict from the conflict_all list
+            elif id2 < 0 and id1 >= 0:
+                iwpid1 = traf.route[id1].findact(traf,id1)
+                if iwpid1 != -1: # To avoid problems if there are no waypoints
+                    traf.route[id1].direct(traf, id1, traf.route[id1].wpname[iwpid1])
+                self.conflist_all.remove(conflict)
+            
+            # if both ids are unknown, then delete this conflict, because both aircraft
+            # have completed their flights (and have been deleted)
+            else:
+                self.conflist_all.remove(conflict)        
+            
 
     def create(self, trk, spd, alt):
         # ASAS info: no conflict => empty list
@@ -373,6 +457,9 @@ class ASAS():
         if self.swasas and simt >= self.tasas:
             self.tasas += self.dtasas
 
-            # Conflict detection and resolution
+            # Conflict detection
             self.cd.detect(self, traf, simt)
+            # Is conflict active? Then follow ASAS, else follow AP.
+            self.APorASAS(traf)
+            # Conflict resolution
             self.cr.resolve(self, traf)

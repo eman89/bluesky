@@ -221,8 +221,8 @@ class ScreenIO(QObject):
             # Conflict statistics
             data.nconf_tot  = len(self.sim.traf.asas.conflist_all)
             data.nlos_tot   = len(self.sim.traf.asas.LOSlist_all)
-            data.nconf_exp  = len(self.sim.traf.asas.conflist_exp)
-            data.nlos_exp   = len(self.sim.traf.asas.LOSlist_exp)
+#            data.nconf_exp  = len(self.sim.traf.asas.conflist_exp)
+#            data.nlos_exp   = len(self.sim.traf.asas.LOSlist_exp)
             data.nconf_cur  = len(self.sim.traf.asas.conflist_now)
             data.nlos_cur   = len(self.sim.traf.asas.LOSlist_now)
 
