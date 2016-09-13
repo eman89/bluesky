@@ -50,7 +50,7 @@ class Position():
 
             # apt-RWY type
             else:
-                idx = self.navdb.apid.index(txt.upper())
+                idx = self.navdb.apid.index(txt1.upper())
  
                 self.lat = navdb.aplat[idx]
                 self.lon = navdb.aplon[idx]

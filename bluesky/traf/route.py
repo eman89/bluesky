@@ -43,65 +43,44 @@ class Route():
 
         return
 
-    def addwptStack(self, traf, idx, *args): # args: all arguments of addwpt
+    def addwptStack(self, traf, idx, *args):
         "ADDWPT acid, (wpname/lat,lon),[alt],[spd],[afterwp]"
-
-        # Check FLYBY or FLYOVER switch, instead of adding a waypoint
         if len(args) == 1:
-
             isflyby = args[0].replace('-', '')
-
             if isflyby == "FLYBY":
                 self.swflyby = True
                 return True
-                
             elif isflyby == "FLYOVER":
                 self.swflyby = False
                 return True
 
-        # Check for name given (nav/airport) or not
-        if type (args[0])==str and args[0]=="":
-            name     = traf.id[idx]            
-            wptype   = "latlon"
-            lat      = float(args[0])
-            lon      = float(args[1])
-            wptype   = self.latlon
-
-        elif len(args)>=3 and type(args[0])==str:
+        if type(args[0]) is str:
             name     = args[0]
-            lat      = float(args[1])
-            lon      = float(args[2])
+            lat      = traf.lat[idx]
+            lon      = traf.lon[idx]
             wptype   = self.wpnav
-
+            args     = args[1:]
         else:
-            name   = traf.id[idx]            
-            lat    = float(args[1])
-            lon    = float(args[2])
-            wptype = self.wplatlon
+            name     = traf.id[idx]
+            lat, lon = args[0:2]
+            wptype   = self.wplatlon
+            args     = args[2:]
 
-        # Default altitude, speed and afterwp if not given
-        alt     = -999.  if len(args) < 4 else args[3]
-        spd     = -999.  if len(args) < 5 else args[4]
-        afterwp = ""     if len(args) < 6 else args[5]
-
-        # Add waypoint
+        alt = -999. if len(args) < 1 else args[0]
+        spd = -999. if len(args) < 2 else args[1]
+        afterwp = "" if len(args) < 3 else args[2]
         wpidx = self.addwpt(traf, idx, name, wptype, lat, lon, alt, spd, afterwp)
-
-        # Check for success by checking insetred locaiton in flight plan >= 0
         if wpidx < 0:
             return False, "Waypoint " + name + " not added."
 
-        # chekc for presence of orig/dest
         norig = int(traf.orig[idx] != "")
         ndest = int(traf.dest[idx] != "")
 
-        # Check whether this is first 'real' wayppint (not orig & dest), 
-        # And if so, make active
         if self.nwp - norig - ndest == 1:  # first waypoint: make active
             self.direct(traf, idx, self.wpname[norig])  # 0 if no orig
             traf.swlnav[idx] = True
 
-        if afterwp and self.wpname.count(afterwp) == 0:
+        if afterwp and self.wpname.count(args[2]) == 0:
             return True, "Waypoint " + afterwp + " not found" + \
                 "waypoint added at end of route"
         else:
