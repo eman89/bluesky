@@ -915,8 +915,8 @@ class Traffic:
             self.inside = inside
             
             # delete all aicraft in delAircraftidx 
-            for idx in delAircraftidx:
-                self.delete(self.id[idx])
+            for acid in [self.id[idx] for idx in delAircraftidx]:
+                self.delete(acid)
 
         return
 
