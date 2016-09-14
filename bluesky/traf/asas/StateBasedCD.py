@@ -211,14 +211,17 @@ def detect(dbconf, traf, simt):
         Iv       = 1.0 - vdist / dbconf.dh
         severity = np.minimum(Ih, Iv)
         
-        # Find the indexes in LOSlist_all that contain LOScombi1(i.e., current LOSs)
-        loslist_all = np.array(dbconf.LOSlist_all)
-        loscombi1   = np.array(LOScombi1)
-        loscombiidx = np.where(np.in1d(loslist_all,loscombi1))[0]
-        
-        if len(loscombiidx)>0:
+        if len(dbconf.LOSlist_all)>0:
             import pdb
             pdb.set_trace()
+        
+        # Find the indexes in LOSlist_all that contain LOScombi1(i.e., current LOSs)
+        loslist_all  = np.array(dbconf.LOSlist_all)
+        loscombi1    = np.array(LOScombi1)
+        nrows, ncols = loslist_all.shape()
+        dtype={'names':['f{}'.format(i) for i in range(ncols)],
+               'formats':ncols * [loslist_all.dtype]}
+        loscombiidx = np.where(np.intersect1d(loslist_all.view(dtype), loscombi1.view(dtype)))[0]
         
         # For the current LOSs, update severity if new severity is bigger than the old value 
         LOSmaxsev               = np.array(dbconf.LOSmaxsev)
