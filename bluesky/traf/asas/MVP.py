@@ -27,7 +27,7 @@ def resolve(dbconf, traf):
         for conflict in dbconf.conflist_now:
             
             # Determine ac indexes from callsigns
-            ac1, ac2 = conflict.split(" ")
+            ac1, ac2 = zip(conflict)
             id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
             
             # If A/C indexes are found, then apply MVP on this conflict pair

@@ -347,41 +347,53 @@ class ASAS():
             self.areafiltershape = shapename 
             return True
     
-    def ConfAreaFilter(self, traf, i, j):
+    def ConfAreaFilter(self, traf, ownidx, intidx):
         '''Checks if the conflict between ownship and intruder matches the 
         Conflict-Area-Filter settings'''
         
-        # Determine CPA of Ownship (What to do when ADSB is ON?)
-        rng              = self.tcpa[i, j] * traf.gs[i] / nm
-        cpalato, cpalono = geo.qdrpos(traf.lat[i], traf.lon[i], traf.trk[i], rng)
-        cpaalto          = traf.alt[i] + self.tcpa[i, j] * traf.vs[i]
+        # Determine CPA for ownship 
+        rngo       = self.tcpa[ownidx,intidx] * traf.gs[ownidx] / nm
+        lato, lono = geo.qdrpos(traf.lat[ownidx], traf.lon[ownidx], traf.trk[ownidx], rngo)
+        alto       = traf.alt[ownidx] + self.tcpa[ownidx,intidx] * traf.vs[ownidx]
+        
+        # Determine CPA for intruder 
+        rngi       = self.tcpa[intidx,ownidx] * traf.gs[intidx] / nm
+        lati, loni = geo.qdrpos(traf.lat[intidx], traf.lon[intidx], traf.trk[intidx], rngi)
+        alti       = traf.alt[intidx] + self.tcpa[intidx,ownidx] * traf.vs[intidx]        
 
-        # Determine CPA of Intruder (What to do when ADSB is ON?)
-        rng              = self.tcpa[i, j] * traf.gs[j] / nm
-        cpalati, cpaloni = geo.qdrpos(traf.lat[j], traf.lon[j], traf.trk[j], rng)
-        cpaalti          = traf.alt[j] + self.tcpa[i, j] * traf.vs[j]       
-        
         # Check if CPAs are inside selected shape
-        cpaoInside = areafilter.checkInside(self.areafiltershape, cpalato, cpalono, cpaalto)
-        cpaiInside = areafilter.checkInside(self.areafiltershape, cpalati, cpaloni, cpaalti)
-        
+        cpainsideo = areafilter.checkInside(self.areafiltershape, lato, lono, alto)
+        cpainsidei = areafilter.checkInside(self.areafiltershape, lati, loni, alti)
+    
         # OPTION1: CPA inside selected shape 
         if self.areafiltercode == "OPTION1":            
-            confInArea = cpaiInside and cpaoInside               
+            inarea = np.where(np.logical_and(cpainsidei,cpainsideo))
             
         # OPTION2: CPA and 1 aircraft inside selected shape
         elif self.areafiltercode == "OPTION2":
-            acoInside = areafilter.checkInside(self.areafiltershape, traf.lat[i], traf.lon[i], traf.alt[i])
-            aciInside = areafilter.checkInside(self.areafiltershape, traf.lat[j], traf.lon[j], traf.alt[j])
-            confInArea = (cpaiInside and cpaoInside) and (acoInside or aciInside)
+            acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
+            acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
+            inarea    = np.where(np.logical_and(np.logical_and(cpainsidei,cpainsideo), np.logical_or(acinsideo,acinsidei)))
             
         # OPTION3: CPA and both aircraft inside selected shape
         elif self.areafiltercode == "OPTION3":
-            acoInside = areafilter.checkInside(self.areafiltershape, traf.lat[i], traf.lon[i], traf.alt[i])
-            aciInside = areafilter.checkInside(self.areafiltershape, traf.lat[j], traf.lon[j], traf.alt[j])
-            confInArea = (cpaiInside and cpaoInside) and (acoInside and aciInside)          
+            acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
+            acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
+            inarea    = np.where(np.logical_and(np.logical_and(cpainsidei,cpainsideo), np.logical_and(acinsideo,acinsidei)))
+
+        # Filter out the conflcits that do not match the selected "option"
+        ownidx = ownidx[inarea]
+        rngo   = rngo[inarea]
+        lato   = lato[inarea]
+        lono   = lono[inarea]
+        alto   = alto[inarea] 
+        intidx = intidx[inarea]
+        rngi   = rngi[inarea]
+        lati   = lati[inarea]
+        loni   = loni[inarea]
+        alti   = alti[inarea] 
         
-        return cpalato, cpalono, cpaalto, confInArea
+        return ownidx, intidx, rngo, lato, lono, alto, rngi, lati, loni, alti
     
     def APorASAS(self, traf):
         """ Decide for each aircraft in the conflict list whether the ASAS
@@ -392,7 +404,7 @@ class ASAS():
     
         # Look at all conflicts, also the ones that are solved but CPA is yet to come
         for conflict in self.conflist_all:
-            ac1, ac2 = conflict.split(" ")
+            ac1, ac2 = zip(conflict)
             id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
             if id1 >= 0 and id2 >= 0:
                 # Check if conflict is past CPA
@@ -494,7 +506,7 @@ class ASAS():
 
             # Conflict detection
             self.cd.detect(self, traf, simt)
-            # Is conflict active? Then follow ASAS, else follow AP.
+            # Is conflict active? 
             self.APorASAS(traf)
             # Conflict resolution
             self.cr.resolve(self, traf)
