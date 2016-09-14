@@ -212,24 +212,24 @@ def detect(dbconf, traf, simt):
         Ih       = 1.0 - np.sqrt(hdist2) / dbconf.R
         Iv       = 1.0 - vdist / dbconf.dh
         severity = np.minimum(Ih, Iv)
+        Ih       = Ih[LOSidx]
+        Iv       = Iv[LOSidx]
+        severity = severity[LOSidx]
         
         # Find the indexes in LOSlist_all that contain LOScombi1(i.e., current LOSs)
-        loslist_all = np.asarray(dbconf.LOSlist_all)
-        loscombi1   = np.asarray(LOScombi1)
-        dtype       = {'names':['f{}'.format(i) for i in range(2)],'formats':2 * [loslist_all.dtype]}
-        loscombiidx = np.where(np.intersect1d(loslist_all.view(dtype), loscombi1.view(dtype)))[0]
+        loscombiidx = [index for (index, pair) in enumerate(dbconf.LOSlist_all) if pair in LOScombi1]
     
         # For the current LOSs, update severity if new severity is bigger than the old value 
         if len(loscombiidx) > 0:  
             import pdb
             pdb.set_trace()
-            loscombiidx             = loscombiidx[0]
+
             LOSmaxsev               = np.asarray(dbconf.LOSmaxsev)
             LOShmaxsev              = np.asarray(dbconf.LOShmaxsev)
             LOSvmaxsev              = np.asarray(dbconf.LOSvmaxsev)
-            LOSmaxsev[loscombiidx]  = np.where(severity[loscombiidx] > LOSmaxsev[loscombiidx], severity[loscombiidx], LOSmaxsev[loscombiidx])
-            LOShmaxsev[loscombiidx] = np.where(severity[loscombiidx] > LOSmaxsev[loscombiidx], Ih[loscombiidx], LOShmaxsev[loscombiidx])
-            LOSvmaxsev[loscombiidx] = np.where(severity[loscombiidx] > LOSmaxsev[loscombiidx], Iv[loscombiidx], LOSvmaxsev[loscombiidx])            
+            LOSmaxsev[loscombiidx]  = np.where(severity > LOSmaxsev[loscombiidx], severity[loscombiidx], LOSmaxsev[loscombiidx])
+            LOShmaxsev[loscombiidx] = np.where(severity > LOSmaxsev[loscombiidx], Ih[loscombiidx], LOShmaxsev[loscombiidx])
+            LOSvmaxsev[loscombiidx] = np.where(severity > LOSmaxsev[loscombiidx], Iv[loscombiidx], LOSvmaxsev[loscombiidx])            
             dbconf.LOSmaxsev        = LOSmaxsev.tolist()
             dbconf.LOShmaxsev       = LOShmaxsev.tolist()
             dbconf.LOSvmaxsev       = LOSvmaxsev.tolist()     
