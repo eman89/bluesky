@@ -28,7 +28,7 @@ def resolve(dbconf, traf):
             
             # Determine ac indexes from callsigns
             ac1, ac2 = zip(conflict)
-            id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
+            id1, id2 = traf.id2idx(ac1[0]), traf.id2idx(ac2[0])
             
             # If A/C indexes are found, then apply MVP on this conflict pair
             # Then use the MVP computed resolution to subtract and add dv_mvp 
