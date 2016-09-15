@@ -596,7 +596,7 @@ class Traffic:
             next_qdr = np.where(self.next_qdr < -900., qdr, self.next_qdr)
 
             # distance to turn initialisation point
-            self.actwpturn = np.maximum(10.0, np.abs(turnrad*np.tan(np.radians(0.5*degto180(np.abs(qdr -    \
+            self.actwpturn = np.maximum(0.1, np.abs(turnrad*np.tan(np.radians(0.5*degto180(np.abs(qdr -    \
                  next_qdr))))))
 
             # Check whether shift based dist [nm] is required, set closer than WP turn distanc
