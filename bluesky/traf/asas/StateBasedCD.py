@@ -155,36 +155,32 @@ def detect(dbconf, traf, simt):
     # Add to Conflict and LOS lists------------------------------------------
     if dbconf.nconf > 0:
 
-        # ownidx and intidx contain the same conflicts twice, 
-        # so only use halg for updating the lists
-        ownidxhalf = ownidx
-        intidxhalf = intidx
-
         # Combinations of conflicting aircraft
         # NB: if only one A/C detects a conflict, it is also added to these lists
-        confcombi1 = [(str(traf.id[i]),str(traf.id[j])) for i,j in zip(ownidxhalf,intidxhalf)]
-        confcombi1 = list(set(tuple(sorted(l)) for l in confcombi1)) # we want only unique
-        confcombi2 = [(str(traf.id[i]),str(traf.id[j])) for i,j in zip(intidxhalf,ownidxhalf)]
-        confcombi2 = list(set(tuple(sorted(l)) for l in confcombi2)) # we want only unique
-        dbconf.confpairs.append(confcombi1) # used for solving when ADSB ON, as it contains both permutations
-        dbconf.confpairs.append(confcombi2) # used for solving when ADSB ON, as it contains both permutations
+        totalconfcombi = [(str(traf.id[i]),str(traf.id[j])) for i,j in zip(ownidx,intidx)]
+        confcombi1 = list(set(tuple(sorted(l)) for l in totalconfcombi)) # we want only unique
+        confcombi2 = [tuple(reversed(t)) for t in confcombi1] # now flip the unique ones!
+        
+        # This list is used when resolving conflicts with ADSB ON, so it needs to contain both permutations
+        dbconf.confpairs.extend(totalconfcombi) 
 
         # Update conflict lists: conflist_all (currently active conflicts) and 
         # conflist_now (newly detected conflicts during this detection cycle)
-        if set(dbconf.conflist_all).isdisjoint(confcombi1) and \
-            set(dbconf.conflist_all).isdisjoint(confcombi2) and len(confcombi1)>0:
-                dbconf.conflist_all.extend(confcombi1)
-                
-        if  set(dbconf.conflist_now).isdisjoint(confcombi1) and \
-             set(dbconf.conflist_now).isdisjoint(confcombi2) and len(confcombi1)>0:
-                dbconf.conflist_now.extend(confcombi1)
+        # NOTE: EXTEND WITH UNIQUE ONES THAT ARE DIFFERENT!
+        confcombi1diff = list(set(confcombi1)-set(dbconf.conflist_all))
+        confcombi2diff = list(set(confcombi2)-set(dbconf.conflist_all))
+        confnewcombi   = list(set(tuple(sorted(l)) for l in confcombi1diff+confcombi2diff))        
+        if len(confnewcombi)>0:
+                dbconf.conflist_all.extend(confnewcombi)                
+        # The 'NOW' lists are reset all the time, so just extend it with the unique new conflicts
+        dbconf.conflist_now.extend(confcombi1)
         
         # Check if a LOS occured
-        dx     = (traf.lat[ownidxhalf] - traf.lat[intidxhalf]) * 111319.
-        dy     = (traf.lon[ownidxhalf] - traf.lon[intidxhalf]) * 111319.
+        dx     = (traf.lat[ownidx] - traf.lat[intidx]) * 111319.
+        dy     = (traf.lon[ownidx] - traf.lon[intidx]) * 111319.
         hdist2 = dx**2 + dy**2
         hLOS   = hdist2 < dbconf.R**2
-        vdist  = abs(traf.alt[ownidxhalf] - traf.alt[intidxhalf])
+        vdist  = abs(traf.alt[ownidx] - traf.alt[intidx])
         vLOS   = vdist < dbconf.dh
         LOS    = (hLOS & vLOS)    
         LOSidx = np.where(LOS)[0] # index of los
@@ -193,39 +189,35 @@ def detect(dbconf, traf, simt):
         
             # Combinations of intruding/LOS aircraft
             # NB: if only one A/C detects an intrusion, it is also added to these lists 
-#            import pdb
-#            pdb.set_trace()
-            LOScombi1 = [(str(traf.id[i]),str(traf.id[j])) for i,j in zip(ownidxhalf,intidxhalf)]
-            listcopy  = LOScombi1 # THIS ONE IS needed later
+            LOScombi1 = totalconfcombi          
             LOScombi1 = np.asarray(LOScombi1)             
             LOScombi1 = map(tuple, LOScombi1[LOSidx].tolist()) # get the conflicts that are intrusions
             LOScombi1 = list(set(tuple(sorted(l)) for l in LOScombi1)) # we want only unique
-            LOScombi2 = [(str(traf.id[i]),str(traf.id[j])) for i,j in zip(intidxhalf,ownidxhalf)]
+            LOScombi2 = [(str(traf.id[i]),str(traf.id[j])) for i,j in zip(intidx,ownidx)]
             LOScombi2 = np.asarray(LOScombi2)
             LOScombi2 = map(tuple, LOScombi2[LOSidx].tolist()) # get the conflicts that are intrusions
             LOScombi2 = list(set(tuple(sorted(l)) for l in LOScombi2)) # we want only unique
             
             # Indexes of unique intrusions 
-            LOSidxu = [index for (index, pair) in enumerate(listcopy) if pair in LOScombi1]            
+            LOSidxu = [index for (index, pair) in enumerate(totalconfcombi) if pair in LOScombi1]            
             
             # Update LOS lists: LOSlist_all (all LOS since ASAS is ON) and 
             # LOSlist_now (newly detected conflicts during this detection cycle
-            
-            # NOTE: FIND THE ELEMENTS THAT ARE NOT THE SAME IN BOTH SETS, AND APPEND THOSE!
-            if set(dbconf.LOSlist_all).isdisjoint(LOScombi1) and \
-                set(dbconf.LOSlist_all).isdisjoint(LOScombi2) and len(LOScombi1) > 0:
-                    dbconf.LOSlist_all.extend(LOScombi1)
-                    dummyseverity = [0.0]*len(LOScombi1)
+            # NOTE: EXTEND WITH UNIQUE ONES THAT ARE DIFFERENT!
+            LOScombi1diff = list(set(LOScombi1)-set(dbconf.LOSlist_all))
+            LOScombi2diff = list(set(LOScombi2)-set(dbconf.LOSlist_all))            
+            LOSnewcombi   = list(set(tuple(sorted(l)) for l in LOScombi1diff+LOScombi2diff))        
+            if len(LOSnewcombi)>0:
+                    dbconf.LOSlist_all.extend(LOSnewcombi)
+                    dummyseverity = [0.0]*len(LOSnewcombi)
                     dbconf.LOSmaxsev.extend(dummyseverity)
                     dbconf.LOShmaxsev.extend(dummyseverity)
                     dbconf.LOSvmaxsev.extend(dummyseverity)
-                    
-            if set(dbconf.LOSlist_now).isdisjoint(LOScombi1) and \
-                set(dbconf.LOSlist_now).isdisjoint(LOScombi2) and len(LOScombi1) > 0:
-                    dbconf.LOSlist_now.extend(LOScombi1)
+            # The 'NOW' lists are reset all the time, so just extend it with the unique new LOS
+            dbconf.LOSlist_now.extend(LOScombi1)
             
             # Find the indexes in LOSlist_all that contain LOScombi1(i.e., current LOSs)
-            loscombiidx = [index for (index, pair) in enumerate(dbconf.LOSlist_now) if pair in LOScombi1]
+            loscombiidx = [index for (index, pair) in enumerate(dbconf.LOSlist_all) if pair in LOScombi1]
             
             # Calculate the current intrusion severity for the current conflicts/LOS
             Ih       = 1.0 - np.sqrt(hdist2) / dbconf.R
@@ -236,9 +228,6 @@ def detect(dbconf, traf, simt):
             severity = severity[LOSidxu]            
         
             # For the current LOSs, update severity if new severity is bigger than the old value             
-            import pdb
-            pdb.set_trace()
-
             LOSmaxsev               = np.asarray(dbconf.LOSmaxsev)
             LOShmaxsev              = np.asarray(dbconf.LOShmaxsev)
             LOSvmaxsev              = np.asarray(dbconf.LOSvmaxsev)
