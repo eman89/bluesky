@@ -161,6 +161,7 @@ def detect(dbconf, traf, simt):
         confcombi1 = list(set(tuple(sorted(l)) for l in totalconfcombi)) # we want only unique
         confcombi2 = [tuple(reversed(t)) for t in confcombi1] # now flip the unique ones!
         
+        
         # This list is used when resolving conflicts with ADSB ON, so it needs to contain both permutations
         dbconf.confpairs.extend(totalconfcombi) 
 
@@ -188,17 +189,18 @@ def detect(dbconf, traf, simt):
         if len(LOSidx)>0:            
         
             # Combinations of intruding/LOS aircraft
-            # NB: if only one A/C detects an intrusion, it is also added to these lists 
-            LOScombi1 = totalconfcombi          
-            LOScombi1 = np.asarray(LOScombi1)             
+            # NB: if only one A/C detects an intrusion, it is also added to these lists        
+            LOScombi1 = np.asarray(totalconfcombi)             
             LOScombi1 = map(tuple, LOScombi1[LOSidx].tolist()) # get the conflicts that are intrusions
             LOScombi1 = list(set(tuple(sorted(l)) for l in LOScombi1)) # we want only unique
-            LOScombi2 = [(str(traf.id[i]),str(traf.id[j])) for i,j in zip(intidx,ownidx)]
-            LOScombi2 = np.asarray(LOScombi2)
+#            LOScombi2 = [tuple(reversed(t)) for t in LOScombi1] # now flip the unique ones!
+            LOScombi2 = np.asarray([(str(traf.id[i]),str(traf.id[j])) for i,j in zip(intidx,ownidx)])
             LOScombi2 = map(tuple, LOScombi2[LOSidx].tolist()) # get the conflicts that are intrusions
             LOScombi2 = list(set(tuple(sorted(l)) for l in LOScombi2)) # we want only unique
+            import pdb
+            pdb.set_trace()
             
-            # Indexes of unique intrusions 
+            # Indexes of unique intrusions from the original set of conflicts
             LOSidxu = [index for (index, pair) in enumerate(totalconfcombi) if pair in LOScombi1]            
             
             # Update LOS lists: LOSlist_all (all LOS since ASAS is ON) and 
