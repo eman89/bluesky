@@ -66,23 +66,26 @@ class Route():
             lat      = float(args[0])
             lon      = float(args[1])
             wptype   = self.latlon
+            args     = args[2:]
 
         elif len(args)>=3 and type(args[0])==str:
             name     = args[0]
             lat      = float(args[1])
             lon      = float(args[2])
             wptype   = self.wpnav
+            args     = args[3:]
 
         else:
             name   = traf.id[idx]            
-            lat    = float(args[1])
-            lon    = float(args[2])
+            lat    = float(args[0])
+            lon    = float(args[1])
             wptype = self.wplatlon
+            args   = args[2:]
 
         # Default altitude, speed and afterwp if not given
-        alt     = -999.  if len(args) < 4 else args[3]
-        spd     = -999.  if len(args) < 5 else args[4]
-        afterwp = ""     if len(args) < 6 else args[5]
+        alt     = -999.  if len(args) < 1 else args[0]
+        spd     = -999.  if len(args) < 2 else args[1]
+        afterwp = ""     if len(args) < 3 else args[2]
 
         # Add waypoint
         wpidx = self.addwpt(traf, idx, name, wptype, lat, lon, alt, spd, afterwp)
