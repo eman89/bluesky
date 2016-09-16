@@ -404,8 +404,9 @@ class ASAS():
     
         # Look at all conflicts, also the ones that are solved but CPA is yet to come
         for conflict in self.conflist_all:
-            ac1, ac2 = zip(conflict)
-            id1, id2 = traf.id2idx(ac1[0]), traf.id2idx(ac2[0])
+            ac1      = conflict[0]
+            ac2      = conflict[1]
+            id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
             if id1 >= 0 and id2 >= 0:
                 # Check if conflict is past CPA
                 d = np.array([traf.lon[id2] - traf.lon[id1], traf.lat[id2] - traf.lat[id1]])
