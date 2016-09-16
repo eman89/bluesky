@@ -712,7 +712,7 @@ class Traffic:
             #               while descending to the destination (the last waypoint)
             self.swvnavvs = self.swlnav * self.swvnav * ((dist2wp < self.dist2vs) +
                                      (self.actwpalt > self.alt)) + \
-                                     (1 - self.swlnav) * (dist < self.actwpturn)
+                                     (1 - self.swlnav) * (dist < self.actwpturn) * (self.actwpalt.any()>0.0)   
 
             self.avs = (1-self.swvnavvs)*self.avs + self.swvnavvs*steepness*self.gs
             self.apalt = (1-self.swvnavvs)*self.apalt + self.swvnavvs*self.actwpalt
