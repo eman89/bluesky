@@ -62,6 +62,10 @@ def reset():
     # Close all logs and remove reference to its file object
     for key, log in allloggers.iteritems():
         log.reset()
+    
+    # Delete all logger objects (hack for BlueSky 2Dexpt branchs)
+    allloggers.clear()
+    periodicloggers.clear()
 
 
 def makeLogfileName(logname):
