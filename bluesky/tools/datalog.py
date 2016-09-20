@@ -71,7 +71,7 @@ def reset():
 def makeLogfileName(logname):
     timestamp = datetime.now().strftime('%Y%m%d_%H-%M-%S')
     scn = stack.get_scenfile()
-    scn = scn[:scn.lower().find('.scn')]
+#    scn = scn[:scn.lower().find('.scn')]
     fname = "%s_%s_%s.log" % (logname, scn, timestamp)
     return settings.log_path + '/' + fname
 
@@ -152,9 +152,11 @@ class CSVLogger:
             varlist = [v[0].__dict__.get(vname) for v in self.selvars for vname in v[1]] 
             varlist += additional_vars
 
+            nrows = 1 if not hasattr(varlist[0], '__len__') else len(varlist[0])
+
             # Convert numeric arrays to text, leave text arrays untouched
-            txtdata = [len(varlist[0]) * ['%.3f' % self.simt]] + \
-                [np.char.mod(logprecision, col) if isnum(col[0]) else col for col in varlist]
+            txtdata = [nrows * ['%.3f' % self.simt]] + \
+                [np.char.mod(logprecision, col) if isnum(col) else col for col in varlist]
 
             # log the data to file
             np.savetxt(self.file, np.vstack(txtdata).T, delimiter=',', newline='\n', fmt='%s')
