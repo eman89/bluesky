@@ -84,7 +84,9 @@ class Traffic:
         # Traffic basic flight data
         
         # Traffic basic flight data
-        self.id      = []  # identifier (string)
+        with datalog.registerLogParameters('SNAPLOG', self):
+            self.id        = []  # identifier (string)
+            self.spawnTime = np.array([])  # creation time [s]
         self.type    = []  # aircaft type (string)
         self.lat     = np.array([])  # latitude [deg]
         self.lon     = np.array([])  # longitude [deg]
@@ -246,7 +248,7 @@ class Traffic:
 
             self.create(acid, actype, aclat, aclon, achdg, acalt, acspd)
 
-    def create(self, acid, actype, aclat, aclon, achdg, acalt, casmach):
+    def create(self, acid, actype, aclat, aclon, achdg, acalt, casmach, cretime):
         """Create an aircraft"""
         # Check if not already exist
         if self.id.count(acid.upper()) > 0:
@@ -264,6 +266,7 @@ class Traffic:
         # Process input
         self.id.append(acid.upper())
         self.type.append(actype)
+        self.spawnTime = np.append(self.spawnTime, cretime)
         self.lat   = np.append(self.lat, aclat)
         self.lon   = np.append(self.lon, aclon)
         self.hdg   = np.append(self.hdg, achdg)
