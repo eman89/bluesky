@@ -85,35 +85,41 @@ class Traffic:
         
         # Traffic basic flight data
         with datalog.registerLogParameters('SNAPLOG', self):
-            self.id        = []  # identifier (string)
+            self.id        = []            # identifier (string)
             self.spawnTime = np.array([])  # creation time [s]
-        self.type    = []  # aircaft type (string)
-        self.lat     = np.array([])  # latitude [deg]
-        self.lon     = np.array([])  # longitude [deg]
-        self.hdg     = np.array([])  # traffic heading [deg]
-        self.trk     = np.array([])  # track angle [deg]
-        self.tas     = np.array([])  # true airspeed [m/s]
-        self.gs      = np.array([])  # ground speed [m/s]
+            self.type      = []            # aircaft type (string)
+            self.lat       = np.array([])  # latitude [deg]
+            self.lon       = np.array([])  # longitude [deg]
+            self.alt       = np.array([])  # altitude [m]
+            self.tas       = np.array([])  # true airspeed [m/s]
+            self.gs        = np.array([])  # ground speed [m/s]
+            self.vs        = np.array([])  # vertical speed [m/s]
+            self.hdg       = np.array([])  # traffic heading [deg]
+            self.trk       = np.array([])  # track angle [deg]
+            self.apalt     = []            # selected alt[m]
+            self.aptas     = []            # just for initializing
+            self.atrk      = []            # selected track angle [deg]
+            self.avs       = []            # selected vertical speed [m/s]
+            self.swlnav    = np.array([])  # Lateral (HDG) based on nav?
+            self.swvnav    = np.array([])  # Vertical/longitudinal (ALT+SPD) based on nav info
+            self.startwpt  = np.array([])  # start wapypoint
+            self.endwpt    = np.array([])  # end wapypoint            
+        
         self.gsnorth = np.array([])  # ground speed [m/s]
         self.gseast  = np.array([])  # ground speed [m/s]
         self.cas     = np.array([])  # calibrated airspeed [m/s]
-        self.M       = np.array([])  # mach number
-        self.alt     = np.array([])  # altitude [m]
-        self.fll     = np.array([])  # flight level [ft/100]
-        self.vs      = np.array([])  # vertical speed [m/s]
+        self.M       = np.array([])  # mach number        
+        self.fll     = np.array([])  # flight level [ft/100]        
         self.p       = np.array([])  # atmospheric air pressure [N/m2]
         self.rho     = np.array([])  # atmospheric air density [kg/m3]
         self.Temp    = np.array([])  # atmospheric air temperature [K]
         self.dtemp   = np.array([])  # delta t for non-ISA conditions
 
-        # Traffic autopilot settings
-        self.atrk   = []  # selected track angle [deg]
-        self.aspd   = []  # selected spd(CAS) [m/s]
-        self.aptas  = []  # just for initializing
-        self.ama    = []  # selected spd above crossover altitude (Mach) [-]
-        self.apalt  = []  # selected alt[m]
+        # Traffic autopilot settings        
+        self.aspd   = []  # selected spd(CAS) [m/s]        
+        self.ama    = []  # selected spd above crossover altitude (Mach) [-]        
         self.apfll  = []  # selected fl [ft/100]
-        self.avs    = []  # selected vertical speed [m/s]
+        
 
         # Traffic performance data
         self.avsdef = np.array([])  # [m/s]default vertical speed of autopilot
@@ -142,8 +148,7 @@ class Traffic:
         self.dest   = []  # Four letter code of destination airport
 
         # LNAV route navigation
-        self.swlnav = np.array([])  # Lateral (HDG) based on nav?
-        self.swvnav = np.array([])  # Vertical/longitudinal (ALT+SPD) based on nav info
+        
 
         self.actwplat  = np.array([])  # Active WP latitude
         self.actwplon  = np.array([])  # Active WP longitude
@@ -248,7 +253,7 @@ class Traffic:
 
             self.create(acid, actype, aclat, aclon, achdg, acalt, acspd)
 
-    def create(self, acid, actype, aclat, aclon, achdg, acalt, casmach, cretime):
+    def create(self, sim, acid, actype, aclat, aclon, achdg, acalt, casmach):
         """Create an aircraft"""
         # Check if not already exist
         if self.id.count(acid.upper()) > 0:
@@ -266,21 +271,21 @@ class Traffic:
         # Process input
         self.id.append(acid.upper())
         self.type.append(actype)
-        self.spawnTime = np.append(self.spawnTime, cretime)
-        self.lat   = np.append(self.lat, aclat)
-        self.lon   = np.append(self.lon, aclon)
-        self.hdg   = np.append(self.hdg, achdg)
-        self.alt   = np.append(self.alt, acalt)
-        self.fll   = np.append(self.fll, (acalt) / (100 * ft))
-        self.vs    = np.append(self.vs, 0.)
+        self.spawnTime = np.append(self.spawnTime, sim.simt)
+        self.lat       = np.append(self.lat, aclat)
+        self.lon       = np.append(self.lon, aclon)
+        self.hdg       = np.append(self.hdg, achdg)
+        self.alt       = np.append(self.alt, acalt)
+        self.fll       = np.append(self.fll, (acalt) / (100 * ft))
+        self.vs        = np.append(self.vs, 0.)
         c_temp, c_rho, c_p = vatmos(acalt)
-        self.p     = np.append(self.p, c_p)
-        self.rho   = np.append(self.rho, c_rho)
-        self.Temp  = np.append(self.Temp, c_temp)
-        self.dtemp = np.append(self.dtemp, 0)  # at the moment just ISA conditions
-        self.tas   = np.append(self.tas, acspd)
-        self.cas   = np.append(self.cas, tas2cas(acspd, acalt))
-        self.M     = np.append(self.M, tas2mach(acspd, acalt))
+        self.p         = np.append(self.p, c_p)
+        self.rho       = np.append(self.rho, c_rho)
+        self.Temp      = np.append(self.Temp, c_temp)
+        self.dtemp     = np.append(self.dtemp, 0)  # at the moment just ISA conditions
+        self.tas       = np.append(self.tas, acspd)
+        self.cas       = np.append(self.cas, tas2cas(acspd, acalt))
+        self.M         = np.append(self.M, tas2mach(acspd, acalt))
         
         # Using heading,TAS and wind vector, compute track angle and ground spd
         tasnorth = self.tas[-1]*cos(radians(self.hdg[-1]))
@@ -413,19 +418,20 @@ class Traffic:
         del self.type[idx]
 
         # Traffic basic data
-        self.lat     = np.delete(self.lat, idx)
-        self.lon     = np.delete(self.lon, idx)
-        self.hdg     = np.delete(self.hdg, idx)
-        self.trk     = np.delete(self.trk, idx)
-        self.alt     = np.delete(self.alt, idx)
-        self.fll     = np.delete(self.fll, idx)
-        self.vs      = np.delete(self.vs, idx)
-        self.tas     = np.delete(self.tas, idx)
-        self.gs      = np.delete(self.gs, idx)
-        self.gsnorth = np.delete(self.gsnorth, idx)
-        self.gseast  = np.delete(self.gseast, idx)
-        self.cas     = np.delete(self.cas, idx)
-        self.M       = np.delete(self.M, idx)
+        self.spawnTime = np.delete(self.spawnTime, idx)
+        self.lat       = np.delete(self.lat, idx)
+        self.lon       = np.delete(self.lon, idx)
+        self.hdg       = np.delete(self.hdg, idx)
+        self.trk       = np.delete(self.trk, idx)
+        self.alt       = np.delete(self.alt, idx)
+        self.fll       = np.delete(self.fll, idx)
+        self.vs        = np.delete(self.vs, idx)
+        self.tas       = np.delete(self.tas, idx)
+        self.gs        = np.delete(self.gs, idx)
+        self.gsnorth   = np.delete(self.gsnorth, idx)
+        self.gseast    = np.delete(self.gseast, idx)
+        self.cas       = np.delete(self.cas, idx)
+        self.M         = np.delete(self.M, idx)
 
         self.p      = np.delete(self.p, idx)
         self.rho    = np.delete(self.rho, idx)

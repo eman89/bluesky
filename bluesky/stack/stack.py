@@ -117,7 +117,7 @@ def init(sim, traf, scr):
         "CRE": [
             "CRE acid,type,lat,lon,hdg,alt,spd",
             "txt,txt,latlon,hdg,alt,spd",
-            traf.create
+            lambda *args: traf.create(sim, *args)
         ],
         "DEL": [
             "DEL acid/WIND/shape",
@@ -214,7 +214,7 @@ def init(sim, traf, scr):
         "IC": [
             "IC [IC/filename]",
             "[string]",
-            lambda *args: ic(scr, sim, *args)
+            
         ],
         "INSEDIT": [
             "INSEDIT txt",

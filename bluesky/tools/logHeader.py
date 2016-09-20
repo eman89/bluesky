@@ -20,7 +20,7 @@ def skyHeader():
 
 def snapHeader():
 
-    parameters = " Call Sign [-], AC Type [-], Spawn Time [s], Latitude [deg],"   + \
+    parameters = " Call Sign [-], Spawn Time [s], AC Type [-], Latitude [deg],"   + \
                  " Longitude [deg], Altitude [m], TAS [m/s], GS [m/s], VS [m/s]," + \
                  " HDG [deg], TRK [deg], CMDALT [m], CMDTAS [m/s], CMDTRK [deg]," + \
                  " CMDVS [m/s], ASAS Active [-], ASASALT [m], ASASTAS [m/s],"     + \

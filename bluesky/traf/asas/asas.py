@@ -103,12 +103,13 @@ class ASAS():
 
         # ASAS info per aircraft:
         self.iconf        = []            # index in 'conflicting' aircraft database
-        self.asasactive   = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not
-        self.asastrk      = np.array([])  # heading provided by the ASAS [deg]
-        self.asasspd      = np.array([])  # speed provided by the ASAS (eas) [m/s]
-        self.asasalt      = np.array([])  # speed alt by the ASAS [m]
-        self.asasvsp      = np.array([])  # speed vspeed by the ASAS [m/s]
         
+        with datalog.registerLogParameters('SNAPLOG', self):
+            self.asasactive   = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not
+            self.asasalt      = np.array([])  # speed alt by the ASAS [m]
+            self.asasspd      = np.array([])  # speed provided by the ASAS (eas) [m/s]
+            self.asastrk      = np.array([])  # heading provided by the ASAS [deg]       
+            
         # number of instantaneous conflicts and intrusions
         with datalog.registerLogParameters('SKYLOG', self):
             self.nconflictsnow  = len(self.conflist_now)
