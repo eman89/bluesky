@@ -152,9 +152,9 @@ class Simulation(QObject):
         self.state    = Simulation.init
         self.ffmode   = False
         self.scenname = 'Untitled'
-        self.traf.reset(self.navdb)
         stack.reset()
         datalog.reset()
+        self.traf.reset(self.navdb)               
         areafilter.reset()
         self.screenio.reset()
 

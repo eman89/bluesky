@@ -22,7 +22,7 @@ allloggers      = dict()
 
 def registerLogParameters(name, dataparent):
     if name not in allloggers:
-        allloggers[name] = CSVLogger(name)
+        allloggers[name] = CSVLogger(name)       
 
     allloggers[name].dataparents.append(dataparent)
     return allloggers[name]
@@ -61,12 +61,10 @@ def reset():
 
     # Close all logs and remove reference to its file object
     for key, log in allloggers.iteritems():
+        log.reset()    
+    for key,log in periodicloggers.iteritems():
         log.reset()
     
-    # Delete all logger objects (hack for BlueSky 2Dexpt branchs)
-#    allloggers.clear()
-#    periodicloggers.clear()
-
 
 def makeLogfileName(logname):
     timestamp = datetime.now().strftime('%Y%m%d_%H-%M-%S')
@@ -156,7 +154,7 @@ class CSVLogger:
 
             # Convert numeric arrays to text, leave text arrays untouched
             txtdata = [nrows * ['%s' % str(self.simt).ljust(8, " ")]] + \
-                [str(np.char.mod(logprecision, col)).ljust(15, " ") if isnum(col) else col.ljust(16, " ") for col in varlist]
+                        [np.char.mod(logprecision, col) if isnum(col) else col for col in varlist]
 
             # log the data to file
             np.savetxt(self.file, np.vstack(txtdata).T, delimiter=', ', newline='\n', fmt='%s')

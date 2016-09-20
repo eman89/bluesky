@@ -110,10 +110,10 @@ class ASAS():
         self.asasvsp      = np.array([])  # speed vspeed by the ASAS [m/s]
         
         # number of instantaneous conflicts and intrusions
-        with datalog.registerLogParameters('SKYLOG', self):
-            self.nconflictsnow  = len(self.conflist_now)
-            self.nintrusionsnow = len(self.LOSlist_now)    
-            
+#        with datalog.registerLogParameters('SKYLOG', self):
+#            self.nconflictsnow  = len(self.conflist_now)
+#            self.nintrusionsnow = len(self.LOSlist_now)    
+#            
     def asasLogUpdate(self, traf):
         
         # SKYLOG

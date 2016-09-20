@@ -58,18 +58,17 @@ class Traffic:
         self.reset(navdb)
 
         # Define the periodic loggers
-        datalog.definePeriodicLogger('SNAPLOG', 'SNAPLOG logfile.', settings.snapdt)
-        datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)        
-        datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
+#        datalog.definePeriodicLogger('SNAPLOG', 'SNAPLOG logfile.', settings.snapdt)
+#        datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)        
 
-    def reset(self, navdb):
+    def reset(self, navdb):       
         #  model-specific parameters.
         # Default: BlueSky internal performance model.
         # Insert your BADA files to the folder "BlueSky/data/coefficients/BADA"
         # for working with EUROCONTROL`s Base of Aircraft Data revision 3.12
-
         self.perf = Perf(self)        
         
+        datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
         with datalog.registerLogParameters('SKYLOG', self):
             self.ntraf = 0
 
