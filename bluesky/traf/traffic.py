@@ -56,10 +56,12 @@ class Traffic:
 
         # All traffic data is initialized in the reset function
         self.reset(navdb)
-
+        
+        
         # Define the periodic loggers
-#        datalog.definePeriodicLogger('SNAPLOG', 'SNAPLOG logfile.', settings.snapdt)
-#        datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)        
+        datalog.definePeriodicLogger('SNAPLOG', 'SNAPLOG logfile.', settings.snapdt)
+        datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
+        datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)        
 
     def reset(self, navdb):       
         #  model-specific parameters.
@@ -68,7 +70,7 @@ class Traffic:
         # for working with EUROCONTROL`s Base of Aircraft Data revision 3.12
         self.perf = Perf(self)        
         
-        datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
+        
         with datalog.registerLogParameters('SKYLOG', self):
             self.ntraf = 0
 

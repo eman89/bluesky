@@ -153,7 +153,8 @@ class CSVLogger:
             nrows = 1 if not hasattr(varlist[0], '__len__') else len(varlist[0])
 
             # Convert numeric arrays to text, leave text arrays untouched
-            txtdata = [nrows * ['%s' % str(self.simt).ljust(8, " ")]] + \
+            t = np.round(self.simt,3)
+            txtdata = [nrows * ['%s' % str(t).ljust(8, " ")]] + \
                         [np.char.mod(logprecision, col) if isnum(col) else col for col in varlist]
 
             # log the data to file
