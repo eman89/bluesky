@@ -57,19 +57,17 @@ class Traffic:
         # All traffic data is initialized in the reset function
         self.reset(navdb)
         
-        
         # Define the periodic loggers
-        datalog.definePeriodicLogger('SNAPLOG', 'SNAPLOG logfile.', settings.snapdt)
+        datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
+        datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
         datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
-        datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)        
 
     def reset(self, navdb):       
         #  model-specific parameters.
         # Default: BlueSky internal performance model.
         # Insert your BADA files to the folder "BlueSky/data/coefficients/BADA"
         # for working with EUROCONTROL`s Base of Aircraft Data revision 3.12
-        self.perf = Perf(self)        
-        
+        self.perf = Perf(self)      
         
         with datalog.registerLogParameters('SKYLOG', self):
             self.ntraf = 0
@@ -102,8 +100,8 @@ class Traffic:
             self.avs       = []            # selected vertical speed [m/s]
             self.swlnav    = np.array([])  # Lateral (HDG) based on nav?
             self.swvnav    = np.array([])  # Vertical/longitudinal (ALT+SPD) based on nav info
-            self.startwpt  = np.array([])  # start wapypoint
-            self.endwpt    = np.array([])  # end wapypoint            
+            self.orig      = []  # Four letter code of origin airport
+            self.dest      = []  # Four letter code of destination airport
         
         self.gsnorth = np.array([])  # ground speed [m/s]
         self.gseast  = np.array([])  # ground speed [m/s]
@@ -144,8 +142,7 @@ class Traffic:
         self.limvs_flag  = []
 
         # Traffic navigation information
-        self.orig   = []  # Four letter code of origin airport
-        self.dest   = []  # Four letter code of destination airport
+        
 
         # LNAV route navigation
         
@@ -1156,7 +1153,9 @@ class Traffic:
 
             # If not found, say so
             elif iwp < 0:
-                return False, (self.dest[idx] + " not found.")
+                # Hack for 2Dexpt branch
+                return True
+#                return False, (self.dest[idx] + " not found.")
 
         # Origin: bookkeeping only for now
         else:
@@ -1164,7 +1163,9 @@ class Traffic:
             iwp = route.addwpt(self, idx, self.orig[idx], route.orig,
                                self.lat[idx], self.lon[idx], 0.0, self.cas[idx])
             if iwp < 0:
-                return False, (self.orig[idx] + " not found.")
+                # Hack for 2Dexpt branch
+                return True
+#                return False, (self.orig[idx] + " not found.")
 
     def acinfo(self, acid):
         idx           = self.id.index(acid)

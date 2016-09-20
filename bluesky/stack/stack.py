@@ -214,7 +214,7 @@ def init(sim, traf, scr):
         "IC": [
             "IC [IC/filename]",
             "[string]",
-            
+            lambda *args: ic(scr, sim, *args)
         ],
         "INSEDIT": [
             "INSEDIT txt",
