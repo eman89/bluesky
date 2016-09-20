@@ -1,7 +1,7 @@
 import numpy as np
 from math import *
 from random import random, randint
-from ..tools import datalog,areafilter
+from ..tools import datalog, areafilter, logHeader 
 from ..tools import geo
 from ..tools.aero import fpm, kts, ft, nm, g0, tas2eas, tas2mach, tas2cas, mach2tas,  \
                          mach2cas, cas2tas, cas2mach, Rearth, vatmos, \
@@ -59,9 +59,8 @@ class Traffic:
 
         # Define the periodic loggers
         datalog.definePeriodicLogger('SNAPLOG', 'SNAPLOG logfile.', settings.snapdt)
-        datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
-        
-        datalog.definePeriodicLogger('SKYLOG', 'SKYLOG logfile.', settings.skydt)
+        datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)        
+        datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
 
     def reset(self, navdb):
         #  model-specific parameters.
