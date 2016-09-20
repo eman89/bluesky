@@ -1,7 +1,7 @@
 import numpy as np
 from ... import settings
 from ...tools.aero import ft, nm
-from ...tools import areafilter, geo
+from ...tools import areafilter, geo, datalog
 
 # Import default CD methods
 try:
@@ -108,7 +108,19 @@ class ASAS():
         self.asasspd      = np.array([])  # speed provided by the ASAS (eas) [m/s]
         self.asasalt      = np.array([])  # speed alt by the ASAS [m]
         self.asasvsp      = np.array([])  # speed vspeed by the ASAS [m/s]
-
+        
+        # number of instantaneous conflicts and intrusions
+        with datalog.registerLogParameters('SKYLOG', self):
+            self.nconflictsnow  = len(self.conflist_now)
+            self.nintrusionsnow = len(self.LOSlist_now)    
+            
+    def asasLogUpdate(self, traf):
+        
+        # SKYLOG
+        self.nconflictsnow  = len(self.conflist_now)
+        self.nintrusionsnow = len(self.LOSlist_now)
+        
+        
     def toggle(self, flag=None):
         if flag is None:
             return True, "ASAS is currently " + ("ON" if self.swasas else "OFF")
@@ -507,7 +519,12 @@ class ASAS():
 
             # Conflict detection
             self.cd.detect(self, traf, simt)
+            
             # Is conflict active? 
             self.APorASAS(traf)
+            
             # Conflict resolution
             self.cr.resolve(self, traf)
+            
+            # Update ASAS log variables
+            self.asasLogUpdate(traf)

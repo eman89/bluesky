@@ -64,8 +64,8 @@ def reset():
         log.reset()
     
     # Delete all logger objects (hack for BlueSky 2Dexpt branchs)
-    allloggers.clear()
-    periodicloggers.clear()
+#    allloggers.clear()
+#    periodicloggers.clear()
 
 
 def makeLogfileName(logname):
@@ -155,11 +155,11 @@ class CSVLogger:
             nrows = 1 if not hasattr(varlist[0], '__len__') else len(varlist[0])
 
             # Convert numeric arrays to text, leave text arrays untouched
-            txtdata = [nrows * ['%.3f' % self.simt]] + \
-                [np.char.mod(logprecision, col) if isnum(col) else col for col in varlist]
+            txtdata = [nrows * ['%s' % str(self.simt).ljust(8, " ")]] + \
+                [str(np.char.mod(logprecision, col)).ljust(15, " ") if isnum(col) else col.ljust(16, " ") for col in varlist]
 
             # log the data to file
-            np.savetxt(self.file, np.vstack(txtdata).T, delimiter=',', newline='\n', fmt='%s')
+            np.savetxt(self.file, np.vstack(txtdata).T, delimiter=', ', newline='\n', fmt='%s')
 
     def reset(self):
         self.dt         = self.default_dt
@@ -194,9 +194,11 @@ class CSVLogger:
                     return False, 'Turn ' + self.name + ' on with optional dt'
 
             self.open(makeLogfileName(self.name))
+            return True, self.name + " ON, dt = " + str(self.dt) + " seconds"
 
         elif args[0] == 'OFF':
             self.reset()
+            return True, self.name + " OFF"
         elif args[0] == 'LISTVARS':
             return True, 'Logger ' + self.name + ' has variables: ' \
                 + self.listallvarnames()
