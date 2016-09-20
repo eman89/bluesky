@@ -69,8 +69,8 @@ class Traffic:
         # for working with EUROCONTROL`s Base of Aircraft Data revision 3.12
 
         self.perf = Perf(self)
-
-        self.ntraf = 0
+        with datalog.registerLogParameters('SKYLOG', self):
+            self.ntraf = 0
 
         # Traffic list & arrays definition
 
@@ -80,37 +80,36 @@ class Traffic:
         # which can be found directly below __init__
 
         # Traffic basic flight data
+        
+        # Traffic basic flight data
+        self.id      = []  # identifier (string)
+        self.type    = []  # aircaft type (string)
+        self.lat     = np.array([])  # latitude [deg]
+        self.lon     = np.array([])  # longitude [deg]
+        self.hdg     = np.array([])  # traffic heading [deg]
+        self.trk     = np.array([])  # track angle [deg]
+        self.tas     = np.array([])  # true airspeed [m/s]
+        self.gs      = np.array([])  # ground speed [m/s]
+        self.gsnorth = np.array([])  # ground speed [m/s]
+        self.gseast  = np.array([])  # ground speed [m/s]
+        self.cas     = np.array([])  # calibrated airspeed [m/s]
+        self.M       = np.array([])  # mach number
+        self.alt     = np.array([])  # altitude [m]
+        self.fll     = np.array([])  # flight level [ft/100]
+        self.vs      = np.array([])  # vertical speed [m/s]
+        self.p       = np.array([])  # atmospheric air pressure [N/m2]
+        self.rho     = np.array([])  # atmospheric air density [kg/m3]
+        self.Temp    = np.array([])  # atmospheric air temperature [K]
+        self.dtemp   = np.array([])  # delta t for non-ISA conditions
 
-        with datalog.registerLogParameters('SNAPLOG', self):
-            # Traffic basic flight data
-            self.id      = []  # identifier (string)
-            self.type    = []  # aircaft type (string)
-            self.lat     = np.array([])  # latitude [deg]
-            self.lon     = np.array([])  # longitude [deg]
-            self.hdg     = np.array([])  # traffic heading [deg]
-            self.trk     = np.array([])  # track angle [deg]
-            self.tas     = np.array([])  # true airspeed [m/s]
-            self.gs      = np.array([])  # ground speed [m/s]
-            self.gsnorth = np.array([])  # ground speed [m/s]
-            self.gseast  = np.array([])  # ground speed [m/s]
-            self.cas     = np.array([])  # calibrated airspeed [m/s]
-            self.M       = np.array([])  # mach number
-            self.alt     = np.array([])  # altitude [m]
-            self.fll     = np.array([])  # flight level [ft/100]
-            self.vs      = np.array([])  # vertical speed [m/s]
-            self.p       = np.array([])  # atmospheric air pressure [N/m2]
-            self.rho     = np.array([])  # atmospheric air density [kg/m3]
-            self.Temp    = np.array([])  # atmospheric air temperature [K]
-            self.dtemp   = np.array([])  # delta t for non-ISA conditions
-
-            # Traffic autopilot settings
-            self.atrk   = []  # selected track angle [deg]
-            self.aspd   = []  # selected spd(CAS) [m/s]
-            self.aptas  = []  # just for initializing
-            self.ama    = []  # selected spd above crossover altitude (Mach) [-]
-            self.apalt  = []  # selected alt[m]
-            self.apfll  = []  # selected fl [ft/100]
-            self.avs    = []  # selected vertical speed [m/s]
+        # Traffic autopilot settings
+        self.atrk   = []  # selected track angle [deg]
+        self.aspd   = []  # selected spd(CAS) [m/s]
+        self.aptas  = []  # just for initializing
+        self.ama    = []  # selected spd above crossover altitude (Mach) [-]
+        self.apalt  = []  # selected alt[m]
+        self.apfll  = []  # selected fl [ft/100]
+        self.avs    = []  # selected vertical speed [m/s]
 
         # Traffic performance data
         self.avsdef = np.array([])  # [m/s]default vertical speed of autopilot
