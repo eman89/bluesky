@@ -402,12 +402,8 @@ class ASAS():
         lono   = lono[inarea]
         alto   = alto[inarea] 
         intidx = intidx[inarea]
-        rngi   = rngi[inarea]
-        lati   = lati[inarea]
-        loni   = loni[inarea]
-        alti   = alti[inarea] 
         
-        return ownidx, intidx, rngo, lato, lono, alto, rngi, lati, loni, alti
+        return ownidx, intidx, rngo, lato, lono, alto
     
     def APorASAS(self, traf):
         """ Decide for each aircraft in the conflict list whether the ASAS
