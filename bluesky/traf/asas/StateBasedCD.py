@@ -186,7 +186,7 @@ def detect(dbconf, traf, simt):
         LOS    = (hLOS & vLOS)
         
         # Update LOS lists: LOSlist_all (all LOS since ASAS is ON) and 
-        # LOSlist_now (newly detected conflicts during this detection cycle
+        # LOSlist_now (newly detected conflicts during this detection cycle)
         if LOS:
             if combi not in dbconf.LOSlist_all and combi2 not in dbconf.LOSlist_all:
                 dbconf.LOSlist_all.append(combi)
@@ -211,6 +211,8 @@ def detect(dbconf, traf, simt):
             if idx >= 0:
                 if severity > dbconf.LOSmaxsev[idx]:
                     dbconf.LOSmaxsev[idx]  = severity
+                if severity > dbconf.LOShmaxsev[idx]:
                     dbconf.LOShmaxsev[idx] = Ih
+                if severity > dbconf.LOSvmaxsev[idx]:
                     dbconf.LOSvmaxsev[idx] = Iv 
     
