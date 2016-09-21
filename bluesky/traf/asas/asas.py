@@ -1,7 +1,7 @@
 import numpy as np
 from ... import settings
 from ...tools.aero import ft, nm
-from ...tools import areafilter, geo, datalog
+from ...tools import areafilter, geo, datalog, logHeader
 
 # Import default CD methods
 try:
@@ -40,6 +40,10 @@ class ASAS():
     def __init__(self):
         # All ASAS variables are initialized in the reset function
         self.reset()
+        
+        # create ASAS event loggers
+        self.cfllog = datalog.defineLogger("CFLLOG", logHeader.cflHeader())
+        
 
     def reset(self):
         """ ASAS constructor """
@@ -114,13 +118,21 @@ class ASAS():
         # number of instantaneous conflicts and intrusions
         with datalog.registerLogParameters('SKYLOG', self):
             self.nconflictsnow  = len(self.conflist_now)
-            self.nintrusionsnow = len(self.LOSlist_now)    
+            self.nintrusionsnow = len(self.LOSlist_now)
+        
+        # CFL log variables
+        with datalog.registerLogParameters('CFLLOG', self):
+            self.clogid1 = []
+            self.clogid2 = []
             
     def asasLogUpdate(self, traf):
         
         # SKYLOG
         self.nconflictsnow  = len(self.conflist_now)
         self.nintrusionsnow = len(self.LOSlist_now)
+        
+        # CFLLOG
+        self.cfllog.log()
         
         
     def toggle(self, flag=None):

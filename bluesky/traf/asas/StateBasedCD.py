@@ -24,6 +24,9 @@ def detect(dbconf, traf, simt):
     dbconf.LOSlist_now  = []
     dbconf.conflist_now = []
     dbconf.confpairs    = []
+    
+    dbconf.clogid1 = []
+    dbconf.clogid2 = []
 
     # Horizontal conflict ---------------------------------------------------------
 
@@ -162,7 +165,10 @@ def detect(dbconf, traf, simt):
         # Update conflict lists: conflist_all (currently active conflicts) and 
         # conflist_now (newly detected conflicts during this detection cycle)
         if combi not in dbconf.conflist_all and combi2 not in dbconf.conflist_all:
-            dbconf.conflist_all.append(combi)            
+            dbconf.conflist_all.append(combi)
+            dbconf.clogid1.append(traf.id[i])
+            dbconf.clogid2.append(traf.id[j])
+            
         if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
             dbconf.conflist_now.append(combi)
 
