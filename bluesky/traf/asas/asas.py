@@ -103,14 +103,14 @@ class ASAS():
 
         # ASAS info per aircraft:
         self.iconf        = []            # index in 'conflicting' aircraft database
+        self.asasalt      = np.array([])  # speed alt by the ASAS [m]
+        self.asasvsp      = np.array([])  # speed vspeed by the ASAS [m/s]
         
         with datalog.registerLogParameters('SNAPLOG', self):
-            self.asasactive = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not
-            self.asasalt    = np.array([])  # speed alt by the ASAS [m]
+            self.asasactive = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not           
             self.asasspd    = np.array([])  # speed provided by the ASAS (eas) [m/s]
             self.asastrk    = np.array([])  # heading provided by the ASAS [deg]
-            self.asasvsp    = np.array([])  # speed vspeed by the ASAS [m/s]
-            
+        
         # number of instantaneous conflicts and intrusions
         with datalog.registerLogParameters('SKYLOG', self):
             self.nconflictsnow  = len(self.conflist_now)
@@ -370,6 +370,12 @@ class ASAS():
         lato, lono = geo.qdrpos(traf.lat[ownidx], traf.lon[ownidx], traf.trk[ownidx], rngo)
         alto       = traf.alt[ownidx] + self.tcpa[ownidx,intidx] * traf.vs[ownidx]
         
+#        print self.tcpa[ownidx,intidx]
+#        print self.tcpa[intidx,ownidx]
+#        print traf.gs[ownidx]
+#        print rngo
+#        print
+        
         # Determine CPA for intruder 
         rngi       = self.tcpa[intidx,ownidx] * traf.gs[intidx] / nm
         lati, loni = geo.qdrpos(traf.lat[intidx], traf.lon[intidx], traf.trk[intidx], rngi)
@@ -406,6 +412,13 @@ class ASAS():
         lati   = lati[inarea]
         loni   = loni[inarea]
         alti   = alti[inarea] 
+        
+        print lato
+        print lono
+        print alto
+        print
+        
+        
         
         return ownidx, intidx, rngo, lato, lono, alto, rngi, lati, loni, alti
     
