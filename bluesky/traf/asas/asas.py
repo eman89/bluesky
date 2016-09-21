@@ -370,12 +370,6 @@ class ASAS():
         lato, lono = geo.qdrpos(traf.lat[ownidx], traf.lon[ownidx], traf.trk[ownidx], rngo)
         alto       = traf.alt[ownidx] + self.tcpa[ownidx,intidx] * traf.vs[ownidx]
         
-#        print self.tcpa[ownidx,intidx]
-#        print self.tcpa[intidx,ownidx]
-#        print traf.gs[ownidx]
-#        print rngo
-#        print
-        
         # Determine CPA for intruder 
         rngi       = self.tcpa[intidx,ownidx] * traf.gs[intidx] / nm
         lati, loni = geo.qdrpos(traf.lat[intidx], traf.lon[intidx], traf.trk[intidx], rngi)
@@ -403,24 +397,9 @@ class ASAS():
 
         # Filter out the conflcits that do not match the selected "option"
         ownidx = ownidx[inarea]
-        rngo   = rngo[inarea]
-        lato   = lato[inarea]
-        lono   = lono[inarea]
-        alto   = alto[inarea] 
         intidx = intidx[inarea]
-        rngi   = rngi[inarea]
-        lati   = lati[inarea]
-        loni   = loni[inarea]
-        alti   = alti[inarea] 
-        
-        print lato
-        print lono
-        print alto
-        print
-        
-        
-        
-        return ownidx, intidx, rngo, lato, lono, alto, rngi, lati, loni, alti
+
+        return ownidx, intidx
     
     def APorASAS(self, traf):
         """ Decide for each aircraft in the conflict list whether the ASAS
