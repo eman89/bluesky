@@ -394,12 +394,20 @@ class ASAS():
             acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
             acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
             inarea    = np.where(np.logical_and(np.logical_and(cpainsidei,cpainsideo), np.logical_and(acinsideo,acinsidei)))
-
+            
         # Filter out the conflcits that do not match the selected "option"
         ownidx = ownidx[inarea]
+        rngo   = rngo[inarea]
+        lato   = lato[inarea]
+        lono   = lono[inarea]
+        alto   = alto[inarea] 
         intidx = intidx[inarea]
-
-        return ownidx, intidx
+        rngi   = rngi[inarea]
+        lati   = lati[inarea]
+        loni   = loni[inarea]
+        alti   = alti[inarea] 
+        
+        return ownidx, intidx, rngo, lato, lono, alto, rngi, lati, loni, alti
     
     def APorASAS(self, traf):
         """ Decide for each aircraft in the conflict list whether the ASAS
