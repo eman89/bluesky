@@ -84,25 +84,24 @@ class Traffic:
         # Traffic basic flight data
         with datalog.registerLogParameters('SNAPLOG', self):
             self.id        = []            # identifier (string)
-            self.spawnTime = np.array([])  # creation time [s]
-            self.type      = []            # aircaft type (string)
+            self.spawnTime = np.array([])  # creation time [s]            
             self.lat       = np.array([])  # latitude [deg]
             self.lon       = np.array([])  # longitude [deg]
             self.alt       = np.array([])  # altitude [m]
-            self.tas       = np.array([])  # true airspeed [m/s]
-            self.gs        = np.array([])  # ground speed [m/s]
+            self.tas       = np.array([])  # true airspeed [m/s]            
             self.vs        = np.array([])  # vertical speed [m/s]
-            self.hdg       = np.array([])  # traffic heading [deg]
-            self.trk       = np.array([])  # track angle [deg]
+            self.hdg       = np.array([])  # traffic heading [deg]            
             self.apalt     = []            # selected alt[m]
             self.aptas     = []            # just for initializing
             self.atrk      = []            # selected track angle [deg]
             self.avs       = []            # selected vertical speed [m/s]
-            self.swlnav    = np.array([])  # Lateral (HDG) based on nav?
-            self.swvnav    = np.array([])  # Vertical/longitudinal (ALT+SPD) based on nav info
+            self.swlnav    = np.array([])  # Lateral (HDG) based on nav?            
             self.orig      = []  # Four letter code of origin airport
             self.dest      = []  # Four letter code of destination airport
         
+        self.type      = []            # aircaft type (string)
+        self.trk       = np.array([])  # track angle [deg]
+        self.gs        = np.array([])  # ground speed [m/s]                        
         self.gsnorth = np.array([])  # ground speed [m/s]
         self.gseast  = np.array([])  # ground speed [m/s]
         self.cas     = np.array([])  # calibrated airspeed [m/s]
@@ -142,9 +141,12 @@ class Traffic:
         self.limvs_flag  = []
 
         # Traffic navigation information
+#        self.orig      = []  # Four letter code of origin airport
+#        self.dest      = []  # Four letter code of destination airport
         
 
         # LNAV route navigation
+        self.swvnav    = np.array([])  # Vertical/longitudinal (ALT+SPD) based on nav info
         
 
         self.actwplat  = np.array([])  # Active WP latitude

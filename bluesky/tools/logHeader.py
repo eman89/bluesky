@@ -20,11 +20,11 @@ def skyHeader():
 
 def snapHeader():
 
-    parameters = "Call Sign [-], Spawn Time [s], AC Type [-], Latitude [deg], "   + \
-                 "Longitude [deg], Altitude [m], TAS [m/s], GS [m/s], VS [m/s], " + \
-                 "HDG [deg], TRK [deg], CMDALT [m], CMDTAS [m/s], CMDTRK [deg], " + \
+    parameters = "Call Sign [-], Spawn Time [s], Latitude [deg], "   + \
+                 "Longitude [deg], Altitude [m], TAS [m/s], VS [m/s], " + \
+                 "HDG [deg], CMDALT [m], CMDTAS [m/s], CMDTRK [deg], " + \
                  "CMDVS [m/s], ASAS Active [-], ASASALT [m], ASASTAS [m/s], "     + \
-                 "ASASTRK [deg], ASASVS [m/s], LNAV Active [-], VNAV Active [-], "+ \
+                 "ASASTRK [deg], ASASVS [m/s], LNAV Active [-],  "+ \
                  "Origin [-], Destination [-]"
     
     lines = "##################### #\n"+ \
@@ -34,6 +34,11 @@ def snapHeader():
             parameters + "\n"
     
     return lines
+    
+
+def cflHeader():
+    
+    parameters = "Call Sign id1 [-],"
 
     
     
