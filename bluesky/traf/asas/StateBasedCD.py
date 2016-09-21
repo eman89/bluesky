@@ -15,18 +15,15 @@ def detect(dbconf, traf, simt):
     # Reset lists before new CD
     dbconf.iconf        = [[] for ac in range(traf.ntraf)]
     dbconf.nconf        = 0
-    dbconf.confpairs    = []
+    
     dbconf.rngowncpa    = []
     dbconf.latowncpa    = []
     dbconf.lonowncpa    = []
     dbconf.altowncpa    = []
-    dbconf.rngintcpa    = []
-    dbconf.latintcpa    = []
-    dbconf.lonintcpa    = []
-    dbconf.altintcpa    = []
 
     dbconf.LOSlist_now  = []
     dbconf.conflist_now = []
+    dbconf.confpairs    = []
 
     # Horizontal conflict ---------------------------------------------------------
 
@@ -133,8 +130,7 @@ def detect(dbconf, traf, simt):
     
     # Do conflict area filtering
     if dbconf.swconfareafilt:
-        ownidx, intidx, dbconf.rngowncpa, dbconf.latowncpa, dbconf.lonowncpa, dbconf.altowncpa, \
-                    dbconf.rngintcpa, dbconf.latintcpa, dbconf.lonintcpa, dbconf.altintcpa \
+        ownidx, intidx, dbconf.rngowncpa, dbconf.latowncpa, dbconf.lonowncpa, dbconf.altowncpa \
                             = dbconf.ConfAreaFilter(traf, ownidx, intidx)
     else:
         # Determine CPA for ownship 
@@ -143,12 +139,6 @@ def detect(dbconf, traf, simt):
         dbconf.lonowncpa = geo.qdrpos(traf.lat[ownidx], traf.lon[ownidx], traf.trk [ownidx], dbconf.rngowncpa)
         dbconf.altowncpa = traf.alt [ownidx] + dbconf.tcpa [ownidx,intidx] * traf.vs[ownidx]
         
-        # Determine CPA for intruder (needed for logging)
-        dbconf.rngintcpa = dbconf.tcpa[intidx,ownidx] * traf.gs[intidx] / nm
-        dbconf.latintcpa, \
-        dbconf.lonintcpa = geo.qdrpos(traf.lat[intidx], traf.lon[intidx], traf.trk[intidx], dbconf.rngintcpa)
-        dbconf.altintcpa = traf.alt[intidx] + dbconf.tcpa[intidx,ownidx] * traf.vs[intidx]
-    
     # Number of CURRENTLY detected conflicts. All these conflicts satisfy the conflict-area-filter settings.
     dbconf.nconf = len(ownidx) 
     
