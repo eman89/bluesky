@@ -4,6 +4,7 @@ State-based conflict detection
 
 """
 import numpy as np
+import gc
 from ...tools import geo
 from ...tools.aero import nm
 
@@ -25,8 +26,16 @@ def detect(dbconf, traf, simt):
     dbconf.conflist_now = []
     dbconf.confpairs    = []
     
-    dbconf.clogid1 = []
-    dbconf.clogid2 = []
+    dbconf.clogi         = []
+    dbconf.clogj         = []
+    dbconf.clogid1       = []
+    dbconf.clogid2       = []
+    dbconf.cloglatcpaid1 = []
+    dbconf.clogloncpaid1 = []
+    dbconf.clogaltcpaid1 = []
+    dbconf.cloglatcpaid2 = []
+    dbconf.clogloncpaid2 = []
+    dbconf.clogaltcpaid2 = []
 
     # Horizontal conflict ---------------------------------------------------------
 
@@ -146,7 +155,8 @@ def detect(dbconf, traf, simt):
     dbconf.nconf = len(ownidx) 
     
     # Add to Conflict and LOS lists--------------------------------------------
-    for idx in range(dbconf.nconf):        
+    for idx in range(dbconf.nconf):
+        gc.disable()        
         
         # Determine idx of conflciting aircaft
         i = ownidx[idx]
@@ -162,13 +172,34 @@ def detect(dbconf, traf, simt):
         combi  = str(traf.id[i]) + " " + str(traf.id[j])
         combi2 = str(traf.id[j]) + " " + str(traf.id[i])
 
+        # cpa lat, lon and alt aircraft i (ownship in combi)
+        rngi      = dbconf.tcpa[i,j]*traf.gs[i]/nm
+        lati,loni = geo.qdrpos(traf.lat[i],traf.lon[i], traf.trk[i],rngi)
+        alti      = traf.alt[i]+dbconf.tcpa[i,j]*traf.vs[i]
+
+        # cpa lat, lon and alt aircraft j (intruder in combi)
+        rngj      = dbconf.tcpa[i,j]*traf.gs[j]/nm
+        latj,lonj = geo.qdrpos(traf.lat[j],traf.lon[j], traf.trk[j],rngj)
+        altj      = traf.alt[j]+dbconf.tcpa[i,j]*traf.vs[j]
+
         # Update conflict lists: conflist_all (currently active conflicts) and 
-        # conflist_now (newly detected conflicts during this detection cycle)
+        # all variables related to CFLLOG
         if combi not in dbconf.conflist_all and combi2 not in dbconf.conflist_all:
             dbconf.conflist_all.append(combi)
+            # Now get the stuff you need for the CFLLOG variables!
+            dbconf.clogi.append(i)
+            dbconf.clogj.append(j)
             dbconf.clogid1.append(traf.id[i])
             dbconf.clogid2.append(traf.id[j])
+            dbconf.cloglatcpaid1.append(lati)
+            dbconf.clogloncpaid1.append(loni)
+            dbconf.clogaltcpaid1.append(alti)
+            dbconf.cloglatcpaid2.append(latj)
+            dbconf.clogloncpaid2.append(lonj)
+            dbconf.clogaltcpaid2.append(altj)
             
+        # Update conflist_now (newly detected conflicts during this detection cycle)
+        # and all variables related INSTLOG 
         if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
             dbconf.conflist_now.append(combi)
 
@@ -181,14 +212,16 @@ def detect(dbconf, traf, simt):
         vLOS   = vdist < dbconf.dh
         LOS    = (hLOS & vLOS)
         
-        # Update LOS lists: LOSlist_all (all LOS since ASAS is ON) and 
-        # LOSlist_now (newly detected conflicts during this detection cycle)
         if LOS:
+            # Update LOS lists: LOSlist_all (all LOS since ASAS is ON) and 
+            # all variables related to INTLOG
             if combi not in dbconf.LOSlist_all and combi2 not in dbconf.LOSlist_all:
                 dbconf.LOSlist_all.append(combi)
                 dbconf.LOSmaxsev.append(0.)
                 dbconf.LOShmaxsev.append(0.)
                 dbconf.LOSvmaxsev.append(0.)
+            
+            # LOSlist_now (newly detected conflicts during this detection cycle)
             if combi not in dbconf.LOSlist_now and combi2 not in dbconf.LOSlist_now:
                 dbconf.LOSlist_now.append(combi)
 
@@ -210,5 +243,7 @@ def detect(dbconf, traf, simt):
                 if severity > dbconf.LOShmaxsev[idx]:
                     dbconf.LOShmaxsev[idx] = Ih
                 if severity > dbconf.LOSvmaxsev[idx]:
-                    dbconf.LOSvmaxsev[idx] = Iv 
+                    dbconf.LOSvmaxsev[idx] = Iv
+        
+        gc.enable()
     

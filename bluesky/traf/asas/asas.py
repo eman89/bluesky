@@ -121,18 +121,108 @@ class ASAS():
             self.nintrusionsnow = len(self.LOSlist_now)
         
         # CFL log variables
+        self.clogi = self.clogj = []  
         with datalog.registerLogParameters('CFLLOG', self):
-            self.clogid1 = []
-            self.clogid2 = []
+            self.clogid1           = []
+            self.clogid2           = []
+            self.clogtinconf       = []
+            self.clogtoutconf      = []
+            self.clogtcpa          = []
+            self.cloglatid1        = []
+            self.cloglonid1        = []
+            self.clogaltid1        = []
+            self.clogtasid1        = []
+            self.clogvsid1         = []
+            self.cloghdgid1        = []
+            self.cloglatcpaid1     = []
+            self.clogloncpaid1     = []
+            self.clogaltcpaid1     = []
+            self.clogasasactiveid1 = []
+            self.clogasastasid1    = []
+            self.clogasastrkid1    = []
+#            self.clogncflid1       = []            
+            self.cloglatid2        = []
+            self.cloglonid2        = []
+            self.clogaltid2        = []
+            self.clogtasid2        = []
+            self.clogvsid2         = []
+            self.cloghdgid2        = []
+            self.cloglatcpaid2     = []
+            self.clogloncpaid2     = []
+            self.clogaltcpaid2     = []
+            self.clogasasactiveid2 = []
+            self.clogasastasid2    = []
+            self.clogasastrkid2    = []
+#            self.clogncflid2       = []         
             
     def asasLogUpdate(self, traf):
         
-        # SKYLOG
+        # SKYLOG---------------------------------------------------------------
         self.nconflictsnow  = len(self.conflist_now)
         self.nintrusionsnow = len(self.LOSlist_now)
+        # SKYLOG---------------------------------------------------------------
         
-        # CFLLOG
+        
+        # CFLLOG---------------------------------------------------------------
+        # NOTE: some of the varaibles (which are based on lists ) are updated 
+        #       in StateBasedCD
+        
+        # Reset variables
+
+        self.clogtinconf       = []
+        self.clogtoutconf      = []
+        self.clogtcpa          = []
+        self.cloglatid1        = []
+        self.cloglonid1        = []
+        self.clogaltid1        = []
+        self.clogtasid1        = []
+        self.clogvsid1         = []
+        self.cloghdgid1        = []
+        self.clogasasactiveid1 = []
+        self.clogasastasid1    = []
+        self.clogasastrkid1    = []
+#        self.clogncflid1       = []            
+        self.cloglatid2        = []
+        self.cloglonid2        = []
+        self.clogaltid2        = []
+        self.clogtasid2        = []
+        self.clogvsid2         = []
+        self.cloghdgid2        = []
+        self.clogasasactiveid2 = []
+        self.clogasastasid2    = []
+        self.clogasastrkid2    = []
+#        self.clogncflid2       = []
+
+		# Update the cpa time variables
+        self.clogtinconf  = self.tinconf[self.clogi,self.clogj]
+        self.clogtoutconf = self.toutconf[self.clogi,self.clogj]
+        self.clogtcpa     = self.tcpa[self.clogi,self.clogj]
+                
+        # Update the variables belonging to id1
+        self.cloglatid1        = traf.lat[self.clogi]
+        self.cloglonid1        = traf.lon[self.clogi]
+        self.clogaltid1        = traf.alt[self.clogi]
+        self.clogtasid1        = traf.tas[self.clogi]
+        self.clogvsid1         = traf.vs[self.clogi]
+        self.cloghdgid1        = traf.hdg[self.clogi]
+        self.clogasasactiveid1 = self.asasactive[self.clogi]
+        self.clogasastasid1    = self.asasspd[self.clogi]
+        self.clogasastrkid1    = self.asastrk[self.clogi]
+                
+        # Update the variables belonging to id2
+        self.cloglatid2        = traf.lat[self.clogj]
+        self.cloglonid2        = traf.lon[self.clogj]
+        self.clogaltid2        = traf.alt[self.clogj]
+        self.clogtasid2        = traf.tas[self.clogj]
+        self.clogvsid2         = traf.vs[self.clogj]
+        self.cloghdgid2        = traf.hdg[self.clogj]
+        self.clogasasactiveid2 = self.asasactive[self.clogj]
+        self.clogasastasid2    = self.asasspd[self.clogj]
+        self.clogasastrkid2    = self.asastrk[self.clogj]
+
+        # Call the logger
         self.cfllog.log()
+        # CFLLOG---------------------------------------------------------------
         
         
     def toggle(self, flag=None):

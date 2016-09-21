@@ -13,8 +13,7 @@ def skyHeader():
                  "##################### #\n\n" + \
                  "Units for parameters:\n"     + \
                  parameters + "\n"             + \
-                 "NOTE: ORDER OF PARAMETERS VARIES FROM ABOVE LIST!\n" + \
-                 "      See below for actual order\n"
+                 "NOTE: ORDER OF PARAMETERS VARIES FROM ABOVE LIST! SEE BELOW FOR ACTUAL ORDER!\n"
                  
                  
     return lines
@@ -32,34 +31,28 @@ def snapHeader():
                  "##################### #\n\n"  + \
                  "Units for parameters:\n"      + \
                  parameters + "\n"              + \
-                 "NOTE: ORDER OF PARAMETERS VARIES FROM ABOVE LIST!\n" + \
-                 "      See below for actual order\n"
+                 "NOTE: ORDER OF PARAMETERS VARIES FROM ABOVE LIST! SEE BELOW FOR ACTUAL ORDER!\n"
     
     return lines
     
 
 def cflHeader():
-    
-    parameters =  "Call Sign id1 [-], Latitude id1 [deg], Longitude id1 [deg], "   + \
-                  "Altitude id1 [m], TAS id1 [m/s], VS id1 [m/s], HDG id1 [deg], " + \
-                  "ASAS Active id1 [-], ASASTAS id1 [m/s], ASASTRK id1 [deg], "    + \
-                  "CPA LAT id1 [deg], CPA LON id1 [deg], CPA ALT id1 [m], "        + \
-                  "Tinconf id1 [s], Toutconf id1 [s], Tcpa id1[s],"                + \
-                  "n active Conflicts with id1, "                                  + \
-                  "Call Sign id2 [-], Latitude id2 [deg], Longitude id2 [deg], "   + \
-                  "Altitude id2 [m], TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], " + \
-                  "ASAS Active id2 [-], ASASTAS id2 [m/s], ASASTRK id1 [deg], "    + \
-                  "CPA LAT id2 [deg], CPA LON id2 [deg], CPA ALT id2 [m], "        + \
-                  "Tinconf id2 [s], Toutconf id2 [s], Tcpa id2[s], "               + \
-                  "n active Conflicts with id1"
+    parameters =  "Call Sign id1 [-], Call Sign id2 [-], tinconf [s], toutconf [s], "     + \
+                  "tcpa [s], Latitude id1 [deg], Longitude id1 [deg], Altitude id1 [m], " + \
+                  "TAS id1 [m/s], VS id1 [m/s], HDG id1 [deg], Latitude CPA id1 [deg], "  + \
+                  "Longitude CPA id1 [deg], Altitude CPA id1 [m], ASAS Active id1 [-], "  + \
+                  "ASASTAS id1 [m/s], ASASTRK id1 [deg], N Conflicts With id1 [-], "   + \
+                  "Latitude id2 [deg], Longitude id2 [deg], Altitude id2 [m], "           + \
+                  "TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], Latitude CPA id2 [deg], "  + \
+                  "Longitude CPA id2 [deg], Altitude CPA id2 [m], ASAS Active id2 [-], "  + \
+                  "ASASTAS id2 [m/s], ASASTRK id2 [deg], N Conflicts With id2 [-]"
     
     lines      = "##################### #\n"    + \
-                 "CFL LOG\n"                   + \
+                 "CFL LOG\n"                    + \
                  "##################### #\n\n"  + \
                  "Units for parameters:\n"      + \
                  parameters + "\n"              + \
-                 "NOTE: ORDER OF PARAMETERS VARIES FROM ABOVE LIST!\n" + \
-                 "      See below for actual order\n"
+                 "NOTE: ORDER OF PARAMETERS VARIES FROM ABOVE LIST! SEE BELOW FOR ACTUAL ORDER!\n"
     
     return lines
                   
