@@ -72,16 +72,11 @@ def qdrdist(latd1, lond1, latd2, lond2):
     a    = 6378137.0       # [m] Major semi-axis WGS-84
     r1   = rwgs84(latd1)
     r2   = rwgs84(latd2)
-    
-    if hasattr(latd1, "__len__"):
-        index = np.where((abs(latd1) + abs(latd2))==0.0)
-        latd1[index] = latd1[index] + 0.000000001   
-    
     res2 = 0.5 * (abs(latd1) * (r1 + a) + abs(latd2) * (r2 + a)) / \
         (abs(latd1) + abs(latd2))
         
     # handle latd1+latd2 = 0 
-#    res2 = np.nan_to_num(res2)
+    res2 = np.nan_to_num(res2)
     
     # Condition
     sw   = (latd1 * latd2 >= 0.)
