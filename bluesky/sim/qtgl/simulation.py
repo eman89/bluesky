@@ -12,7 +12,7 @@ from simevents import StackTextEventType, BatchEventType, BatchEvent, SimStateEv
 from ...traf import Traffic
 from ...navdb import Navdatabase
 from ... import stack
-from ...traf import Metric
+#from ...traf import Metric
 from ... import settings
 from ...tools.datafeed import Modesbeast
 from ...tools import datalog, areafilter
