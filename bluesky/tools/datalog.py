@@ -194,7 +194,7 @@ class CSVLogger:
                 nrows = len(varlist[0])
                 if nrows == 0:
                     return
-                txtdata = [nrows * [str(t).ljust(7," ")]] + [col2txt(col) for col in varlist]
+                txtdata = [nrows * [str(t).ljust(6," ")]] + [col2txt(col) for col in varlist]
             else:
                 txtdata = [str(t).ljust(8," ")] + [num2txt(col) for col in varlist]
 

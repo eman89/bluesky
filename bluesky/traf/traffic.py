@@ -55,6 +55,9 @@ class Traffic:
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
         datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
         
+        with datalog.registerLogParameters('SKYLOG', self):
+            self.ntraf = 0   
+        
         with datalog.registerLogParameters('SNAPLOG', self):
             self.id        = []            # identifier (string)
             self.spawnTime = np.array([])  # creation time [s]            
@@ -72,9 +75,6 @@ class Traffic:
             self.orig      = []  # Four letter code of origin airport
             self.dest      = []  # Four letter code of destination airport
         
-        with datalog.registerLogParameters('SKYLOG', self):
-            self.ntraf = 0       
-        
         # ASAS object
         self.asas = ASAS()
         self.wind = WindSim()
@@ -87,7 +87,9 @@ class Traffic:
         # Default: BlueSky internal performance model.
         # Insert your BADA files to the folder "BlueSky/data/coefficients/BADA"
         # for working with EUROCONTROL`s Base of Aircraft Data revision 3.12
-        self.perf = Perf(self)       
+
+        self.perf = Perf(self)
+
         self.ntraf = 0
 
         # Traffic list & arrays definition
@@ -98,42 +100,34 @@ class Traffic:
         # which can be found directly below __init__
 
         # Traffic basic flight data
-        
-        # Traffic basic flight data
-        self.id        = []            # identifier (string)
-        self.spawnTime = np.array([])  # creation time [s]            
-        self.lat       = np.array([])  # latitude [deg]
-        self.lon       = np.array([])  # longitude [deg]
-        self.alt       = np.array([])  # altitude [m]
-        self.tas       = np.array([])  # true airspeed [m/s]            
-        self.vs        = np.array([])  # vertical speed [m/s]
-        self.hdg       = np.array([])  # traffic heading [deg]            
-        self.apalt     = []            # selected alt[m]
-        self.aptas     = []            # just for initializing
-        self.atrk      = []            # selected track angle [deg]
-        self.avs       = []            # selected vertical speed [m/s]
-        self.swlnav    = np.array([])  # Lateral (HDG) based on nav?            
-        self.orig      = []  # Four letter code of origin airport
-        self.dest      = []  # Four letter code of destination airport
-        
-        self.type      = []            # aircaft type (string)
-        self.trk       = np.array([])  # track angle [deg]
-        self.gs        = np.array([])  # ground speed [m/s]                        
+        self.id      = []  # identifier (string)
+        self.type    = []  # aircaft type (string)
+        self.lat     = np.array([])  # latitude [deg]
+        self.lon     = np.array([])  # longitude [deg]
+        self.hdg     = np.array([])  # traffic heading [deg]
+        self.trk     = np.array([])  # track angle [deg]
+        self.tas     = np.array([])  # true airspeed [m/s]
+        self.gs      = np.array([])  # ground speed [m/s]
         self.gsnorth = np.array([])  # ground speed [m/s]
         self.gseast  = np.array([])  # ground speed [m/s]
         self.cas     = np.array([])  # calibrated airspeed [m/s]
-        self.M       = np.array([])  # mach number        
-        self.fll     = np.array([])  # flight level [ft/100]        
+        self.M       = np.array([])  # mach number
+        self.alt     = np.array([])  # altitude [m]
+        self.fll     = np.array([])  # flight level [ft/100]
+        self.vs      = np.array([])  # vertical speed [m/s]
         self.p       = np.array([])  # atmospheric air pressure [N/m2]
         self.rho     = np.array([])  # atmospheric air density [kg/m3]
         self.Temp    = np.array([])  # atmospheric air temperature [K]
         self.dtemp   = np.array([])  # delta t for non-ISA conditions
 
-        # Traffic autopilot settings        
-        self.aspd   = []  # selected spd(CAS) [m/s]        
-        self.ama    = []  # selected spd above crossover altitude (Mach) [-]        
+        # Traffic autopilot settings
+        self.atrk   = []  # selected track angle [deg]
+        self.aspd   = []  # selected spd(CAS) [m/s]
+        self.aptas  = []  # just for initializing
+        self.ama    = []  # selected spd above crossover altitude (Mach) [-]
+        self.apalt  = []  # selected alt[m]
         self.apfll  = []  # selected fl [ft/100]
-        
+        self.avs    = []  # selected vertical speed [m/s]
 
         # Traffic performance data
         self.avsdef = np.array([])  # [m/s]default vertical speed of autopilot
@@ -158,12 +152,13 @@ class Traffic:
         self.limvs_flag  = []
 
         # Traffic navigation information
-        self.orig      = []  # Four letter code of origin airport
-        self.dest      = []  # Four letter code of destination airport
-        
+        self.orig   = []  # Four letter code of origin airport
+        self.dest   = []  # Four letter code of destination airport
 
         # LNAV route navigation
-        self.swvnav    = np.array([])  # Vertical/longitudinal (ALT+SPD) based on nav info
+        self.swlnav = np.array([])  # Lateral (HDG) based on nav?
+        self.swvnav = np.array([])  # Vertical/longitudinal (ALT+SPD) based on nav info
+
         self.actwplat  = np.array([])  # Active WP latitude
         self.actwplon  = np.array([])  # Active WP longitude
         self.actwpalt  = np.array([])  # Active WP altitude to arrive at

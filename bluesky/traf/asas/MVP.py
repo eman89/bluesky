@@ -58,7 +58,6 @@ def resolve(dbconf, traf):
                         dv[id1] = 0.0
                     if ac2 in dbconf.resoofflst: # -> Then id2 does not do any resolutions
                         dv[id2] = 0.0    
-                    
                                                                
     else:
         for i in range(dbconf.nconf):

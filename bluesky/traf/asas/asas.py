@@ -42,9 +42,53 @@ class ASAS():
         # All ASAS variables are initialized in the reset function
         self.reset()
         
-        # create ASAS event loggers
+        # Skylog parameter registration
+        with datalog.registerLogParameters('SKYLOG', self):
+            self.nconflictsnow  = 0
+            self.nintrusionsnow = 0
+        
+        # Snaplog parameter registration
+        with datalog.registerLogParameters('SNAPLOG', self):
+            self.asasactive = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not           
+            self.asasspd    = np.array([])  # speed provided by the ASAS (eas) [m/s]
+            self.asastrk    = np.array([])  # heading provided by the ASAS [deg]
+        
+        # Create ASAS event loggers
         self.cfllog = datalog.defineLogger("CFLLOG", logHeader.cflHeader())
         
+        # Cfllog parameter registration
+        with datalog.registerLogParameters('CFLLOG', self):
+            self.clogid1           = []
+            self.clogid2           = []
+            self.clogtinconf       = []
+            self.clogtoutconf      = []
+            self.clogtcpa          = []
+            self.cloglatid1        = []
+            self.cloglonid1        = []
+            self.clogaltid1        = []
+            self.clogtasid1        = []
+            self.clogvsid1         = []
+            self.cloghdgid1        = []
+            self.cloglatcpaid1     = []
+            self.clogloncpaid1     = []
+            self.clogaltcpaid1     = []
+            self.clogasasactiveid1 = []
+            self.clogasastasid1    = []
+            self.clogasastrkid1    = []
+            self.clogncflid1       = []            
+            self.cloglatid2        = []
+            self.cloglonid2        = []
+            self.clogaltid2        = []
+            self.clogtasid2        = []
+            self.clogvsid2         = []
+            self.cloghdgid2        = []
+            self.cloglatcpaid2     = []
+            self.clogloncpaid2     = []
+            self.clogaltcpaid2     = []
+            self.clogasasactiveid2 = []
+            self.clogasastasid2    = []
+            self.clogasastrkid2    = []
+            self.clogncflid2       = []
 
     def reset(self):
         """ ASAS constructor """
@@ -107,54 +151,51 @@ class ASAS():
         self.LOSvmaxsev   = []
 
         # ASAS info per aircraft:
-        self.iconf        = []            # index in 'conflicting' aircraft database
-        self.asasalt      = np.array([])  # speed alt by the ASAS [m]
-        self.asasvsp      = np.array([])  # speed vspeed by the ASAS [m/s]
+        self.iconf      = []            # index in 'conflicting' aircraft database
+        self.asasalt    = np.array([])  # speed alt by the ASAS [m]
+        self.asasvsp    = np.array([])  # speed vspeed by the ASAS [m/s]        
+        self.asasactive = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not           
+        self.asasspd    = np.array([])  # speed provided by the ASAS (eas) [m/s]
+        self.asastrk    = np.array([])  # heading provided by the ASAS [deg]
         
-        with datalog.registerLogParameters('SNAPLOG', self):
-            self.asasactive = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not           
-            self.asasspd    = np.array([])  # speed provided by the ASAS (eas) [m/s]
-            self.asastrk    = np.array([])  # heading provided by the ASAS [deg]
+        # Skylog variables        
+        self.nconflictsnow  = len(self.conflist_now)
+        self.nintrusionsnow = len(self.LOSlist_now)
         
-        # number of instantaneous conflicts and intrusions
-        with datalog.registerLogParameters('SKYLOG', self):
-            self.nconflictsnow  = len(self.conflist_now)
-            self.nintrusionsnow = len(self.LOSlist_now)
-        
-        # CFL log variables
-        self.clogi = self.clogj = []  
-        with datalog.registerLogParameters('CFLLOG', self):
-            self.clogid1           = []
-            self.clogid2           = []
-            self.clogtinconf       = []
-            self.clogtoutconf      = []
-            self.clogtcpa          = []
-            self.cloglatid1        = []
-            self.cloglonid1        = []
-            self.clogaltid1        = []
-            self.clogtasid1        = []
-            self.clogvsid1         = []
-            self.cloghdgid1        = []
-            self.cloglatcpaid1     = []
-            self.clogloncpaid1     = []
-            self.clogaltcpaid1     = []
-            self.clogasasactiveid1 = []
-            self.clogasastasid1    = []
-            self.clogasastrkid1    = []
-            self.clogncflid1       = []            
-            self.cloglatid2        = []
-            self.cloglonid2        = []
-            self.clogaltid2        = []
-            self.clogtasid2        = []
-            self.clogvsid2         = []
-            self.cloghdgid2        = []
-            self.cloglatcpaid2     = []
-            self.clogloncpaid2     = []
-            self.clogaltcpaid2     = []
-            self.clogasasactiveid2 = []
-            self.clogasastasid2    = []
-            self.clogasastrkid2    = []
-            self.clogncflid2       = []         
+        # CFLlog variables
+        self.clogi             = []
+        self.clogj             = []  
+        self.clogid1           = []
+        self.clogid2           = []
+        self.clogtinconf       = []
+        self.clogtoutconf      = []
+        self.clogtcpa          = []
+        self.cloglatid1        = []
+        self.cloglonid1        = []
+        self.clogaltid1        = []
+        self.clogtasid1        = []
+        self.clogvsid1         = []
+        self.cloghdgid1        = []
+        self.cloglatcpaid1     = []
+        self.clogloncpaid1     = []
+        self.clogaltcpaid1     = []
+        self.clogasasactiveid1 = []
+        self.clogasastasid1    = []
+        self.clogasastrkid1    = []
+        self.clogncflid1       = []            
+        self.cloglatid2        = []
+        self.cloglonid2        = []
+        self.clogaltid2        = []
+        self.clogtasid2        = []
+        self.clogvsid2         = []
+        self.cloghdgid2        = []
+        self.cloglatcpaid2     = []
+        self.clogloncpaid2     = []
+        self.clogaltcpaid2     = []
+        self.clogasasactiveid2 = []
+        self.clogasastasid2    = []
+        self.clogasastrkid2    = []
+        self.clogncflid2       = []         
             
     def asasLogUpdate(self, traf):
         
