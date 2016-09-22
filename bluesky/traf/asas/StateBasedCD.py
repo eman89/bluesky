@@ -169,8 +169,8 @@ def detect(dbconf, traf, simt):
         
         # Combinations of conflicting aircraft
         # NB: if only one A/C detects a conflict, it is also added to these lists
-        combi  = str(traf.id[i]) + " " + str(traf.id[j])
-        combi2 = str(traf.id[j]) + " " + str(traf.id[i])
+        combi  = (traf.id[i],traf.id[j])
+        combi2 = (traf.id[j],traf.id[i])
 
         # cpa lat, lon and alt aircraft i (ownship in combi)
         rngi      = dbconf.tcpa[i,j]*traf.gs[i]/nm
