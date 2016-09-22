@@ -50,38 +50,11 @@ class Traffic:
     """
 
     def __init__(self, navdb):
-        # ASAS object
-        self.asas = ASAS()
-        self.wind = WindSim()
-
-        # All traffic data is initialized in the reset function
-        self.reset(navdb)
-        
         # Define the periodic loggers
         datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
         datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
-
-    def reset(self, navdb):       
-        #  model-specific parameters.
-        # Default: BlueSky internal performance model.
-        # Insert your BADA files to the folder "BlueSky/data/coefficients/BADA"
-        # for working with EUROCONTROL`s Base of Aircraft Data revision 3.12
-        self.perf = Perf(self)      
         
-        with datalog.registerLogParameters('SKYLOG', self):
-            self.ntraf = 0
-
-        # Traffic list & arrays definition
-
-        # !!!IMPORTANT NOTE!!!
-        # Any variables added here should also be added in the Traffic
-        # methods self.create() (append) and self.delete() (delete)
-        # which can be found directly below __init__
-
-        # Traffic basic flight data
-        
-        # Traffic basic flight data
         with datalog.registerLogParameters('SNAPLOG', self):
             self.id        = []            # identifier (string)
             self.spawnTime = np.array([])  # creation time [s]            
@@ -98,6 +71,50 @@ class Traffic:
             self.swlnav    = np.array([])  # Lateral (HDG) based on nav?            
             self.orig      = []  # Four letter code of origin airport
             self.dest      = []  # Four letter code of destination airport
+        
+        with datalog.registerLogParameters('SKYLOG', self):
+            self.ntraf = 0       
+        
+        # ASAS object
+        self.asas = ASAS()
+        self.wind = WindSim()
+
+        # All traffic data is initialized in the reset function
+        self.reset(navdb)       
+
+    def reset(self, navdb):       
+        #  model-specific parameters.
+        # Default: BlueSky internal performance model.
+        # Insert your BADA files to the folder "BlueSky/data/coefficients/BADA"
+        # for working with EUROCONTROL`s Base of Aircraft Data revision 3.12
+        self.perf = Perf(self)       
+        self.ntraf = 0
+
+        # Traffic list & arrays definition
+
+        # !!!IMPORTANT NOTE!!!
+        # Any variables added here should also be added in the Traffic
+        # methods self.create() (append) and self.delete() (delete)
+        # which can be found directly below __init__
+
+        # Traffic basic flight data
+        
+        # Traffic basic flight data
+        self.id        = []            # identifier (string)
+        self.spawnTime = np.array([])  # creation time [s]            
+        self.lat       = np.array([])  # latitude [deg]
+        self.lon       = np.array([])  # longitude [deg]
+        self.alt       = np.array([])  # altitude [m]
+        self.tas       = np.array([])  # true airspeed [m/s]            
+        self.vs        = np.array([])  # vertical speed [m/s]
+        self.hdg       = np.array([])  # traffic heading [deg]            
+        self.apalt     = []            # selected alt[m]
+        self.aptas     = []            # just for initializing
+        self.atrk      = []            # selected track angle [deg]
+        self.avs       = []            # selected vertical speed [m/s]
+        self.swlnav    = np.array([])  # Lateral (HDG) based on nav?            
+        self.orig      = []  # Four letter code of origin airport
+        self.dest      = []  # Four letter code of destination airport
         
         self.type      = []            # aircaft type (string)
         self.trk       = np.array([])  # track angle [deg]
@@ -141,14 +158,12 @@ class Traffic:
         self.limvs_flag  = []
 
         # Traffic navigation information
-#        self.orig      = []  # Four letter code of origin airport
-#        self.dest      = []  # Four letter code of destination airport
+        self.orig      = []  # Four letter code of origin airport
+        self.dest      = []  # Four letter code of destination airport
         
 
         # LNAV route navigation
         self.swvnav    = np.array([])  # Vertical/longitudinal (ALT+SPD) based on nav info
-        
-
         self.actwplat  = np.array([])  # Active WP latitude
         self.actwplon  = np.array([])  # Active WP longitude
         self.actwpalt  = np.array([])  # Active WP altitude to arrive at
