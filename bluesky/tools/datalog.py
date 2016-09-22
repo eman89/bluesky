@@ -233,9 +233,10 @@ class CSVLogger:
                     return False, 'Turn ' + self.name + ' on with optional dt'
 
             self.open(makeLogfileName(self.name))
-
+            return True, self.name + " ON. dt = " + self.dt + " seconds"
         elif args[0] == 'OFF':
             self.reset()
+            return True, self.name + " OFF"
         elif args[0] == 'LISTVARS':
             return True, 'Logger ' + self.name + ' has variables: ' \
                 + self.listallvarnames()
