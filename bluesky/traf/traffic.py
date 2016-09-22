@@ -119,6 +119,7 @@ class Traffic:
         self.rho     = np.array([])  # atmospheric air density [kg/m3]
         self.Temp    = np.array([])  # atmospheric air temperature [K]
         self.dtemp   = np.array([])  # delta t for non-ISA conditions
+        self.spawnTime = np.array([])  # creation time [s]
 
         # Traffic autopilot settings
         self.atrk   = []  # selected track angle [deg]

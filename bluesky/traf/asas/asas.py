@@ -75,7 +75,7 @@ class ASAS():
             self.clogasasactiveid1 = []
             self.clogasastasid1    = []
             self.clogasastrkid1    = []
-            self.clogncflid1       = []            
+            self.clognsecondaryid1 = []            
             self.cloglatid2        = []
             self.cloglonid2        = []
             self.clogaltid2        = []
@@ -88,7 +88,7 @@ class ASAS():
             self.clogasasactiveid2 = []
             self.clogasastasid2    = []
             self.clogasastrkid2    = []
-            self.clogncflid2       = []
+            self.clognsecondaryid2 = []
 
     def reset(self):
         """ ASAS constructor """
@@ -182,7 +182,7 @@ class ASAS():
         self.clogasasactiveid1 = []
         self.clogasastasid1    = []
         self.clogasastrkid1    = []
-        self.clogncflid1       = []            
+        self.clognsecondaryid1 = []            
         self.cloglatid2        = []
         self.cloglonid2        = []
         self.clogaltid2        = []
@@ -195,7 +195,7 @@ class ASAS():
         self.clogasasactiveid2 = []
         self.clogasastasid2    = []
         self.clogasastrkid2    = []
-        self.clogncflid2       = []         
+        self.clognsecondaryid2 = []         
             
     def asasLogUpdate(self, traf):
         
@@ -222,7 +222,7 @@ class ASAS():
             self.clogasasactiveid1 = []
             self.clogasastasid1    = []
             self.clogasastrkid1    = []
-            self.clogncflid1       = np.zeros(len(self.clogid1))            
+            self.clognsecondaryid1 = np.zeros(len(self.clogid1))            
             self.cloglatid2        = []
             self.cloglonid2        = []
             self.clogaltid2        = []
@@ -232,7 +232,7 @@ class ASAS():
             self.clogasasactiveid2 = []
             self.clogasastasid2    = []
             self.clogasastrkid2    = []
-            self.clogncflid2       = np.zeros(len(self.clogid2))
+            self.clognsecondaryid2 = np.zeros(len(self.clogid2))
     
     		# Update the cpa time variables
             self.clogtinconf  = self.tinconf[self.clogi,self.clogj]
@@ -263,12 +263,14 @@ class ASAS():
             
             # Update the number of conflicts variables for id1 and id2
             conflist_all_flatten = np.array(self.conflist_all).flatten()
-            countConflist_all    = dict(Counter(conflist_all_flatten))
+            countConflist_all    = Counter(conflist_all_flatten)
             for i in range(len(self.clogid1)):
                 if self.clogid1[i] in conflist_all_flatten:
-                    self.clogncflid1[i] = self.clogncflid1[i] + countConflist_all[self.clogid1[i]]   
+                    self.clognsecondaryid1[i] = self.clognsecondaryid1[i] + countConflist_all[self.clogid1[i]]
+                    self.clognsecondaryid1[i] = self.clognsecondaryid1[i] - self.clogid1.count(self.clogid1[i]) - self.clogid2.count(self.clogid1[i])
                 if self.clogid2[i] in conflist_all_flatten:
-                    self.clogncflid2[i] = self.clogncflid2[i] + countConflist_all[self.clogid2[i]]       
+                    self.clognsecondaryid2[i] = self.clognsecondaryid2[i] + countConflist_all[self.clogid2[i]]
+                    self.clognsecondaryid2[i] = self.clognsecondaryid2[i] - self.clogid1.count(self.clogid2[i]) - self.clogid2.count(self.clogid2[i])
     
             # Finally, call the logger
             self.cfllog.log()
