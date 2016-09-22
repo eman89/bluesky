@@ -61,27 +61,18 @@ def instHeader():
                   "tcpa [s], Latitude id1 [deg], Longitude id1 [deg], Altitude id1 [m], "          + \
                   "TAS id1 [m/s], VS id1 [m/s], HDG id1 [deg], Latitude CPA id1 [deg], "           + \
                   "Longitude CPA id1 [deg], Altitude CPA id1 [m], ASAS Active id1 [-], "           + \
-                  "ASASTAS id1 [m/s], ASASTRK id1 [deg], nSecondary Conflicts id1 [-], "           + \
+                  "ASASTAS id1 [m/s], ASASTRK id1 [deg], "                                         + \
                   "Latitude id2 [deg], Longitude id2 [deg], Altitude id2 [m], "                    + \
                   "TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], Latitude CPA id2 [deg], "           + \
                   "Longitude CPA id2 [deg], Altitude CPA id2 [m], ASAS Active id2 [-], "           + \
-                  "ASASTAS id2 [m/s], ASASTRK id2 [deg], nSecondary Conflicts id2 [-] "            + \
+                  "ASASTAS id2 [m/s], ASASTRK id2 [deg], "                                         + \
                   "nTraf"
     
     lines      = "##############################\n"    + \
                  "INST LOG\n"                          + \
-                 "Instantaneous Conflict Data"         + \
+                 "Instantaneous Conflict Data\n"       + \
                  "##############################\n\n"  + \
                  "Parameters [Units]:\n"               + \
                  parameters + "\n"
     
     return lines
-                  
-
-
-
-    
-    
-    
-    
-

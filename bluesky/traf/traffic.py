@@ -52,8 +52,7 @@ class Traffic:
     def __init__(self, navdb):
         # Define the periodic loggers
         datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
-        datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
-        datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
+        datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)        
         
         with datalog.registerLogParameters('SKYLOG', self):
             self.ntraf = 0   

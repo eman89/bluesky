@@ -196,7 +196,7 @@ class CSVLogger:
                     return
                 txtdata = [nrows * [str(t).ljust(7," ")]] + [col2txt(col) for col in varlist]
             else:
-                txtdata = [str(t).ljust(8," ")] + [num2txt(col) for col in varlist]
+                txtdata = [str(t).ljust(7," ")] + [num2txt(col) for col in varlist]
 
             # log the data to file
             np.savetxt(self.file, np.vstack(txtdata).T, delimiter=', ', newline='\n', fmt='%s')

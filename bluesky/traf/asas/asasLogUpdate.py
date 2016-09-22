@@ -4,13 +4,13 @@ from collections import Counter
 
 def asasLogUpdate(dbconf, traf):
         
-    # SKYLOG---------------------------------------------------------------
+    # SKYLOG-------------------------------------------------------------------
     dbconf.nconflictsnow  = len(dbconf.conflist_now)
     dbconf.nintrusionsnow = len(dbconf.LOSlist_now)
-    # SKYLOG---------------------------------------------------------------
+    # SKYLOG-------------------------------------------------------------------
     
     
-    # CFLLOG---------------------------------------------------------------
+    # CFLLOG-------------------------------------------------------------------
     # NOTE: some of the varaibles (which are based on lists ) are updated 
     #       in StateBasedCD        
     if len(dbconf.clogid1) > 0:       
@@ -39,7 +39,7 @@ def asasLogUpdate(dbconf, traf):
         dbconf.clogasastrkid2    = []
         dbconf.clognsecondaryid2 = np.zeros(len(dbconf.clogid2))
 
-		# Update the cpa time variables
+        # Update the cpa time variables
         dbconf.clogtinconf  = dbconf.tinconf[dbconf.clogi,dbconf.clogj]
         dbconf.clogtoutconf = dbconf.toutconf[dbconf.clogi,dbconf.clogj]
         dbconf.clogtcpa     = dbconf.tcpa[dbconf.clogi,dbconf.clogj]
@@ -79,4 +79,64 @@ def asasLogUpdate(dbconf, traf):
 
         # Finally, call the logger
         dbconf.cfllog.log()
-    # CFLLOG---------------------------------------------------------------
+    # CFLLOG-------------------------------------------------------------------
+        
+        
+    # INSTLOG------------------------------------------------------------------
+    # Reset variables
+    dbconf.inslogtinconf       = []
+    dbconf.inslogtoutconf      = []
+    dbconf.inslogtcpa          = []
+    dbconf.insloglatid1        = []
+    dbconf.insloglonid1        = []
+    dbconf.inslogaltid1        = []
+    dbconf.inslogtasid1        = []
+    dbconf.inslogvsid1         = []
+    dbconf.insloghdgid1        = []
+    dbconf.inslogasasactiveid1 = []
+    dbconf.inslogasastasid1    = []
+    dbconf.inslogasastrkid1    = []
+    dbconf.insloglatid2        = []
+    dbconf.insloglonid2        = []
+    dbconf.inslogaltid2        = []
+    dbconf.inslogtasid2        = []
+    dbconf.inslogvsid2         = []
+    dbconf.insloghdgid2        = []
+    dbconf.inslogasasactiveid2 = []
+    dbconf.inslogasastasid2    = []
+    dbconf.inslogasastrkid2    = []
+    dbconf.inslogntraf         = []
+    
+    # Update the cpa time variables
+    dbconf.inslogtinconf  = dbconf.tinconf[dbconf.inslogi,dbconf.inslogj]
+    dbconf.inslogtoutconf = dbconf.toutconf[dbconf.inslogi,dbconf.inslogj]
+    dbconf.inslogtcpa     = dbconf.tcpa[dbconf.inslogi,dbconf.inslogj]
+                
+    # Update the variables belonging to id1
+    dbconf.insloglatid1        = traf.lat[dbconf.inslogi]
+    dbconf.insloglonid1        = traf.lon[dbconf.inslogi]
+    dbconf.inslogaltid1        = traf.alt[dbconf.inslogi]
+    dbconf.inslogtasid1        = traf.tas[dbconf.inslogi]
+    dbconf.inslogvsid1         = traf.vs[dbconf.inslogi]
+    dbconf.insloghdgid1        = traf.hdg[dbconf.inslogi]
+    dbconf.inslogasasactiveid1 = dbconf.asasactive[dbconf.inslogi]
+    dbconf.inslogasastasid1    = dbconf.asasspd[dbconf.inslogi]
+    dbconf.inslogasastrkid1    = dbconf.asastrk[dbconf.inslogi]
+            
+    # Update the variables belonging to id2
+    dbconf.insloglatid2        = traf.lat[dbconf.inslogj]
+    dbconf.insloglonid2        = traf.lon[dbconf.inslogj]
+    dbconf.inslogaltid2        = traf.alt[dbconf.inslogj]
+    dbconf.inslogtasid2        = traf.tas[dbconf.inslogj]
+    dbconf.inslogvsid2         = traf.vs[dbconf.inslogj]
+    dbconf.insloghdgid2        = traf.hdg[dbconf.inslogj]
+    dbconf.inslogasasactiveid2 = dbconf.asasactive[dbconf.inslogj]
+    dbconf.inslogasastasid2    = dbconf.asasspd[dbconf.inslogj]
+    dbconf.inslogasastrkid2    = dbconf.asastrk[dbconf.inslogj]
+        
+    # Update number of aircraft
+    dbconf.inslogntraf = [traf.ntraf]*len(dbconf.inslogi)
+    
+    # There is no need to manually call the logger as INSTLOG is periodic!
+    # INSTLOG------------------------------------------------------------------
+    

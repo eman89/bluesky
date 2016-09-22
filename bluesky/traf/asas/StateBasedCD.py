@@ -36,7 +36,18 @@ def detect(dbconf, traf, simt):
     dbconf.cloglatcpaid2 = []
     dbconf.clogloncpaid2 = []
     dbconf.clogaltcpaid2 = []
-
+    
+    dbconf.inslogi         = []
+    dbconf.inslogj         = []
+    dbconf.inslogid1       = []
+    dbconf.inslogid2       = []
+    dbconf.insloglatcpaid1 = []
+    dbconf.inslogloncpaid1 = []
+    dbconf.inslogaltcpaid1 = []
+    dbconf.insloglatcpaid2 = []
+    dbconf.inslogloncpaid2 = []
+    dbconf.inslogaltcpaid2 = []
+    
     # Horizontal conflict ---------------------------------------------------------
 
     # qdlst is for [i,j] qdr from i to j, from perception of ADSB and own coordinates
@@ -202,7 +213,18 @@ def detect(dbconf, traf, simt):
         # and all variables related INSTLOG 
         if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
             dbconf.conflist_now.append(combi)
-
+            # Now get the stuff you need for the INSTLOG variables!
+            dbconf.inslogi.append(i)
+            dbconf.inslogj.append(j)
+            dbconf.inslogid1.append(traf.id[i])
+            dbconf.inslogid2.append(traf.id[j])
+            dbconf.insloglatcpaid1.append(lati)
+            dbconf.inslogloncpaid1.append(loni)
+            dbconf.inslogaltcpaid1.append(alti)
+            dbconf.insloglatcpaid2.append(latj)
+            dbconf.inslogloncpaid2.append(lonj)
+            dbconf.inslogaltcpaid2.append(altj)
+                                    
         # Check if a LOS occured
         dx     = (traf.lat[i] - traf.lat[j]) * 111319.
         dy     = (traf.lon[i] - traf.lon[j]) * 111319.
