@@ -1,5 +1,5 @@
 import numpy as np
-from collections import Counter
+from asasLogUpdate import asasLogUpdate
 from ... import settings
 from ...tools.aero import ft, nm
 from ...tools import areafilter, geo, datalog, logHeader
@@ -196,86 +196,6 @@ class ASAS():
         self.clogasastasid2    = []
         self.clogasastrkid2    = []
         self.clognsecondaryid2 = []         
-            
-    def asasLogUpdate(self, traf):
-        
-        # SKYLOG---------------------------------------------------------------
-        self.nconflictsnow  = len(self.conflist_now)
-        self.nintrusionsnow = len(self.LOSlist_now)
-        # SKYLOG---------------------------------------------------------------
-        
-        
-        # CFLLOG---------------------------------------------------------------
-        # NOTE: some of the varaibles (which are based on lists ) are updated 
-        #       in StateBasedCD        
-        if len(self.clogid1) > 0:       
-            # Reset variables
-            self.clogtinconf       = []
-            self.clogtoutconf      = []
-            self.clogtcpa          = []
-            self.cloglatid1        = []
-            self.cloglonid1        = []
-            self.clogaltid1        = []
-            self.clogtasid1        = []
-            self.clogvsid1         = []
-            self.cloghdgid1        = []
-            self.clogasasactiveid1 = []
-            self.clogasastasid1    = []
-            self.clogasastrkid1    = []
-            self.clognsecondaryid1 = np.zeros(len(self.clogid1))            
-            self.cloglatid2        = []
-            self.cloglonid2        = []
-            self.clogaltid2        = []
-            self.clogtasid2        = []
-            self.clogvsid2         = []
-            self.cloghdgid2        = []
-            self.clogasasactiveid2 = []
-            self.clogasastasid2    = []
-            self.clogasastrkid2    = []
-            self.clognsecondaryid2 = np.zeros(len(self.clogid2))
-    
-    		# Update the cpa time variables
-            self.clogtinconf  = self.tinconf[self.clogi,self.clogj]
-            self.clogtoutconf = self.toutconf[self.clogi,self.clogj]
-            self.clogtcpa     = self.tcpa[self.clogi,self.clogj]
-                    
-            # Update the variables belonging to id1
-            self.cloglatid1        = traf.lat[self.clogi]
-            self.cloglonid1        = traf.lon[self.clogi]
-            self.clogaltid1        = traf.alt[self.clogi]
-            self.clogtasid1        = traf.tas[self.clogi]
-            self.clogvsid1         = traf.vs[self.clogi]
-            self.cloghdgid1        = traf.hdg[self.clogi]
-            self.clogasasactiveid1 = self.asasactive[self.clogi]
-            self.clogasastasid1    = self.asasspd[self.clogi]
-            self.clogasastrkid1    = self.asastrk[self.clogi]
-                    
-            # Update the variables belonging to id2
-            self.cloglatid2        = traf.lat[self.clogj]
-            self.cloglonid2        = traf.lon[self.clogj]
-            self.clogaltid2        = traf.alt[self.clogj]
-            self.clogtasid2        = traf.tas[self.clogj]
-            self.clogvsid2         = traf.vs[self.clogj]
-            self.cloghdgid2        = traf.hdg[self.clogj]
-            self.clogasasactiveid2 = self.asasactive[self.clogj]
-            self.clogasastasid2    = self.asasspd[self.clogj]
-            self.clogasastrkid2    = self.asastrk[self.clogj]
-            
-            # Update the number of conflicts variables for id1 and id2
-            conflist_all_flatten = np.array(self.conflist_all).flatten()
-            countConflist_all    = Counter(conflist_all_flatten)
-            for i in range(len(self.clogid1)):
-                if self.clogid1[i] in conflist_all_flatten:
-                    self.clognsecondaryid1[i] = self.clognsecondaryid1[i] + countConflist_all[self.clogid1[i]]
-                    self.clognsecondaryid1[i] = self.clognsecondaryid1[i] - self.clogid1.count(self.clogid1[i]) - self.clogid2.count(self.clogid1[i])
-                if self.clogid2[i] in conflist_all_flatten:
-                    self.clognsecondaryid2[i] = self.clognsecondaryid2[i] + countConflist_all[self.clogid2[i]]
-                    self.clognsecondaryid2[i] = self.clognsecondaryid2[i] - self.clogid1.count(self.clogid2[i]) - self.clogid2.count(self.clogid2[i])
-    
-            # Finally, call the logger
-            self.cfllog.log()
-        # CFLLOG---------------------------------------------------------------
-        
         
     def toggle(self, flag=None):
         if flag is None:
@@ -679,4 +599,4 @@ class ASAS():
             self.cr.resolve(self, traf)
             
             # Update ASAS log variables
-            self.asasLogUpdate(traf)
+            asasLogUpdate(self, traf)
