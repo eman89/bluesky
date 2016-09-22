@@ -63,8 +63,8 @@ def reset():
     # Close all logs and remove reference to its file object
     for key, log in allloggers.iteritems():
         log.reset()
-    for key, log in periodicloggers.iteritems():
-        log.reset()
+#    for key, log in periodicloggers.iteritems():
+#        log.reset()
 
 
 def makeLogfileName(logname):
@@ -189,16 +189,17 @@ class CSVLogger:
             varlist += additional_vars
 
             # Convert numeric arrays to text, leave text arrays untouched
+            t = np.round(self.simt,2)
             if isinstance(varlist[0], collections.Container):
                 nrows = len(varlist[0])
                 if nrows == 0:
                     return
-                txtdata = [nrows * [str(self.simt)]] + [col2txt(col) for col in varlist]
+                txtdata = [nrows * [str(t).ljust(7," ")]] + [col2txt(col) for col in varlist]
             else:
-                txtdata = [str(self.simt)] + [num2txt(col) for col in varlist]
+                txtdata = [str(t).ljust(8," ")] + [num2txt(col) for col in varlist]
 
             # log the data to file
-            np.savetxt(self.file, np.vstack(txtdata).T, delimiter=',', newline='\n', fmt='%s')
+            np.savetxt(self.file, np.vstack(txtdata).T, delimiter=', ', newline='\n', fmt='%s')
 
     def reset(self):
         self.dt         = self.default_dt
@@ -233,7 +234,7 @@ class CSVLogger:
                     return False, 'Turn ' + self.name + ' on with optional dt'
 
             self.open(makeLogfileName(self.name))
-            return True, self.name + " ON. dt = " + self.dt + " seconds"
+            return True, self.name + " ON" + (". dt = " + str(self.dt) if self.dt>0 else " ") 
         elif args[0] == 'OFF':
             self.reset()
             return True, self.name + " OFF"
