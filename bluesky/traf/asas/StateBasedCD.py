@@ -48,6 +48,15 @@ def detect(dbconf, traf, simt):
     dbconf.inslogloncpaid2 = []
     dbconf.inslogaltcpaid2 = []
     
+    dbconf.ilogi       = []
+    dbconf.ilogj       = []
+    dbconf.ilogid1     = []
+    dbconf.ilogid2     = []
+    dbconf.ilogintsev  = []
+    dbconf.iloginthsev = []
+    dbconf.ilogintvsev = []
+    
+    
     # Horizontal conflict ---------------------------------------------------------
 
     # qdlst is for [i,j] qdr from i to j, from perception of ADSB and own coordinates
@@ -200,8 +209,8 @@ def detect(dbconf, traf, simt):
             # Now get the stuff you need for the CFLLOG variables!
             dbconf.clogi.append(i)
             dbconf.clogj.append(j)
-            dbconf.clogid1.append(traf.id[i])
-            dbconf.clogid2.append(traf.id[j])
+            dbconf.clogid1.append(combi[0])
+            dbconf.clogid2.append(combi[1])
             dbconf.cloglatcpaid1.append(lati)
             dbconf.clogloncpaid1.append(loni)
             dbconf.clogaltcpaid1.append(alti)
@@ -216,8 +225,8 @@ def detect(dbconf, traf, simt):
             # Now get the stuff you need for the INSTLOG variables!
             dbconf.inslogi.append(i)
             dbconf.inslogj.append(j)
-            dbconf.inslogid1.append(traf.id[i])
-            dbconf.inslogid2.append(traf.id[j])
+            dbconf.inslogid1.append(combi[0])
+            dbconf.inslogid2.append(combi[1])
             dbconf.insloglatcpaid1.append(lati)
             dbconf.inslogloncpaid1.append(loni)
             dbconf.inslogaltcpaid1.append(alti)
@@ -247,25 +256,141 @@ def detect(dbconf, traf, simt):
             if combi not in dbconf.LOSlist_now and combi2 not in dbconf.LOSlist_now:
                 dbconf.LOSlist_now.append(combi)
 
-            # Calculate the current intrusion severity for the current LOS
-            Ih       = 1.0 - np.sqrt(hdist2) / dbconf.R
-            Iv       = 1.0 - vdist / dbconf.dh
-            severity = min(Ih, Iv)
-            
-            # Only continue if combi is found in LOSlist (and not combi2)
-            try:  
-                idx = dbconf.LOSlist_all.index(combi)
-            except:
-                idx = -1
-            
-            # Update severity if new severity is bigger than the old value
-            if idx >= 0:
-                if severity > dbconf.LOSmaxsev[idx]:
-                    dbconf.LOSmaxsev[idx]  = severity
-                if severity > dbconf.LOShmaxsev[idx]:
-                    dbconf.LOShmaxsev[idx] = Ih
-                if severity > dbconf.LOSvmaxsev[idx]:
-                    dbconf.LOSvmaxsev[idx] = Iv
+#            # Calculate the current intrusion severity for the current LOS
+#            Ih       = 1.0 - np.sqrt(hdist2) / dbconf.R
+#            Iv       = 1.0 - vdist / dbconf.dh
+#            severity = min(Ih, Iv)
+#            
+#            # Only continue if combi is found in LOSlist (and not combi2)
+#            try:  
+#                idx = dbconf.LOSlist_all.index(combi)
+#            except:
+#                idx = -1
+#            
+#            # Update severity if new severity is bigger than the old value
+#            if idx >= 0:
+#                if severity > dbconf.LOSmaxsev[idx]:
+#                    dbconf.LOSmaxsev[idx]  = severity
+#                    dbconf.LOShmaxsev[idx] = Ih
+#                    dbconf.LOSvmaxsev[idx] = Iv
+#                    
+#                else: # If the severity is decreasing then log it the first time it starts decreasing
+#                    if combi not in dbconf.LOSlist_logged:
+#                        dbconf.ilogi.append(i)
+#                        dbconf.ilogj.append(j)
+#                        dbconf.ilogid1.append(traf.id[i])
+#                        dbconf.ilogid2.append(traf.id[j])
+#                        dbconf.ilogintsev.append(dbconf.LOSmaxsev[idx])
+#                        dbconf.iloginthsev.append(dbconf.LOShmaxsev[idx])
+#                        dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[idx])
+#                        dbconf.LOSlist_logged.append(combi)                
         
         gc.enable()
+        
+    # ----------------------------------------------------------------------
+    # Check if LOS has passed
+    # ----------------------------------------------------------------------
+    for intrusion in dbconf.LOSlist_all:
+        
+        gc.disable()
+        
+        # Determine the aircraft involved in this LOS
+        ac1      = intrusion[0]
+        ac2      = intrusion[1]
+        id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
+        intid    = dbconf.LOSlist_all.index(intrusion)
+        
+        # Check is the aircraft still exist 
+        id1exists = False if id1<0 else True
+        id2exists = False if id2<0 else True        
+                
+        # If both ac exist then check if it is still a LOS
+        if id1exists and id2exists:
+            
+            # LOS check
+            dx     = (traf.lat[id1] - traf.lat[id2]) * 111319.
+            dy     = (traf.lon[id1] - traf.lon[id2]) * 111319.
+            hdist2 = dx**2 + dy**2
+            hLOS   = hdist2 < dbconf.R**2
+            vdist  = abs(traf.alt[id1] - traf.alt[id2])
+            vLOS   = vdist < dbconf.dh
+            LOS    = (hLOS & vLOS)
+            
+            # if it is a LOS, then compute the severity
+            if LOS:
+                
+                # Calculate the current intrusion severity for the current LOS
+                Ih       = 1.0 - np.sqrt(hdist2) / dbconf.R
+                Iv       = 1.0 - vdist / dbconf.dh
+                severity = min(Ih, Iv)
+                
+                # Check if the severity is larger than the one logged for this LOS.
+                # If so update the severity
+                if severity > dbconf.LOSmaxsev[intid]:
+                    dbconf.LOSmaxsev[intid]  = severity
+                    dbconf.LOShmaxsev[intid] = Ih
+                    dbconf.LOSvmaxsev[intid] = Iv
+                
+                # If the severity is decreasing then log it the first time it starts decreasing    
+                else: 
+                    if intrusion not in dbconf.LOSlist_logged:
+                        dbconf.ilogid1exists.append(id1exists)
+                        dbconf.ilogid2exists.append(id2exists)
+                        dbconf.ilogi.append(id1)
+                        dbconf.ilogj.append(id2)
+                        dbconf.ilogid1.append(ac1)
+                        dbconf.ilogid2.append(ac2)
+                        dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
+                        dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
+                        dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
+                        dbconf.LOSlist_logged.append(intrusion)
+                        
+            # If it is no longer a LOS, check if it has been logged, and then delete it   
+            else:
+                if intrusion not in dbconf.LOSlist_logged:
+                    dbconf.ilogid1exists.append(id1exists)
+                    dbconf.ilogid2exists.append(id2exists)
+                    dbconf.ilogi.append(id1)
+                    dbconf.ilogj.append(id2)
+                    dbconf.ilogid1.append(ac1)
+                    dbconf.ilogid2.append(ac2)
+                    dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
+                    dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
+                    dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
+                
+                # delete it completely (not from LOSlist_now)
+                dbconf.LOSllist_all.remove(intrusion)
+                dbconf.LOSlist_logged.remove(intrusion)
+                del dbconf.LOSmaxsev[intid]
+                del dbconf.LOShmaxsev[intid]
+                del dbconf.LOSvmaxsev[intid]           
+        
+        #if one or both of the both aircraft no longer exists, check if it has 
+        # been logged and then delete it
+        else:
+            if intrusion not in dbconf.LOSlist_logged:
+                dbconf.ilogid1exists.append(id1exists)
+                dbconf.ilogid2exists.append(id2exists)
+                dbconf.ilogi.append(id1)
+                dbconf.ilogj.append(id2)
+                dbconf.ilogid1.append(ac1)
+                dbconf.ilogid2.append(ac2)
+                dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
+                dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
+                dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
+                
+            # delete it completely (not from LOSlist_now)
+            dbconf.LOSllist_all.remove(intrusion)
+            dbconf.LOSlist_logged.remove(intrusion)
+            del dbconf.LOSmaxsev[intid]
+            del dbconf.LOShmaxsev[intid]
+            del dbconf.LOSvmaxsev[intid]
+        
+        gc.enable()
+                
+        
+        
+        
+        
+        
     

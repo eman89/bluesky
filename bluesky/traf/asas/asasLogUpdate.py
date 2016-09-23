@@ -83,6 +83,8 @@ def asasLogUpdate(dbconf, traf):
         
         
     # INSTLOG------------------------------------------------------------------
+    # NOTE: some of the varaibles (which are based on lists ) are updated 
+    #       in StateBasedCD   
     # Reset variables
     dbconf.inslogtinconf       = []
     dbconf.inslogtoutconf      = []
@@ -139,4 +141,61 @@ def asasLogUpdate(dbconf, traf):
     
     # There is no need to manually call the logger as INSTLOG is periodic!
     # INSTLOG------------------------------------------------------------------
+    
+    
+    # INTLOG-------------------------------------------------------------------
+    # NOTE: some of the varaibles (which are based on lists ) are updated 
+    #       in StateBasedCD
+    if len(dbconf.ilogid1) > 0:
+        # Reset Varaibles
+        dbconf.ilogtinconf       = []
+        dbconf.ilogtoutconf      = []
+        dbconf.iloglatid1        = []
+        dbconf.iloglonid1        = []
+        dbconf.ilogaltid1        = []
+        dbconf.ilogtasid1        = []
+        dbconf.ilogvsid1         = []
+        dbconf.iloghdgid1        = []
+        dbconf.ilogasasactiveid1 = []
+        dbconf.ilogasastasid1    = []
+        dbconf.ilogasastrkid1    = []
+        dbconf.iloglatid2        = []
+        dbconf.iloglonid2        = []
+        dbconf.ilogaltid2        = []
+        dbconf.ilogtasid2        = []
+        dbconf.ilogvsid2         = []
+        dbconf.iloghdgid2        = []
+        dbconf.ilogasasactiveid2 = []
+        dbconf.ilogasastasid2    = []
+        dbconf.ilogasastrkid2    = []
+        
+        # Update the conflict time variables
+        dbconf.ilogtinconf  = dbconf.tinconf[dbconf.ilogi,dbconf.ilogj]
+        dbconf.ilogtoutconf = dbconf.toutconf[dbconf.ilogi,dbconf.ilogj]        
+        
+        # Update the varaibles beloning to id1
+        dbconf.iloglatid1        = traf.lat[dbconf.ilogi]
+        dbconf.iloglonid1        = traf.lon[dbconf.ilogi]
+        dbconf.ilogaltid1        = traf.alt[dbconf.ilogi]
+        dbconf.ilogtasid1        = traf.tas[dbconf.ilogi]
+        dbconf.ilogvsid1         = traf.vs[dbconf.ilogi]
+        dbconf.iloghdgid1        = traf.hdg[dbconf.ilogi]
+        dbconf.ilogasasactiveid1 = dbconf.asasactive[dbconf.ilogi]
+        dbconf.ilogasastasid1    = dbconf.asasspd[dbconf.ilogi]
+        dbconf.ilogasastrkid1    = dbconf.asastrk[dbconf.ilogi]
+        
+        # Update the variables belonging to id2
+        dbconf.iloglatid2        = traf.lat[dbconf.ilogj]
+        dbconf.iloglonid2        = traf.lon[dbconf.ilogj]
+        dbconf.ilogaltid2        = traf.alt[dbconf.ilogj]
+        dbconf.ilogtasid2        = traf.tas[dbconf.ilogj]
+        dbconf.ilogvsid2         = traf.vs[dbconf.ilogj]
+        dbconf.iloghdgid2        = traf.hdg[dbconf.ilogj]
+        dbconf.ilogasasactiveid2 = dbconf.asasactive[dbconf.ilogj]
+        dbconf.ilogasastasid2    = dbconf.asasspd[dbconf.ilogj]
+        dbconf.ilogasastrkid2    = dbconf.asastrk[dbconf.ilogj]        
+        
+        # Finally, call the logger
+        dbconf.intlog.log()   
+    # INTLOG-------------------------------------------------------------------
     

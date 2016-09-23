@@ -76,3 +76,26 @@ def instHeader():
                  parameters + "\n"
     
     return lines
+    
+
+def intHeader():
+    parameters =  "SimTime [s], Call Sign id1 [-], Call Sign id2 [-], Max Intrusion Severity, " + \
+                  "Horizontal Intrusion at Max IS [-], Vertical Intrusion at MAX IS [-], "      + \
+                  "tinconf [s], toutconf [s], "                                                 + \
+                  "Latitude id1 [deg], Longitude id1 [deg], Altitude id1 [m], "                 + \
+                  "TAS id1 [m/s], VS id1 [m/s], HDG id1 [deg], "                                + \
+                  "ASAS Active id1 [-], ASASTAS id1 [m/s], ASASTRK id1 [deg], "                 + \
+                  "Latitude id2 [deg], Longitude id2 [deg], Altitude id2 [m], "                 + \
+                  "TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], "                                + \
+                  "ASAS Active id2 [-], ASASTAS id2 [m/s], ASASTRK id2 [deg]" 
+    
+    lines      = "##############################\n"    + \
+                 "INT LOG\n"                          + \
+                 "Intrusion (LOS) Data\n"       + \
+                 "##############################\n\n"  + \
+                 "Parameters [Units]:\n"               + \
+                 parameters + "\n"
+    
+    return lines
+    
+    

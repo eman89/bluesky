@@ -55,6 +55,7 @@ class ASAS():
         
         # Create ASAS event loggers
         self.cfllog = datalog.defineLogger("CFLLOG", logHeader.cflHeader())
+        self.intlog = datalog.defineLogger("INTLOG", logHeader.intHeader())
         
         # Cfllog parameter registration
         with datalog.registerLogParameters('CFLLOG', self):
@@ -89,6 +90,34 @@ class ASAS():
             self.clogasastasid2    = []
             self.clogasastrkid2    = []
             self.clognsecondaryid2 = []
+        
+        # Intlog parameter registration
+        with datalog.registerLogParameters('INTLOG', self):
+            self.ilogid1           = []
+            self.ilogid2           = []
+            self.ilogintsev        = []
+            self.iloginthsev       = []
+            self.ilogintvsev       = []
+            self.ilogtinconf       = []
+            self.ilogtoutconf      = []
+            self.iloglatid1        = []
+            self.iloglonid1        = []
+            self.ilogaltid1        = []
+            self.ilogtasid1        = []
+            self.ilogvsid1         = []
+            self.iloghdgid1        = []
+            self.ilogasasactiveid1 = []
+            self.ilogasastasid1    = []
+            self.ilogasastrkid1    = []
+            self.iloglatid2        = []
+            self.iloglonid2        = []
+            self.ilogaltid2        = []
+            self.ilogtasid2        = []
+            self.ilogvsid2         = []
+            self.iloghdgid2        = []
+            self.ilogasasactiveid2 = []
+            self.ilogasastasid2    = []
+            self.ilogasastrkid2    = []       
         
         # Create Instlog for instantaneous conflicts
         datalog.definePeriodicLogger('INSTLOG', logHeader.instHeader(), settings.instdt)
@@ -174,10 +203,11 @@ class ASAS():
         self.lonowncpa    = np.array([])
         self.altowncpa    = np.array([])
 
-        self.conflist_all  = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from list once past CPA
-        self.LOSlist_all   = []  # List of all Losses Of Separation till now.
-        self.conflist_now  = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
-        self.LOSlist_now   = []  # List of Losses Of Separations in the current ASAS cycle. 
+        self.conflist_all   = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from list once past CPA
+        self.LOSlist_all    = []  # List of all Losses Of Separation till now.
+        self.conflist_now   = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
+        self.LOSlist_now    = []  # List of Losses Of Separations in the current ASAS cycle. 
+        self.LOSlist_logged = []  # List of all LOS that have been logged
         
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
@@ -231,7 +261,38 @@ class ASAS():
         self.clogasastrkid2    = []
         self.clognsecondaryid2 = []
         
+        # INTlog variables
+        self.ilogi             = []
+        self.ilogj             = []
+        self.ilogid1           = []
+        self.ilogid2           = []
+        self.ilogintsev        = []
+        self.iloginthsev       = []
+        self.ilogintvsev       = []
+        self.ilogtinconf       = []
+        self.ilogtoutconf      = []
+        self.iloglatid1        = []
+        self.iloglonid1        = []
+        self.ilogaltid1        = []
+        self.ilogtasid1        = []
+        self.ilogvsid1         = []
+        self.iloghdgid1        = []
+        self.ilogasasactiveid1 = []
+        self.ilogasastasid1    = []
+        self.ilogasastrkid1    = []
+        self.iloglatid2        = []
+        self.iloglonid2        = []
+        self.ilogaltid2        = []
+        self.ilogtasid2        = []
+        self.ilogvsid2         = []
+        self.iloghdgid2        = []
+        self.ilogasasactiveid2 = []
+        self.ilogasastasid2    = []
+        self.ilogasastrkid2    = []
+        
         #INSTLOG variables
+        self.inslogi             = []
+        self.inslogj             = []
         self.inslogid1           = []
         self.inslogid2           = []
         self.inslogtinconf       = []
@@ -605,7 +666,7 @@ class ASAS():
                     # If conflict is solved, remove it from conflist_all list
                     # This is so that if a conflict between this pair of aircraft 
                     # occurs again, then that new conflict should be detected, logged
-                    # and solved (if reso is on)
+                    # and solved (if reso is on).
                     self.conflist_all.remove(conflict)
             
             # If aircraft id1 cannot be found in traffic because it has finished its
@@ -629,7 +690,10 @@ class ASAS():
             # if both ids are unknown, then delete this conflict, because both aircraft
             # have completed their flights (and have been deleted)
             else:
-                self.conflist_all.remove(conflict)      
+                self.conflist_all.remove(conflict) 
+    
+    def hasLOSbeenlogged():
+        pass
 
     def create(self, trk, spd, alt):
         # ASAS info: no conflict => empty list
