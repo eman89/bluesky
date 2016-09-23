@@ -193,10 +193,11 @@ def detect(dbconf, traf, simt):
         latj,lonj = geo.qdrpos(traf.lat[j],traf.lon[j], traf.trk[j],rngj)
         altj      = traf.alt[j]+dbconf.tcpa[i,j]*traf.vs[j]
 
-        # Update conflict lists: conflist_all (currently active conflicts) and 
-        # all variables related to CFLLOG
+        # Update conflist_all (currently active conflicts), conflist_total (display)
+        # and some variables related to CFLLOG (others updated in asasLogUpdate())
         if combi not in dbconf.conflist_all and combi2 not in dbconf.conflist_all:
             dbconf.conflist_all.append(combi)
+            dbconf.conflist_total.append(combi)
             # Now get the stuff you need for the CFLLOG variables!
             dbconf.clogi.append(i)
             dbconf.clogj.append(j)
@@ -210,7 +211,7 @@ def detect(dbconf, traf, simt):
             dbconf.clogaltcpaid2.append(altj)
             
         # Update conflist_now (newly detected conflicts during this detection cycle)
-        # and all variables related INSTLOG 
+        # and some variables related INSTLOG (others updated in asasLogUpdate())
         if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
             dbconf.conflist_now.append(combi)
             # Now get the stuff you need for the INSTLOG variables!
@@ -235,10 +236,10 @@ def detect(dbconf, traf, simt):
         isLOS  = (hLOS & vLOS)
         
         if isLOS:
-            # Update LOS lists: LOSlist_all (all LOS since ASAS is ON) and 
-            # all variables related to INTLOG
+            # Update LOS lists: LOSlist_all (all LOS that are active) and LOSlist_total (display)
             if combi not in dbconf.LOSlist_all and combi2 not in dbconf.LOSlist_all:
                 dbconf.LOSlist_all.append(combi)
+                dbconf.LOSlist_total.append(combi)
                 dbconf.LOSmaxsev.append(0.)
                 dbconf.LOShmaxsev.append(0.)
                 dbconf.LOSvmaxsev.append(0.)
@@ -250,8 +251,8 @@ def detect(dbconf, traf, simt):
             # NOTE: Logging for LOS done in logLOS() in asasLogUpdate.py
             #       This is because a LOS is only logged when its severity is 
             #       highest.
-            #       This apprroach is not possible for logging conflicts as cpa
-            #       locations are much easier to compute here.
+            #       Some variables for conflicts are also logged in asasLogUpdate
+            #       but some are logged here are they are based on lists (easier here in loop)
 
         gc.enable()
             
