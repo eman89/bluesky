@@ -203,13 +203,13 @@ class ASAS():
         self.lonowncpa    = np.array([])
         self.altowncpa    = np.array([])
 
-        self.conflist_all   = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from list once past CPA
-        self.LOSlist_all    = []  # List of all Losses Of Separation that are still active (LOS still on going). LOS deleted from list when it is over.
-        self.conflist_now   = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
-        self.LOSlist_now    = []  # List of Losses Of Separations in the current ASAS cycle. 
-        self.conflist_total = []  # List of all conflicts since the simulation has started. Used for display on the GUI. 
-        self.LOSlist_total  = []  # List of all LOS since the simulation has started. Used for display on the GUI.
-        self.LOSlist_logged = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once. 
+        self.conflist_active   = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from this list once past CPA
+        self.LOSlist_active    = []  # List of all Losses Of Separation that are still active (LOS still on-going). LOS deleted from this list when it is over.
+        self.conflist_now      = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
+        self.LOSlist_now       = []  # List of Losses Of Separations in the current ASAS cycle. 
+        self.conflist_total    = []  # List of all conflicts since the simulation has started. Used for display on the GUI. 
+        self.LOSlist_total     = []  # List of all LOS since the simulation has started. Used for display on the GUI.
+        self.LOSlist_logged    = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once. 
         
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
@@ -618,7 +618,7 @@ class ASAS():
         self.asasactive.fill(False)
     
         # Look at all conflicts, also the ones that are solved but CPA is yet to come
-        for conflict in self.conflist_all:
+        for conflict in self.conflist_active:
             ac1      = conflict[0]
             ac2      = conflict[1]
             id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
@@ -667,11 +667,11 @@ class ASAS():
                     if iwpid2 != -1: # To avoid problems if there are no waypoints
                         traf.route[id2].direct(traf, id2, traf.route[id2].wpname[iwpid2])
                     
-                    # If conflict is solved, remove it from conflist_all list
+                    # If conflict is solved, remove it from conflist_active list
                     # This is so that if a conflict between this pair of aircraft 
                     # occurs again, then that new conflict should be detected, logged
                     # and solved (if reso is on).
-                    self.conflist_all.remove(conflict)
+                    self.conflist_active.remove(conflict)
             
             # If aircraft id1 cannot be found in traffic because it has finished its
             # flight (and has been deleted), start trajectory recovery for aircraft id2
@@ -680,7 +680,7 @@ class ASAS():
                  iwpid2 = traf.route[id2].findact(traf,id2)
                  if iwpid2 != -1: # To avoid problems if there are no waypoints
                      traf.route[id2].direct(traf, id2, traf.route[id2].wpname[iwpid2])
-                 self.conflist_all.remove(conflict)
+                 self.conflist_active.remove(conflict)
     
             # If aircraft id2 cannot be found in traffic because it has finished its
             # flight (and has been deleted) start trajectory recovery for aircraft id1
@@ -689,12 +689,12 @@ class ASAS():
                 iwpid1 = traf.route[id1].findact(traf,id1)
                 if iwpid1 != -1: # To avoid problems if there are no waypoints
                     traf.route[id1].direct(traf, id1, traf.route[id1].wpname[iwpid1])
-                self.conflist_all.remove(conflict)
+                self.conflist_active.remove(conflict)
             
             # if both ids are unknown, then delete this conflict, because both aircraft
             # have completed their flights (and have been deleted)
             else:
-                self.conflist_all.remove(conflict) 
+                self.conflist_active.remove(conflict) 
     
     def hasLOSbeenlogged():
         pass

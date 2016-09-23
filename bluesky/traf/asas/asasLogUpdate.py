@@ -68,14 +68,14 @@ def asasLogUpdate(dbconf, traf):
         dbconf.clogasastrkid2    = dbconf.asastrk[dbconf.clogj]
         
         # Update the number of secondary conflicts for id1 and id2
-        conflist_all_flatten = np.array(dbconf.conflist_all).flatten()
-        countConflist_all    = Counter(conflist_all_flatten)
+        conflist_active_flatten = np.array(dbconf.conflist_active).flatten()
+        countconflist_active    = Counter(conflist_active_flatten)
         for i in range(len(dbconf.clogid1)):
-            if dbconf.clogid1[i] in conflist_all_flatten:
-                dbconf.clognsecondaryid1[i] = dbconf.clognsecondaryid1[i] + countConflist_all[dbconf.clogid1[i]]
+            if dbconf.clogid1[i] in conflist_active_flatten:
+                dbconf.clognsecondaryid1[i] = dbconf.clognsecondaryid1[i] + countconflist_active[dbconf.clogid1[i]]
                 dbconf.clognsecondaryid1[i] = dbconf.clognsecondaryid1[i] - dbconf.clogid1.count(dbconf.clogid1[i]) - dbconf.clogid2.count(dbconf.clogid1[i])
-            if dbconf.clogid2[i] in conflist_all_flatten:
-                dbconf.clognsecondaryid2[i] = dbconf.clognsecondaryid2[i] + countConflist_all[dbconf.clogid2[i]]
+            if dbconf.clogid2[i] in conflist_active_flatten:
+                dbconf.clognsecondaryid2[i] = dbconf.clognsecondaryid2[i] + countconflist_active[dbconf.clogid2[i]]
                 dbconf.clognsecondaryid2[i] = dbconf.clognsecondaryid2[i] - dbconf.clogid1.count(dbconf.clogid2[i]) - dbconf.clogid2.count(dbconf.clogid2[i])
 
         # Finally, call the logger
@@ -222,14 +222,14 @@ def logLOS(dbconf, traf):
     dbconf.iloginthsev   = []
     dbconf.ilogintvsev   = []
     
-    for intrusion in dbconf.LOSlist_all:
+    for intrusion in dbconf.LOSlist_active:
         gc.disable()
         
         # Determine the aircraft involved in this LOS
         ac1      = intrusion[0]
         ac2      = intrusion[1]
         id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
-        intid    = dbconf.LOSlist_all.index(intrusion)
+        intid    = dbconf.LOSlist_active.index(intrusion)
         
         # Check is the aircraft still exist 
         id1exists = False if id1<0 else True
@@ -283,7 +283,7 @@ def logLOS(dbconf, traf):
                     dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
                     dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
                 # delete it completely (not from LOSlist_now)
-                dbconf.LOSlist_all.remove(intrusion)
+                dbconf.LOSlist_active.remove(intrusion)
                 dbconf.LOSlist_logged.remove(intrusion)
                 del dbconf.LOSmaxsev[intid]
                 del dbconf.LOShmaxsev[intid]
@@ -302,7 +302,7 @@ def logLOS(dbconf, traf):
                 dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
                 dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
             # delete it completely (not from LOSlist_now)
-            dbconf.LOSlist_all.remove(intrusion)
+            dbconf.LOSlist_active.remove(intrusion)
             dbconf.LOSlist_logged.remove(intrusion)
             del dbconf.LOSmaxsev[intid]
             del dbconf.LOShmaxsev[intid]
