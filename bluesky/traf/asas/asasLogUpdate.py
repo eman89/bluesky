@@ -151,8 +151,10 @@ def asasLogUpdate(dbconf, traf):
     id1exists = np.asarray(dbconf.ilogid1exists)
     id2exists = np.asarray(dbconf.ilogid2exists)
     
-    if len(dbconf.ilogid1) > 0:
-        
+    Fail = -999.999
+#    Fail = 'Fail'
+    
+    if len(dbconf.ilogid1) > 0:        
         # Reset Varaibles
         dbconf.ilogtinconf       = []
         dbconf.ilogtoutconf      = []
@@ -176,33 +178,30 @@ def asasLogUpdate(dbconf, traf):
         dbconf.ilogasastrkid2    = []
         
         # Update the conflict time variables
-        failvalues          = (1-id1exists)*(1-id2exists)*np.array([9999.9999]*len(dbconf.ilogid1))
-        dbconf.ilogtinconf  = id1exists*id2exists*dbconf.tinconf[dbconf.ilogi,dbconf.ilogj] + failvalues
-        dbconf.ilogtoutconf = id1exists*id2exists*dbconf.toutconf[dbconf.ilogi,dbconf.ilogj] + failvalues       
+        dbconf.ilogtinconf  = np.where(id1exists & id2exists, dbconf.tinconf[dbconf.ilogi,dbconf.ilogj], Fail)
+        dbconf.ilogtoutconf = np.where(id1exists & id2exists, dbconf.toutconf[dbconf.ilogi,dbconf.ilogj], Fail)       
         
         # Update the varaibles beloning to id1
-        failvalues               = (1-id1exists)*np.array([9999.9999]*len(dbconf.ilogid1))
-        dbconf.iloglatid1        = id1exists*traf.lat[dbconf.ilogi] + failvalues
-        dbconf.iloglonid1        = id1exists*traf.lon[dbconf.ilogi] + failvalues
-        dbconf.ilogaltid1        = id1exists*traf.alt[dbconf.ilogi] + failvalues
-        dbconf.ilogtasid1        = id1exists*traf.tas[dbconf.ilogi] + failvalues
-        dbconf.ilogvsid1         = id1exists*traf.vs[dbconf.ilogi]  + failvalues
-        dbconf.iloghdgid1        = id1exists*traf.hdg[dbconf.ilogi] + failvalues
-        dbconf.ilogasasactiveid1 = id1exists*dbconf.asasactive[dbconf.ilogi] + failvalues
-        dbconf.ilogasastasid1    = id1exists*dbconf.asasspd[dbconf.ilogi] + failvalues
-        dbconf.ilogasastrkid1    = id1exists*dbconf.asastrk[dbconf.ilogi] + failvalues
+        dbconf.iloglatid1        = np.where(id1exists, traf.lat[dbconf.ilogi], Fail)
+        dbconf.iloglonid1        = np.where(id1exists, traf.lon[dbconf.ilogi], Fail)
+        dbconf.ilogaltid1        = np.where(id1exists, traf.alt[dbconf.ilogi], Fail)
+        dbconf.ilogtasid1        = np.where(id1exists, traf.tas[dbconf.ilogi], Fail)
+        dbconf.ilogvsid1         = np.where(id1exists, traf.vs[dbconf.ilogi] , Fail)
+        dbconf.iloghdgid1        = np.where(id1exists, traf.hdg[dbconf.ilogi], Fail)
+        dbconf.ilogasasactiveid1 = np.where(id1exists, dbconf.asasactive[dbconf.ilogi], Fail)
+        dbconf.ilogasastasid1    = np.where(id1exists, dbconf.asasspd[dbconf.ilogi], Fail)
+        dbconf.ilogasastrkid1    = np.where(id1exists, dbconf.asastrk[dbconf.ilogi], Fail)
         
         # Update the variables belonging to id2
-        failvalues               = (1-id2exists)*np.array([9999.9999]*len(dbconf.ilogid2))
-        dbconf.iloglatid2        = id2exists*traf.lat[dbconf.ilogj] + failvalues
-        dbconf.iloglonid2        = id2exists*traf.lon[dbconf.ilogj] + failvalues
-        dbconf.ilogaltid2        = id2exists*traf.alt[dbconf.ilogj] + failvalues
-        dbconf.ilogtasid2        = id2exists*traf.tas[dbconf.ilogj] + failvalues
-        dbconf.ilogvsid2         = id2exists*traf.vs[dbconf.ilogj]  + failvalues
-        dbconf.iloghdgid2        = id2exists*traf.hdg[dbconf.ilogj] + failvalues
-        dbconf.ilogasasactiveid2 = id2exists*dbconf.asasactive[dbconf.ilogj] + failvalues
-        dbconf.ilogasastasid2    = id2exists*dbconf.asasspd[dbconf.ilogj] + failvalues
-        dbconf.ilogasastrkid2    = id2exists*dbconf.asastrk[dbconf.ilogj] + failvalues    
+        dbconf.iloglatid2        = np.where(id2exists, traf.lat[dbconf.ilogj], Fail)
+        dbconf.iloglonid2        = np.where(id2exists, traf.lon[dbconf.ilogj], Fail)
+        dbconf.ilogaltid2        = np.where(id2exists, traf.alt[dbconf.ilogj], Fail)
+        dbconf.ilogtasid2        = np.where(id2exists, traf.tas[dbconf.ilogj], Fail)
+        dbconf.ilogvsid2         = np.where(id2exists, traf.vs[dbconf.ilogj] , Fail)
+        dbconf.iloghdgid2        = np.where(id2exists, traf.hdg[dbconf.ilogj], Fail)
+        dbconf.ilogasasactiveid2 = np.where(id2exists, dbconf.asasactive[dbconf.ilogj], Fail)
+        dbconf.ilogasastasid2    = np.where(id2exists, dbconf.asasspd[dbconf.ilogj], Fail)
+        dbconf.ilogasastrkid2    = np.where(id2exists, dbconf.asastrk[dbconf.ilogj], Fail) 
         
         # Finally, call the logger
         dbconf.intlog.log()   
@@ -234,7 +233,10 @@ def logLOS(dbconf, traf):
         # Check is the aircraft still exist 
         id1exists = False if id1<0 else True
         id2exists = False if id2<0 else True        
-                
+        
+        import pdb
+        pdb.set_trace()
+        
         # If both ac exist then check if it is still a LOS
         if id1exists and id2exists:
             # LOS check
@@ -272,6 +274,8 @@ def logLOS(dbconf, traf):
                         dbconf.LOSlist_logged.append(intrusion)
             # If it is no longer a LOS, check if it has been logged, and then delete it   
             else:
+#                import pdb
+#                pdb.set_trace()
                 if intrusion not in dbconf.LOSlist_logged:
                     dbconf.ilogid1exists.append(id1exists)
                     dbconf.ilogid2exists.append(id2exists)
@@ -291,6 +295,8 @@ def logLOS(dbconf, traf):
         #if one or both of the both aircraft no longer exists, check if it has 
         # been logged and then delete it
         else:
+#            import pdb
+#            pdb.set_trace()
             if intrusion not in dbconf.LOSlist_logged:
                 dbconf.ilogid1exists.append(id1exists)
                 dbconf.ilogid2exists.append(id2exists)
