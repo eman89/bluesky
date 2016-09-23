@@ -88,13 +88,15 @@ def intHeader():
                   "Latitude id2 [deg], Longitude id2 [deg], Altitude id2 [m], "                 + \
                   "TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], "                                + \
                   "ASAS Active id2 [-], ASASTAS id2 [m/s], ASASTRK id2 [deg]" 
+                  
+    warning    = "NOTE!!! 9999.9999 INDICATES THAT AN INTRUSION WAS LOGGED AFTER AN AIRCRAFT WAS DELETED!!!"
     
     lines      = "##############################\n"    + \
                  "INT LOG\n"                          + \
                  "Intrusion (LOS) Data\n"       + \
                  "##############################\n\n"  + \
                  "Parameters [Units]:\n"               + \
-                 parameters + "\n"
+                 parameters + "\n\n" + warning + "\n\n"
     
     return lines
     

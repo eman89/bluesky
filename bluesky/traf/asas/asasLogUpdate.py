@@ -1,5 +1,6 @@
 import numpy as np
 from collections import Counter
+import gc
 
 
 def asasLogUpdate(dbconf, traf):
@@ -66,7 +67,7 @@ def asasLogUpdate(dbconf, traf):
         dbconf.clogasastasid2    = dbconf.asasspd[dbconf.clogj]
         dbconf.clogasastrkid2    = dbconf.asastrk[dbconf.clogj]
         
-        # Update the number of conflicts variables for id1 and id2
+        # Update the number of secondary conflicts for id1 and id2
         conflist_all_flatten = np.array(dbconf.conflist_all).flatten()
         countConflist_all    = Counter(conflist_all_flatten)
         for i in range(len(dbconf.clogid1)):
@@ -144,9 +145,14 @@ def asasLogUpdate(dbconf, traf):
     
     
     # INTLOG-------------------------------------------------------------------
-    # NOTE: some of the varaibles (which are based on lists ) are updated 
-    #       in StateBasedCD
+    
+    # first check all the current active LOS and compute the severity
+    
+    id1exists = np.asarray(dbconf.ilogid1exists)
+    id2exists = np.asarray(dbconf.ilogid2exists)
+    
     if len(dbconf.ilogid1) > 0:
+        
         # Reset Varaibles
         dbconf.ilogtinconf       = []
         dbconf.ilogtoutconf      = []
@@ -170,32 +176,136 @@ def asasLogUpdate(dbconf, traf):
         dbconf.ilogasastrkid2    = []
         
         # Update the conflict time variables
-        dbconf.ilogtinconf  = dbconf.tinconf[dbconf.ilogi,dbconf.ilogj]
-        dbconf.ilogtoutconf = dbconf.toutconf[dbconf.ilogi,dbconf.ilogj]        
+        failvalues          = (1-id1exists)*(1-id2exists)*np.array([9999.9999]*len(dbconf.ilogid1))
+        dbconf.ilogtinconf  = id1exists*id2exists*dbconf.tinconf[dbconf.ilogi,dbconf.ilogj] + failvalues
+        dbconf.ilogtoutconf = id1exists*id2exists*dbconf.toutconf[dbconf.ilogi,dbconf.ilogj] + failvalues       
         
         # Update the varaibles beloning to id1
-        dbconf.iloglatid1        = traf.lat[dbconf.ilogi]
-        dbconf.iloglonid1        = traf.lon[dbconf.ilogi]
-        dbconf.ilogaltid1        = traf.alt[dbconf.ilogi]
-        dbconf.ilogtasid1        = traf.tas[dbconf.ilogi]
-        dbconf.ilogvsid1         = traf.vs[dbconf.ilogi]
-        dbconf.iloghdgid1        = traf.hdg[dbconf.ilogi]
-        dbconf.ilogasasactiveid1 = dbconf.asasactive[dbconf.ilogi]
-        dbconf.ilogasastasid1    = dbconf.asasspd[dbconf.ilogi]
-        dbconf.ilogasastrkid1    = dbconf.asastrk[dbconf.ilogi]
+        failvalues               = (1-id1exists)*np.array([9999.9999]*len(dbconf.ilogid1))
+        dbconf.iloglatid1        = id1exists*traf.lat[dbconf.ilogi] + failvalues
+        dbconf.iloglonid1        = id1exists*traf.lon[dbconf.ilogi] + failvalues
+        dbconf.ilogaltid1        = id1exists*traf.alt[dbconf.ilogi] + failvalues
+        dbconf.ilogtasid1        = id1exists*traf.tas[dbconf.ilogi] + failvalues
+        dbconf.ilogvsid1         = id1exists*traf.vs[dbconf.ilogi]  + failvalues
+        dbconf.iloghdgid1        = id1exists*traf.hdg[dbconf.ilogi] + failvalues
+        dbconf.ilogasasactiveid1 = id1exists*dbconf.asasactive[dbconf.ilogi] + failvalues
+        dbconf.ilogasastasid1    = id1exists*dbconf.asasspd[dbconf.ilogi] + failvalues
+        dbconf.ilogasastrkid1    = id1exists*dbconf.asastrk[dbconf.ilogi] + failvalues
         
         # Update the variables belonging to id2
-        dbconf.iloglatid2        = traf.lat[dbconf.ilogj]
-        dbconf.iloglonid2        = traf.lon[dbconf.ilogj]
-        dbconf.ilogaltid2        = traf.alt[dbconf.ilogj]
-        dbconf.ilogtasid2        = traf.tas[dbconf.ilogj]
-        dbconf.ilogvsid2         = traf.vs[dbconf.ilogj]
-        dbconf.iloghdgid2        = traf.hdg[dbconf.ilogj]
-        dbconf.ilogasasactiveid2 = dbconf.asasactive[dbconf.ilogj]
-        dbconf.ilogasastasid2    = dbconf.asasspd[dbconf.ilogj]
-        dbconf.ilogasastrkid2    = dbconf.asastrk[dbconf.ilogj]        
+        failvalues               = (1-id2exists)*np.array([9999.9999]*len(dbconf.ilogid2))
+        dbconf.iloglatid2        = id2exists*traf.lat[dbconf.ilogj] + failvalues
+        dbconf.iloglonid2        = id2exists*traf.lon[dbconf.ilogj] + failvalues
+        dbconf.ilogaltid2        = id2exists*traf.alt[dbconf.ilogj] + failvalues
+        dbconf.ilogtasid2        = id2exists*traf.tas[dbconf.ilogj] + failvalues
+        dbconf.ilogvsid2         = id2exists*traf.vs[dbconf.ilogj]  + failvalues
+        dbconf.iloghdgid2        = id2exists*traf.hdg[dbconf.ilogj] + failvalues
+        dbconf.ilogasasactiveid2 = id2exists*dbconf.asasactive[dbconf.ilogj] + failvalues
+        dbconf.ilogasastasid2    = id2exists*dbconf.asasspd[dbconf.ilogj] + failvalues
+        dbconf.ilogasastrkid2    = id2exists*dbconf.asastrk[dbconf.ilogj] + failvalues    
         
         # Finally, call the logger
         dbconf.intlog.log()   
     # INTLOG-------------------------------------------------------------------
+
     
+def logLOS(dbconf, traf):
+    
+    # Reset variables
+    dbconf.ilogid1exists = []
+    dbconf.ilogid2exists = []
+    dbconf.ilogi         = []
+    dbconf.ilogj         = []
+    dbconf.ilogid1       = []
+    dbconf.ilogid2       = []
+    dbconf.ilogintsev    = []
+    dbconf.iloginthsev   = []
+    dbconf.ilogintvsev   = []
+    
+    for intrusion in dbconf.LOSlist_all:
+        gc.disable()
+        
+        # Determine the aircraft involved in this LOS
+        ac1      = intrusion[0]
+        ac2      = intrusion[1]
+        id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
+        intid    = dbconf.LOSlist_all.index(intrusion)
+        
+        # Check is the aircraft still exist 
+        id1exists = False if id1<0 else True
+        id2exists = False if id2<0 else True        
+                
+        # If both ac exist then check if it is still a LOS
+        if id1exists and id2exists:
+            # LOS check
+            dx     = (traf.lat[id1] - traf.lat[id2]) * 111319.
+            dy     = (traf.lon[id1] - traf.lon[id2]) * 111319.
+            hdist2 = dx**2 + dy**2
+            hLOS   = hdist2 < dbconf.R**2
+            vdist  = abs(traf.alt[id1] - traf.alt[id2])
+            vLOS   = vdist < dbconf.dh
+            isLOS  = (hLOS & vLOS)
+            # if it is still a LOS, then compute the severity
+            if isLOS:
+                # Calculate the current intrusion severity for the current LOS
+                Ih       = 1.0 - np.sqrt(hdist2) / dbconf.R
+                Iv       = 1.0 - vdist / dbconf.dh
+                severity = min(Ih, Iv)
+                # Check if the severity is larger than the one logged for this LOS.
+                # If so update the severity
+                if severity > dbconf.LOSmaxsev[intid]:
+                    dbconf.LOSmaxsev[intid]  = severity
+                    dbconf.LOShmaxsev[intid] = Ih
+                    dbconf.LOSvmaxsev[intid] = Iv
+                # If the severity is decreasing then log it the first time it starts decreasing    
+                else: 
+                    if intrusion not in dbconf.LOSlist_logged:
+                        dbconf.ilogid1exists.append(id1exists)
+                        dbconf.ilogid2exists.append(id2exists)
+                        dbconf.ilogi.append(id1)
+                        dbconf.ilogj.append(id2)
+                        dbconf.ilogid1.append(ac1)
+                        dbconf.ilogid2.append(ac2)
+                        dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
+                        dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
+                        dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
+                        dbconf.LOSlist_logged.append(intrusion)
+            # If it is no longer a LOS, check if it has been logged, and then delete it   
+            else:
+                if intrusion not in dbconf.LOSlist_logged:
+                    dbconf.ilogid1exists.append(id1exists)
+                    dbconf.ilogid2exists.append(id2exists)
+                    dbconf.ilogi.append(id1)
+                    dbconf.ilogj.append(id2)
+                    dbconf.ilogid1.append(ac1)
+                    dbconf.ilogid2.append(ac2)
+                    dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
+                    dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
+                    dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
+                # delete it completely (not from LOSlist_now)
+                dbconf.LOSlist_all.remove(intrusion)
+                dbconf.LOSlist_logged.remove(intrusion)
+                del dbconf.LOSmaxsev[intid]
+                del dbconf.LOShmaxsev[intid]
+                del dbconf.LOSvmaxsev[intid]           
+        #if one or both of the both aircraft no longer exists, check if it has 
+        # been logged and then delete it
+        else:
+            if intrusion not in dbconf.LOSlist_logged:
+                dbconf.ilogid1exists.append(id1exists)
+                dbconf.ilogid2exists.append(id2exists)
+                dbconf.ilogi.append(id1)
+                dbconf.ilogj.append(id2)
+                dbconf.ilogid1.append(ac1)
+                dbconf.ilogid2.append(ac2)
+                dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
+                dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
+                dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
+            # delete it completely (not from LOSlist_now)
+            dbconf.LOSlist_all.remove(intrusion)
+            dbconf.LOSlist_logged.remove(intrusion)
+            del dbconf.LOSmaxsev[intid]
+            del dbconf.LOShmaxsev[intid]
+            del dbconf.LOSvmaxsev[intid]
+        
+        gc.enable() 

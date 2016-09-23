@@ -262,6 +262,8 @@ class ASAS():
         self.clognsecondaryid2 = []
         
         # INTlog variables
+        self.ilogid1exists     = []
+        self.ilogid2exists     = []
         self.ilogi             = []
         self.ilogj             = []
         self.ilogid1           = []
