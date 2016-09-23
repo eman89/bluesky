@@ -147,7 +147,8 @@ def asasLogUpdate(dbconf, traf):
     # INTLOG-------------------------------------------------------------------
     
     # first check all the current active LOS and compute the severity
-    
+    logLOS(dbconf, traf)
+        
     id1exists = np.asarray(dbconf.ilogid1exists)
     id2exists = np.asarray(dbconf.ilogid2exists)
     
@@ -234,9 +235,6 @@ def logLOS(dbconf, traf):
         id1exists = False if id1<0 else True
         id2exists = False if id2<0 else True        
         
-        import pdb
-        pdb.set_trace()
-        
         # If both ac exist then check if it is still a LOS
         if id1exists and id2exists:
             # LOS check
@@ -274,8 +272,6 @@ def logLOS(dbconf, traf):
                         dbconf.LOSlist_logged.append(intrusion)
             # If it is no longer a LOS, check if it has been logged, and then delete it   
             else:
-#                import pdb
-#                pdb.set_trace()
                 if intrusion not in dbconf.LOSlist_logged:
                     dbconf.ilogid1exists.append(id1exists)
                     dbconf.ilogid2exists.append(id2exists)
@@ -295,8 +291,6 @@ def logLOS(dbconf, traf):
         #if one or both of the both aircraft no longer exists, check if it has 
         # been logged and then delete it
         else:
-#            import pdb
-#            pdb.set_trace()
             if intrusion not in dbconf.LOSlist_logged:
                 dbconf.ilogid1exists.append(id1exists)
                 dbconf.ilogid2exists.append(id2exists)
