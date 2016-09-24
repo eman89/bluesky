@@ -203,13 +203,13 @@ class ASAS():
         self.lonowncpa    = np.array([])
         self.altowncpa    = np.array([])
 
-        self.conflist_active   = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from this list once past CPA
-        self.LOSlist_active    = []  # List of all Losses Of Separation that are still active (LOS still on-going). LOS deleted from this list when it is over.
-        self.conflist_now      = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
-        self.LOSlist_now       = []  # List of Losses Of Separations in the current ASAS cycle. 
-        self.conflist_total    = []  # List of all conflicts since the simulation has started. Used for display on the GUI. 
-        self.LOSlist_total     = []  # List of all LOS since the simulation has started. Used for display on the GUI.
-        self.LOSlist_logged    = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once. 
+        self.conflist_active = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from this list once past CPA
+        self.LOSlist_active  = []  # List of all Losses Of Separation that are still active (LOS still on-going). LOS deleted from this list when it is over.
+        self.conflist_now    = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
+        self.LOSlist_now     = []  # List of Losses Of Separations in the current ASAS cycle.
+        self.LOSlist_logged  = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once. 
+        self.nconf_total     = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI. 
+        self.nLOS_total      = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
         
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []

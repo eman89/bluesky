@@ -193,11 +193,11 @@ def detect(dbconf, traf, simt):
         latj,lonj = geo.qdrpos(traf.lat[j],traf.lon[j], traf.trk[j],rngj)
         altj      = traf.alt[j]+dbconf.tcpa[i,j]*traf.vs[j]
 
-        # Update conflist_active (currently active conflicts), conflist_total (display)
+        # Update conflist_active (currently active conflicts), nconf_total (display)
         # and some variables related to CFLLOG (others updated in asasLogUpdate())
         if combi not in dbconf.conflist_active and combi2 not in dbconf.conflist_active:
+            dbconf.nconf_total = dbconf.nconf_total + 1            
             dbconf.conflist_active.append(combi)
-            dbconf.conflist_total.append(combi)
             # Now get the stuff you need for the CFLLOG variables!
             dbconf.clogi.append(i)
             dbconf.clogj.append(j)
@@ -236,10 +236,10 @@ def detect(dbconf, traf, simt):
         isLOS  = (hLOS & vLOS)
         
         if isLOS:
-            # Update LOS lists: LOSlist_active (all LOS that are active) and LOSlist_total (display)
+            # Update LOS lists: LOSlist_active (all LOS that are active) and nLOS_total (display)
             if combi not in dbconf.LOSlist_active and combi2 not in dbconf.LOSlist_active:
+                dbconf.nLOS_total = dbconf.nLOS_total + 1                
                 dbconf.LOSlist_active.append(combi)
-                dbconf.LOSlist_total.append(combi)
                 dbconf.LOSmaxsev.append(0.)
                 dbconf.LOShmaxsev.append(0.)
                 dbconf.LOSvmaxsev.append(0.)
