@@ -118,7 +118,6 @@ class Traffic:
         self.rho     = np.array([])  # atmospheric air density [kg/m3]
         self.Temp    = np.array([])  # atmospheric air temperature [K]
         self.dtemp   = np.array([])  # delta t for non-ISA conditions
-        self.spawnTime = np.array([])  # creation time [s]
 
         # Traffic autopilot settings
         self.atrk   = []  # selected track angle [deg]
@@ -195,6 +194,12 @@ class Traffic:
         self.adsbtas    = np.array([])
         self.adsbgs     = np.array([])
         self.adsbvs     = np.array([])
+        
+        # Flight Statistics Data
+        self.spawnTime       = np.array([])   # creation time [s]
+        self.distance2D      = np.array([])   # Horizontal flight distance [m]
+        self.distance3D      = np.array([])   # 3D flight distance [m]
+        self.work            = np.array([])   # Work Done [GJ]
 
         #-----------------------------------------------------------------------------
         # Not per aircraft data
@@ -280,7 +285,6 @@ class Traffic:
         # Process input
         self.id.append(acid.upper())
         self.type.append(actype)
-        self.spawnTime = np.append(self.spawnTime, sim.simt)
         self.lat       = np.append(self.lat, aclat)
         self.lon       = np.append(self.lon, aclon)
         self.hdg       = np.append(self.hdg, achdg)
@@ -410,6 +414,12 @@ class Traffic:
         self.eps        = np.append(self.eps, 0.01)
 
         self.asas.create(self.trk[-1], acspd, acalt)
+        
+        # Flight Statistics Data
+        self.spawnTime       = np.append(self.spawnTime, sim.simt)   
+        self.distance2D      = np.append(self.distance2D, 0.0)   
+        self.distance3D      = np.append(self.distance3D, 0.0)  
+        self.work            = np.append(self.work, 0.0)   
 
         return True
 
@@ -427,7 +437,6 @@ class Traffic:
         del self.type[idx]
 
         # Traffic basic data
-        self.spawnTime = np.delete(self.spawnTime, idx)
         self.lat       = np.delete(self.lat, idx)
         self.lon       = np.delete(self.lon, idx)
         self.hdg       = np.delete(self.hdg, idx)
@@ -538,6 +547,13 @@ class Traffic:
         self.eps = np.delete(self.eps, idx)
 
         self.asas.delete(idx)
+        
+        # Flight Statistics Data
+        self.spawnTime       = np.delete(self.spawnTime, idx)   
+        self.distance2D      = np.delete(self.distance2D, idx)   
+        self.distance3D      = np.delete(self.distance3D, idx)  
+        self.work            = np.delete(self.work, idx)   
+        
         return True
 
     def update(self, simt, simdt):
@@ -917,6 +933,18 @@ class Traffic:
             self.lastlat = self.lat
             self.lastlon = self.lon
             self.lasttim[:] = simt
+            
+        #---------Flight Statistics Update----------        
+            
+        # Horizontal distance
+        self.distance2D = self.distance2D + (simdt*self.gs)
+        
+        # 3D distance 
+        resultantspd = np.sqrt(self.gs*self.gs + self.vs*self.vs)
+        self.distance3D = self.distance3D + (simdt*resultantspd)
+        
+        # Work Done
+        self.work = (self.work + (abs(self.perf.Thr)*simdt*resultantspd))/10**9 
 
         # ----------------AREA check----------------
         # Update area once per areadt seconds:
@@ -932,7 +960,7 @@ class Traffic:
             # Update self.inside with the new inside
             self.inside = inside
             
-            # delete all aicraft in delAircraftidx 
+            # delete all aicraft in delAircraftidx and log their flight statistics
             for acid in [self.id[idx] for idx in delAircraftidx]:
                 self.delete(acid)
 
@@ -1202,6 +1230,12 @@ class Traffic:
                 line += " to " + self.dest[idx]
 
         return line
+        
+    
+    def logFLST(self):
+        '''Updates the arrays that are used for logging'''
+        pass
+        
         
     def setArea(self, scr, args):
         ''' Set Experiment Area. Aicraft leaving the experiment area are deleted.
