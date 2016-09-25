@@ -1,6 +1,6 @@
 import bluesky.settings as settings
 
-print "   *****   BlueSky Open ATM simulator *****"
+print "    ***** BlueSky Open ATM simulator *****     "
 print "Distributed under GNU General Public License v3"
 
 settings.init()

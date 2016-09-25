@@ -74,6 +74,33 @@ class Traffic:
             self.orig      = []  # Four letter code of origin airport
             self.dest      = []  # Four letter code of destination airport
         
+        # Define FLSTLOG
+        self.flstlog = datalog.defineLogger("FLSTLOG", logHeader.flstHeader())    
+        with datalog.registerLogParameters('FLSTLOG', self):
+            self.flogid              = []
+            self.flogflightime       = []
+            self.flogdistance2d      = []
+            self.flogdistance3d      = []
+            self.flogworkdone        = []
+            self.flogrouteefficiency = []
+            self.flogspawntime       = []
+            self.floglat             = []
+            self.floglon             = []
+            self.flogalt             = []
+            self.flogtas             = []
+            self.flogvs              = []
+            self.floghdg             = []
+            self.flogapalt           = []
+            self.flogaptas           = []
+            self.flogatrk            = []
+            self.flogavs             = []
+            self.flogswlnav          = []
+            self.flogorig            = []
+            self.flogdest            = []
+            self.flogasasactive      = []
+            self.flogasasspd         = []
+            self.flogasastrk         = []      
+        
         # ASAS object
         self.asas = ASAS()
         self.wind = WindSim()
@@ -200,6 +227,31 @@ class Traffic:
         self.distance2D      = np.array([])   # Horizontal flight distance [m]
         self.distance3D      = np.array([])   # 3D flight distance [m]
         self.work            = np.array([])   # Work Done [GJ]
+        
+        # FLSTLOG varaibles 
+        self.flogid              = []
+        self.flogflightime       = []
+        self.flogdistance2d      = []
+        self.flogdistance3d      = []
+        self.flogworkdone        = []
+        self.flogrouteefficiency = []
+        self.flogspawntime       = []
+        self.floglat             = []
+        self.floglon             = []
+        self.flogalt             = []
+        self.flogtas             = []
+        self.flogvs              = []
+        self.floghdg             = []
+        self.flogapalt           = []
+        self.flogaptas           = []
+        self.flogatrk            = []
+        self.flogavs             = []
+        self.flogswlnav          = []
+        self.flogorig            = []
+        self.flogdest            = []
+        self.flogasasactive      = []
+        self.flogasasspd         = []
+        self.flogasastrk         = []
 
         #-----------------------------------------------------------------------------
         # Not per aircraft data
@@ -222,7 +274,7 @@ class Traffic:
         # Traffic area: delete traffic when it leaves this area (so not when outside)
         self.swarea     = False
         self.areaname   = None
-        self.areadt     = 5.0  # [s] frequency of area check (simtime)
+        self.areadt     = 1.0  # [s] frequency of area check (simtime)
         self.areat0     = -100.  # last time checked
         self.inside = np.array([])
         # What to do with FIR?
@@ -936,15 +988,15 @@ class Traffic:
             
         #---------Flight Statistics Update----------        
             
-        # Horizontal distance
+        # Horizontal distance [m]
         self.distance2D = self.distance2D + (simdt*self.gs)
         
-        # 3D distance 
+        # 3D distance [m]
         resultantspd = np.sqrt(self.gs*self.gs + self.vs*self.vs)
         self.distance3D = self.distance3D + (simdt*resultantspd)
         
-        # Work Done
-        self.work = (self.work + (abs(self.perf.Thr)*simdt*resultantspd))/10**9 
+        # Work Done [MJ]
+        self.work = (self.work + (abs(self.perf.Thr)*simdt*resultantspd)) 
 
         # ----------------AREA check----------------
         # Update area once per areadt seconds:
@@ -959,6 +1011,9 @@ class Traffic:
 
             # Update self.inside with the new inside
             self.inside = inside
+            
+            # Log the flight statistics for the aircraft about to be deleted
+            self.logFLST(simt, delAircraftidx)
             
             # delete all aicraft in delAircraftidx and log their flight statistics
             for acid in [self.id[idx] for idx in delAircraftidx]:
@@ -1230,12 +1285,75 @@ class Traffic:
                 line += " to " + self.dest[idx]
 
         return line
-        
     
-    def logFLST(self):
+    def logFLST(self, simt, delAircraftidx):
         '''Updates the arrays that are used for logging'''
-        pass
-        
+        if len(delAircraftidx)>0:
+            # Reset variables
+            self.flogid              = []
+            self.flogflightime       = []
+            self.flogdistance2d      = []
+            self.flogdistance3d      = []
+            self.flogworkdone        = []
+            self.flogrouteefficiency = []
+            self.flogspawntime       = []
+            self.floglat             = []
+            self.floglon             = []
+            self.flogalt             = []
+            self.flogtas             = []
+            self.flogvs              = []
+            self.floghdg             = []
+            self.flogapalt           = []
+            self.flogaptas           = []
+            self.flogatrk            = []
+            self.flogavs             = []
+            self.flogswlnav          = []
+            self.flogorig            = []
+            self.flogdest            = []
+            self.flogasasactive      = []
+            self.flogasasspd         = []
+            self.flogasastrk         = []
+            
+            # Update Variables
+            self.flogid              = np.array(self.id)[delAircraftidx]
+            self.flogflightime       = simt - self.spawnTime[delAircraftidx]
+            self.flogdistance2d      = self.distance2D[delAircraftidx]
+            self.flogdistance3d      = self.distance3D[delAircraftidx]
+            self.flogworkdone        = self.work[delAircraftidx]        
+            self.flogspawntime       = self.spawnTime[delAircraftidx]
+            self.floglat             = self.lat[delAircraftidx]
+            self.floglon             = self.lon[delAircraftidx]
+            self.flogalt             = self.alt[delAircraftidx]
+            self.flogtas             = self.tas[delAircraftidx]
+            self.flogvs              = self.vs[delAircraftidx]
+            self.floghdg             = self.hdg[delAircraftidx]
+            self.flogapalt           = self.apalt[delAircraftidx]
+            self.flogaptas           = self.aptas[delAircraftidx]
+            self.flogatrk            = self.atrk[delAircraftidx]
+            self.flogavs             = self.avs[delAircraftidx]
+            self.flogswlnav          = self.swlnav[delAircraftidx]
+            self.flogorig            = np.array(self.orig)[delAircraftidx]
+            self.flogdest            = np.array(self.dest)[delAircraftidx]
+            self.flogasasactive      = self.asas.asasactive[delAircraftidx]
+            self.flogasasspd         = self.asas.asasspd[delAircraftidx]
+            self.flogasastrk         = self.asas.asastrk[delAircraftidx]
+            
+            # Compute flight efficiency
+            directDistance = np.zeros(len(delAircraftidx))
+            for i in delAircraftidx:
+                orig = self.orig[i]
+                dest = self.dest[i]
+                origidx = self.navdb.getwpidx(orig)
+                destidx = self.navdb.getwpidx(dest)
+                origlat = self.navdb.wplat[origidx]
+                origlon = self.navdb.wplon[origidx]
+                destlat = self.navdb.wplat[destidx]
+                destlon = self.navdb.wplon[destidx]
+                directDistance = geo.latlondist(origlat, origlon, destlat, destlon)
+            self.flogrouteefficiency = 1.0 - (abs(directDistance-self.flogdistance2d)/self.flogdistance2d)
+            
+            # Call the logger
+            self.flstlog.log()       
         
     def setArea(self, scr, args):
         ''' Set Experiment Area. Aicraft leaving the experiment area are deleted.
