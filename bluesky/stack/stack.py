@@ -34,6 +34,7 @@ cmddict   = dict()
 cmdsynon  = dict()
 cmdstack  = []
 
+scenname  = ""
 scenfile  = ""
 scentime  = []
 scencmd   = []
@@ -370,7 +371,7 @@ def init(sim, traf, scr):
         "SCEN": [
             "SCEN scenname",
             "string",
-            sim.scenarioInit
+            scenarioinit
         ],
         "SEED": [
             "SEED value",
@@ -493,8 +494,8 @@ def init(sim, traf, scr):
     stack("ZOOM 0.4")
 
 
-def get_scenfile():
-    return scenfile
+def get_scenname():
+    return scenname
 
 
 def get_scendata():
@@ -505,7 +506,13 @@ def set_scendata(newtime, newcmd):
     global scentime, scencmd
     scentime = newtime
     scencmd  = newcmd
+    
 
+def scenarioinit(name):
+    global scenname
+    scenname = name
+    return True, 'Starting scenario ' + name
+    
 
 def append_commands(newcommands):
     """ Append additional functions to the stack command dictionary """
@@ -549,25 +556,23 @@ def stack(cmdline):
             cmdstack.append(line)
 
 
-def openfile(scenname, absrel='ABS', mergeWithExisting=False):
-    global scentime, scencmd
+def openfile(fname, absrel='ABS', mergeWithExisting=False):
+    global scentime, scencmd, scenname
+
+    # Split the incoming filename into a path, a filename and an extension
+    path, fname   = os.path.split(os.path.normpath(fname))
+    scenname, ext = os.path.splitext(fname)
+    if len(path) == 0:
+        path = os.path.normpath(settings.scenario_path)
+    if len(ext) == 0:
+        ext = '.scn'
+
+    # The entire filename, possibly with added path and extension
+    scenfile = os.path.join(path, scenname + ext)
 
     # If timestamps in file should be interpreted as relative we need to add
     # the current simtime to every timestamp
     t_offset = sim.simt if absrel == 'REL' else 0.0
-
-    # Add .scn extension if necessary
-    if scenname.lower().find(".scn") < 0:
-        scenname = scenname + ".scn"
-
-    # If it is with a path don't touch it, else add path
-    if scenname.find("/") < 0 and scenname.find( "\\") < 0:
-        scenfile = settings.scenario_path
-        if scenfile[-1] is not '/':
-            scenfile = scenfile + '/'
-        scenfile = scenfile+scenname
-    else:
-        scenfile = scenname
 
     if not os.path.exists(scenfile):
         return False, "Error: cannot find file: " + scenfile
@@ -594,7 +599,7 @@ def openfile(scenname, absrel='ABS', mergeWithExisting=False):
                     scentime.append(ihr + imin + xsec + t_offset)
                     scencmd.append(line[icmdline + 1:].strip("\n"))
                 except:
-                    if not(len(line.strip())>0 and line.strip()[0]=="#"):                        
+                    if not(len(line.strip()) >0 and line.strip()[0] == "#"):                        
                         print "except this:", line
                     pass  # nice try, we will just ignore this syntax error
 
