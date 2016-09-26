@@ -69,7 +69,9 @@ def reset():
 
 def makeLogfileName(logname):
     timestamp = datetime.now().strftime('%Y%m%d_%H-%M-%S')
-    fname     = "%s_%s_%s.log" % (logname, stack.get_scenname(), timestamp)
+    scn = stack.get_scenfile()
+#    scn = scn[:scn.lower().find('.scn')]
+    fname = "%s_%s_%s.log" % (logname, scn, timestamp)
     return settings.log_path + '/' + fname
 
 
@@ -141,8 +143,8 @@ class CSVLogger:
         self.selvars.append((obj, obj.log_attrs))
         # Reset the object back to its original class, and remove its reference
         # to the list of log parameters.
-        obj.__class__ = obj.__class__.__bases__[0]
         del obj.log_attrs
+        obj.__class__ = obj.__class__.__bases__[0]
         self.dataparents.pop()
 
     def setheader(self, header):
@@ -224,7 +226,6 @@ class CSVLogger:
                 '\nUsage: ' + self.name + ' ON/OFF,[dt] or LISTVARS or SELECTVARS var1,...,varn'
             return True, text
         elif args[0] == 'ON':
-            self.tlog = self.simt
             # Set log dt if passed
             if len(args) > 1:
                 if type(args[1]) is float:
