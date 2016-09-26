@@ -78,7 +78,7 @@ class Traffic:
         self.flstlog = datalog.defineLogger("FLSTLOG", logHeader.flstHeader())    
         with datalog.registerLogParameters('FLSTLOG', self):
             self.flogid              = []
-            self.flogflightime       = []
+            self.flogflighttime      = []
             self.flogdistance2d      = []
             self.flogdistance3d      = []
             self.flogworkdone        = []
@@ -230,7 +230,7 @@ class Traffic:
         
         # FLSTLOG varaibles 
         self.flogid              = []
-        self.flogflightime       = []
+        self.flogflighttime      = []
         self.flogdistance2d      = []
         self.flogdistance3d      = []
         self.flogworkdone        = []
@@ -1291,7 +1291,7 @@ class Traffic:
         if len(delAircraftidx)>0:
             # Reset variables
             self.flogid              = []
-            self.flogflightime       = []
+            self.flogflighttime      = []
             self.flogdistance2d      = []
             self.flogdistance3d      = []
             self.flogworkdone        = []
@@ -1316,7 +1316,7 @@ class Traffic:
             
             # Update Variables
             self.flogid              = np.array(self.id)[delAircraftidx]
-            self.flogflightime       = simt - self.spawnTime[delAircraftidx]
+            self.flogflighttime      = simt - self.spawnTime[delAircraftidx]
             self.flogdistance2d      = self.distance2D[delAircraftidx]
             self.flogdistance3d      = self.distance3D[delAircraftidx]
             self.flogworkdone        = self.work[delAircraftidx]        
