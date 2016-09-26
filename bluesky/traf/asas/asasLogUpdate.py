@@ -109,6 +109,7 @@ def asasLogUpdate(dbconf, traf):
     dbconf.inslogasastasid2    = []
     dbconf.inslogasastrkid2    = []
     dbconf.inslogntraf         = []
+    dbconf.inslogntrafexpt     = []
     
     # Update the cpa time variables
     dbconf.inslogtinconf  = dbconf.tinconf[dbconf.inslogi,dbconf.inslogj]
@@ -138,7 +139,8 @@ def asasLogUpdate(dbconf, traf):
     dbconf.inslogasastrkid2    = dbconf.asastrk[dbconf.inslogj]
         
     # Update number of aircraft
-    dbconf.inslogntraf = [traf.ntraf]*len(dbconf.inslogi)
+    dbconf.inslogntraf     = [traf.ntraf]*len(dbconf.inslogi)
+    dbconf.inslogntrafexpt = [traf.ntrafexpt]*len(dbconf.inslogi)
     
     # There is no need to manually call the logger as INSTLOG is periodic!
     # INSTLOG------------------------------------------------------------------

@@ -27,7 +27,7 @@ airport_file = data_path + '/global/airports.dat'
 start_location = 'EHAM'
 
 # Simulation timestep [seconds]
-simdt = 0.05
+simdt = 0.1
 
 # Snaplog dt [seconds]
 snapdt = 30.0

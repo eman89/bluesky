@@ -55,7 +55,8 @@ class Traffic:
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)        
         
         with datalog.registerLogParameters('SKYLOG', self):
-            self.ntraf = 0   
+            self.ntraf     = 0
+            self.ntrafexpt = 0
         
         with datalog.registerLogParameters('SNAPLOG', self):
             self.id        = []            # identifier (string)
@@ -116,7 +117,8 @@ class Traffic:
 
         self.perf = Perf(self)
 
-        self.ntraf = 0
+        self.ntraf     = 0
+        self.ntrafexpt = 0
 
         # Traffic list & arrays definition
 
@@ -996,7 +998,11 @@ class Traffic:
         self.distance3D = self.distance3D + (simdt*resultantspd)
         
         # Work Done [MJ]
-        self.work = (self.work + (abs(self.perf.Thr)*simdt*resultantspd)) 
+        self.work = (self.work + (abs(self.perf.Thr)*simdt*resultantspd))
+        
+        #----------Number of aircraft in experiment area-------------
+        exptInside     = areafilter.checkInside('EXPTAREA', self.lat, self.lon, self.alt)
+        self.ntrafexpt = len(exptInside[exptInside==True])
 
         # ----------------AREA check----------------
         # Update area once per areadt seconds:

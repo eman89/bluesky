@@ -152,6 +152,7 @@ class ASAS():
             self.inslogasastasid2    = []
             self.inslogasastrkid2    = []
             self.inslogntraf         = []
+            self.inslogntrafexpt     = []
 
     def reset(self):
         """ ASAS constructor """
@@ -327,6 +328,7 @@ class ASAS():
         self.inslogasastasid2    = []
         self.inslogasastrkid2    = []
         self.inslogntraf         = []
+        self.inslogntrafexpt     = []
         
     def toggle(self, flag=None):
         if flag is None:

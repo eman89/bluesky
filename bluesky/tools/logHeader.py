@@ -6,7 +6,7 @@ Contains functions to write the header for the different log files
 '''
 
 def skyHeader():    
-    parameters = "SimTime [s], nTraf [-], nConflicts Now [-], nIntrusions Now [-]"
+    parameters = "SimTime [s], nTraf [-], nTraf Expt Area [-], nConflicts Now [-], nIntrusions Now [-]"
     
     lines      = "##############################\n"   + \
                  "SKY LOG\n"                          + \
@@ -66,7 +66,7 @@ def instHeader():
                   "TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], Latitude CPA id2 [deg], "           + \
                   "Longitude CPA id2 [deg], Altitude CPA id2 [m], ASAS Active id2 [-], "           + \
                   "ASASTAS id2 [m/s], ASASTRK id2 [deg], "                                         + \
-                  "nTraf"
+                  "nTraf, nTraf Expt Area [-]"
     
     lines      = "##############################\n"    + \
                  "INST LOG\n"                          + \

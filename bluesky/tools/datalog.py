@@ -234,7 +234,7 @@ class CSVLogger:
                     return False, 'Turn ' + self.name + ' on with optional dt'
 
             self.open(makeLogfileName(self.name))
-            return True, self.name + " ON" + (". dt = " + str(self.dt) if self.dt>0 else " ") 
+            return True, self.name + " ON" + (". dt [s] = " + str(self.dt) if self.dt>0 else " ") 
         elif args[0] == 'OFF':
             self.reset()
             return True, self.name + " OFF"
