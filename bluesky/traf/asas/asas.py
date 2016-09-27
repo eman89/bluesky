@@ -620,7 +620,7 @@ class ASAS():
         self.asasactive.fill(False)
     
         # Look at all conflicts, also the ones that are solved but CPA is yet to come
-        for conflict in self.conflist_active:
+        for conflict in self.conflist_active[:]:
             ac1      = conflict[0]
             ac2      = conflict[1]
             id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)

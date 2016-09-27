@@ -224,7 +224,7 @@ def logLOS(dbconf, traf):
     dbconf.iloginthsev   = []
     dbconf.ilogintvsev   = []
     
-    for intrusion in dbconf.LOSlist_active:
+    for intrusion in dbconf.LOSlist_active[:]:
         gc.disable()
         
         # Determine the aircraft involved in this LOS
