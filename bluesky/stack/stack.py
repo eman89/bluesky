@@ -543,9 +543,10 @@ def setSeed(value):
 
 
 def reset():
-    global scentime, scencmd
+    global scentime, scencmd, scenname
     scentime = []
     scencmd  = []
+    scenname = ''
 
 
 def stack(cmdline):
@@ -557,7 +558,7 @@ def stack(cmdline):
 
 
 def openfile(fname, absrel='ABS', mergeWithExisting=False):
-    global scentime, scencmd, scenname
+    global scentime, scencmd
 
     # Split the incoming filename into a path, a filename and an extension
     path, fname   = os.path.split(os.path.normpath(fname))
@@ -591,11 +592,11 @@ def openfile(fname, absrel='ABS', mergeWithExisting=False):
                 # Try reading timestamp and command
                 try:
                     icmdline = line.index('>')
-                    tstamp = line[:icmdline]
-                    ttxt = tstamp.strip().split(':')
-                    ihr = int(ttxt[0]) * 3600.0
-                    imin = int(ttxt[1]) * 60.0
-                    xsec = float(ttxt[2])
+                    tstamp   = line[:icmdline]
+                    ttxt     = tstamp.strip().split(':')
+                    ihr      = int(ttxt[0]) * 3600.0
+                    imin     = int(ttxt[1]) * 60.0
+                    xsec     = float(ttxt[2])
                     scentime.append(ihr + imin + xsec + t_offset)
                     scencmd.append(line[icmdline + 1:].strip("\n"))
                 except:
@@ -612,7 +613,7 @@ def openfile(fname, absrel='ABS', mergeWithExisting=False):
 
 
 def ic(scr, sim, filename=''):
-    global scenfile
+    global scenfile, scenname
     if filename == '':
         filename = scr.show_file_dialog()
     elif filename == "IC":
@@ -621,8 +622,9 @@ def ic(scr, sim, filename=''):
     if len(filename) > 0:
         sim.reset()
         result = openfile(filename)
-        if type(result) is bool:
-            scenfile = filename
+        if result is True:
+            scenfile    = filename
+            scenname, _ = os.path.splitext(os.path.basename(filename))
             return True, "Opened " + filename
         else:
             return result
