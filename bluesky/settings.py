@@ -12,7 +12,10 @@ data_path = 'data'
 log_path = 'output'
 
 # Indicate the scenario path
-scenario_path = 'scenario'
+scenario_path = 'scenario/2DExptStability/NoDest/FiltOption1'
+# scenario_path = 'scenario/2DExptStability/NoDest/FiltOption2'
+# scenario_path = 'scenario/2DExptStability/Dest/FiltOption1'
+# scenario_path = 'scenario/2DExptStability/Dest/FiltOption2'
 
 # Indicate the path for the aircraft performance data
 perf_path = data_path + '/coefficients/BS_aircraft'
