@@ -30,13 +30,13 @@ start_location = 'EHAM'
 simdt = 0.1
 
 # Snaplog dt [seconds]
-snapdt = 30.0
+snapdt = 15.0
 
 # Instlog dt [seconds]
-instdt = 30.0
+instdt = 15.0
 
 # Skylog dt [seconds]
-skydt = 60.0
+skydt = 15.0
 
 # Selective snap log dt [seconds]
 selsnapdt = 5.0
