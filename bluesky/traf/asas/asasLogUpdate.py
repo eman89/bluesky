@@ -286,7 +286,6 @@ def logLOS(dbconf, traf):
                     dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
                 # delete it completely (not from LOSlist_now)
                 dbconf.LOSlist_active.remove(intrusion)
-                dbconf.LOSlist_logged.remove(intrusion)
                 del dbconf.LOSmaxsev[intid]
                 del dbconf.LOShmaxsev[intid]
                 del dbconf.LOSvmaxsev[intid]           
@@ -305,7 +304,6 @@ def logLOS(dbconf, traf):
                 dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
             # delete it completely (not from LOSlist_now)
             dbconf.LOSlist_active.remove(intrusion)
-            dbconf.LOSlist_logged.remove(intrusion)
             del dbconf.LOSmaxsev[intid]
             del dbconf.LOShmaxsev[intid]
             del dbconf.LOSvmaxsev[intid]
