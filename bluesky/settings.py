@@ -12,10 +12,7 @@ data_path = 'data'
 log_path = 'output'
 
 # Indicate the scenario path
-scenario_path = 'scenario/2DExptStability/NoDest/FiltOption1'
-# scenario_path = 'scenario/2DExptStability/NoDest/FiltOption2'
-# scenario_path = 'scenario/2DExptStability/Dest/FiltOption1'
-# scenario_path = 'scenario/2DExptStability/Dest/FiltOption2'
+scenario_path = 'scenario'
 
 # Indicate the path for the aircraft performance data
 perf_path = data_path + '/coefficients/BS_aircraft'
@@ -30,22 +27,25 @@ airport_file = data_path + '/global/airports.dat'
 start_location = 'EHAM'
 
 # Simulation timestep [seconds]
-simdt = 0.1
+simdt = 0.05
 
 # Snaplog dt [seconds]
-snapdt = 15.0
+snapdt = 30.0
 
 # Instlog dt [seconds]
-instdt = 15.0
+instdt = 30.0
 
 # Skylog dt [seconds]
-skydt = 15.0
+skydt = 60.0
 
 # Selective snap log dt [seconds]
 selsnapdt = 5.0
 
 # Prefer compiled BlueSky modules (cgeo, casas)
 prefer_compiled = True
+
+# Limit the max number of cpu nodes for parallel simulation
+max_nnodes = 999
 
 #=========================================================================
 #=  ASAS default settings
