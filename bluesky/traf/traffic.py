@@ -84,6 +84,7 @@ class Traffic:
             self.flogdistance3d      = []
             self.flogworkdone        = []
             self.flogrouteefficiency = []
+            self.flogdist2dest       = []
             self.flogspawntime       = []
             self.floglat             = []
             self.floglon             = []
@@ -237,6 +238,7 @@ class Traffic:
         self.flogdistance3d      = []
         self.flogworkdone        = []
         self.flogrouteefficiency = []
+        self.flogdist2dest       = []
         self.flogspawntime       = []
         self.floglat             = []
         self.floglon             = []
@@ -1302,6 +1304,7 @@ class Traffic:
             self.flogdistance3d      = []
             self.flogworkdone        = []
             self.flogrouteefficiency = []
+            self.flogdist2dest       = []
             self.flogspawntime       = []
             self.floglat             = []
             self.floglon             = []
@@ -1344,22 +1347,28 @@ class Traffic:
             self.flogasasspd         = self.asas.asasspd[delAircraftidx]
             self.flogasastrk         = self.asas.asastrk[delAircraftidx]
             
-            # Compute flight efficiency
-            directDistance = np.zeros(len(delAircraftidx))
+            # Compute flight efficiency and distance to destination
+            directDistance       = []
+            distance2Destination = []
             for i in delAircraftidx:
-                orig = self.orig[i]
-                dest = self.dest[i]
-                origidx = self.navdb.getwpidx(orig)
-                destidx = self.navdb.getwpidx(dest)
-                origlat = self.navdb.wplat[origidx]
-                origlon = self.navdb.wplon[origidx]
-                destlat = self.navdb.wplat[destidx]
-                destlon = self.navdb.wplon[destidx]
-                directDistance = geo.latlondist(origlat, origlon, destlat, destlon)
-            self.flogrouteefficiency = 1.0 - (abs(directDistance-self.flogdistance2d)/self.flogdistance2d)
+                orig                 = self.orig[i]
+                dest                 = self.dest[i]
+                origidx              = self.navdb.getwpidx(orig)
+                destidx              = self.navdb.getwpidx(dest)
+                origlat              = self.navdb.wplat[origidx]
+                origlon              = self.navdb.wplon[origidx]
+                destlat              = self.navdb.wplat[destidx]
+                destlon              = self.navdb.wplon[destidx]
+                directDistance.append(geo.latlondist(origlat, origlon, self.lat[i], self.lon[i]))
+                distance2Destination.append(geo.latlondist(self.lat[i], self.lon[i], destlat, destlon))
+            
+            # store flight efficiency and distance to destination into their flog variables
+            self.flogrouteefficiency = 1.0 - ((self.flogdistance2d-directDistance)/directDistance)
+            self.flogdist2dest       = distance2Destination
             
             # Call the logger
-            self.flstlog.log()       
+            self.flstlog.log()
+            
         
     def setArea(self, scr, args):
         ''' Set Experiment Area. Aicraft leaving the experiment area are deleted.

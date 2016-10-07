@@ -103,8 +103,8 @@ def intHeader():
     
 def flstHeader():
     parameters = "SimTime [s], Call Sign [-], flightDuration [s], Distance2D [m], "               + \
-                 "Distance3D [m], Work Done [J], Route Efficiency [-], Spawn Time [s], "         + \
-                 " Latitude [deg], Longitude [deg], "                                             + \
+                 "Distance3D [m], Work Done [J], Route Efficiency [-], 2D Dist2Dest [m],"         + \
+                 "Spawn Time [s], Latitude [deg], Longitude [deg], "                              + \
                  "Altitude [m], TAS [m/s], VS [m/s], HDG [deg], CMDALT [m], "                     + \
                  "CMDTAS [m/s], CMDTRK [deg], CMDVS [m/s], LNAV Active [-], "                     + \
                  "Origin [-], Destination [-], ASAS Active [-], ASASTAS [m/s], "                  + \
