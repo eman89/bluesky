@@ -278,7 +278,7 @@ class Traffic:
         # Traffic area: delete traffic when it leaves this area (so not when outside)
         self.swarea     = False
         self.areaname   = None
-        self.areadt     = 1.0  # [s] frequency of area check (simtime)
+        self.areadt     = 0.1  # [s] frequency of area check (simtime)
         self.areat0     = -100.  # last time checked
         self.inside = np.array([])
         # What to do with FIR?
@@ -1359,7 +1359,7 @@ class Traffic:
                 origlon              = self.navdb.wplon[origidx]
                 destlat              = self.navdb.wplat[destidx]
                 destlon              = self.navdb.wplon[destidx]
-                directDistance.append(geo.latlondist(origlat, origlon, self.lat[i], self.lon[i]))
+                directDistance.append(geo.latlondist(origlat, origlon, destlat, destlon))
                 distance2Destination.append(geo.latlondist(self.lat[i], self.lon[i], destlat, destlon))
             
             # store flight efficiency and distance to destination into their flog variables
