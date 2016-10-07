@@ -84,7 +84,6 @@ class Traffic:
             self.flogdistance3d      = []
             self.flogworkdone        = []
             self.flogrouteefficiency = []
-            self.flogdist2dest       = []
             self.flogspawntime       = []
             self.floglat             = []
             self.floglon             = []
@@ -101,7 +100,8 @@ class Traffic:
             self.flogdest            = []
             self.flogasasactive      = []
             self.flogasasspd         = []
-            self.flogasastrk         = []      
+            self.flogasastrk         = []
+            self.flogdist2dest       = []
         
         # ASAS object
         self.asas = ASAS()
@@ -238,7 +238,6 @@ class Traffic:
         self.flogdistance3d      = []
         self.flogworkdone        = []
         self.flogrouteefficiency = []
-        self.flogdist2dest       = []
         self.flogspawntime       = []
         self.floglat             = []
         self.floglon             = []
@@ -256,6 +255,7 @@ class Traffic:
         self.flogasasactive      = []
         self.flogasasspd         = []
         self.flogasastrk         = []
+        self.flogdist2dest       = []
 
         #-----------------------------------------------------------------------------
         # Not per aircraft data
@@ -1003,8 +1003,9 @@ class Traffic:
         self.work = (self.work + (abs(self.perf.Thr)*simdt*resultantspd))
         
         #----------Number of aircraft in experiment area-------------
-        exptInside     = areafilter.checkInside('EXPTAREA', self.lat, self.lon, self.alt)
-        self.ntrafexpt = len(exptInside[exptInside==True])
+        if 'EXPTAREA' in areafilter.areas:
+            exptInside     = areafilter.checkInside('EXPTAREA', self.lat, self.lon, self.alt)
+            self.ntrafexpt = len(exptInside[exptInside==True])
 
         # ----------------AREA check----------------
         # Update area once per areadt seconds:
@@ -1304,7 +1305,6 @@ class Traffic:
             self.flogdistance3d      = []
             self.flogworkdone        = []
             self.flogrouteefficiency = []
-            self.flogdist2dest       = []
             self.flogspawntime       = []
             self.floglat             = []
             self.floglon             = []
@@ -1322,6 +1322,7 @@ class Traffic:
             self.flogasasactive      = []
             self.flogasasspd         = []
             self.flogasastrk         = []
+            self.flogdist2dest       = []
             
             # Update Variables
             self.flogid              = np.array(self.id)[delAircraftidx]
