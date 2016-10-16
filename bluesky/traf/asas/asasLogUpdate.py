@@ -284,12 +284,12 @@ def logLOS(dbconf, traf):
                     dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
                     dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
                     dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
-                # delete it completely (not from LOSlist_now)
+                # Delete it completely (not from LOSlist_active)
                 dbconf.LOSlist_active.remove(intrusion)
                 del dbconf.LOSmaxsev[intid]
                 del dbconf.LOShmaxsev[intid]
                 del dbconf.LOSvmaxsev[intid]           
-        #if one or both of the both aircraft no longer exists, check if it has 
+        # If one or both of the both aircraft no longer exists, check if it has 
         # been logged and then delete it
         else:
             if intrusion not in dbconf.LOSlist_logged:
@@ -302,7 +302,7 @@ def logLOS(dbconf, traf):
                 dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
                 dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
                 dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
-            # delete it completely (not from LOSlist_now)
+            # Delete it completely (not from LOSlist_active)
             dbconf.LOSlist_active.remove(intrusion)
             del dbconf.LOSmaxsev[intid]
             del dbconf.LOShmaxsev[intid]

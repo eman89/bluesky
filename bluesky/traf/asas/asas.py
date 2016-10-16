@@ -197,6 +197,10 @@ class ASAS():
         self.swconfareafilt  = False                   # [-] swtich to activate the CONFAREAFILT command. This conflict filter is area based.
         self.areafiltercode  = None                    # [-] Code for the conflict area filter that should be used (OPTION1, OPTION2, OPTION3) 
         self.areafiltershape = None                    # [-] Name of shape where area conflict filter is active 
+        
+        self.swspawncheck     = False                  # [-] switch to activate the RESOSPAWNCHECK command. This command prevents aircraft spawned in very short term conflicts and in intrusions from perfroming conflict resolutions.
+        self.spawncheckfactor = 0.4                    # [-] factor that is multiplied with the look-ahead-time to determine what constitutes a 'very short term conflcit' 
+        
 
         self.confpairs    = []                         # Start with emtpy database: no conflicts
         self.nconf        = 0                          # Number of detected conflicts
@@ -204,13 +208,14 @@ class ASAS():
         self.lonowncpa    = np.array([])
         self.altowncpa    = np.array([])
 
-        self.conflist_active = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from this list once past CPA
-        self.LOSlist_active  = []  # List of all Losses Of Separation that are still active (LOS still on-going). LOS deleted from this list when it is over.
-        self.conflist_now    = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
-        self.LOSlist_now     = []  # List of Losses Of Separations in the current ASAS cycle.
-        self.LOSlist_logged  = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once. 
-        self.nconf_total     = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI. 
-        self.nLOS_total      = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
+        self.conflist_active         = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from this list once past CPA
+        self.LOSlist_active          = []  # List of all Losses Of Separation that are still active (LOS still on-going). LOS deleted from this list when it is over.
+        self.conflist_now            = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
+        self.LOSlist_now             = []  # List of Losses Of Separations in the current ASAS cycle.
+        self.LOSlist_logged          = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once. 
+        self.conflist_resospawncheck = []  # List of conflicts that have met the Reso Spawn Check command conditions. These conflicts will not be solved even if CR is on. 
+        self.nconf_total             = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI. 
+        self.nLOS_total              = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
         
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
@@ -568,6 +573,35 @@ class ASAS():
             self.areafiltershape = shapename 
             return True
     
+    def SetResoSpawnCheck(self, flag=None, factor=None):
+        '''Set the reso-spawn-check flag and factor. 
+        Reso-spawn-check prevents aircraft that are just spawned
+        in a very short term conflict (determined by the factor argument), or 
+        spawned in an intrusion, from performing a resolution. This is good from 
+        a resolution stabilty point of view. These conflicts/intrusions will 
+        continue to be logged, but not resolved. 
+        '''
+        if flag is None and factor is None: 
+            return True, "RESOSPAWNCHECK ON/OFF, [LOOK_AHEAD_TIME_FACTOR (>0)]" + \
+                         "\nRESOSPAWNCHECK is currently " + ("ON" if self.swspawncheck else "OFF") + \
+                         "\nLOOK_AHEAD_TIME_FACTOR is currently " + str(self.spawncheckfactor)
+        if not flag:
+            self.swspawncheck     = flag
+            self.spawncheckfactor = 0.4  # restore to default value. aprox 3*horizontal separation margin (5 NM) at 500 kts
+            return True, "RESOSPAWNCHECK deactivated"
+        else:
+            if factor is None:
+                self.swspawncheck = flag
+                return True, "RESOSPAWNCHECK activated. LOOK_AHEAD_TIME_FACTOR equals " + str(self.spawncheckfactor)
+            elif factor<0.0:
+                return False,"LOOK_AHEAD_TIME_FACTOR must be a POSITIVE float"
+            elif factor>0.0:
+                self.swspawncheck = flag
+                self.spawncheckfactor = factor
+                return True, "RESOSPAWNCHECK activated. LOOK_AHEAD_TIME_FACTOR equals " + str(self.spawncheckfactor)
+            else:
+                return False, "LOOK_AHEAD_TIME_FACTOR not understood. Check syntax!"
+        
     def ConfAreaFilter(self, traf, ownidx, intidx):
         '''Checks if the conflict between ownship and intruder matches the 
         Conflict-Area-Filter settings'''

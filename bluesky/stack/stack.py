@@ -338,6 +338,11 @@ def init(sim, traf, scr):
             "[string]",
             traf.asas.SetResooff
         ],
+        "RESOSPAWNCHECK": [
+            "RESOSPAWNCHECK [ON/OFF factor]",
+            "[onoff, float]",
+            traf.asas.SetResoSpawnCheck
+        ],
         "RMETHH": [
             "RMETHH [method]",
             "[txt]",

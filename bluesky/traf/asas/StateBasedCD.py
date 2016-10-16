@@ -176,6 +176,9 @@ def detect(dbconf, traf, simt):
             continue
         
         dbconf.iconf[i].append(idx)
+        
+        # Append all conflicts to confpairs list. This is used if ADSB is active
+        # to solve conflicts.
         dbconf.confpairs.append((traf.id[i], traf.id[j]))
         
         # Combinations of conflicting aircraft
@@ -252,7 +255,7 @@ def detect(dbconf, traf, simt):
             #       This is because a LOS is only logged when its severity is 
             #       highest.
             #       Some variables for conflicts are also logged in asasLogUpdate
-            #       but some are logged here are they are based on lists (easier here in loop)
+            #       but some are logged here are  as they are based on lists (easier here in loop)
 
         gc.enable()
             
