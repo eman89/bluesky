@@ -44,14 +44,17 @@ def cflHeader():
                   "Latitude id2 [deg], Longitude id2 [deg], Altitude id2 [m], "                    + \
                   "TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], Latitude CPA id2 [deg], "           + \
                   "Longitude CPA id2 [deg], Altitude CPA id2 [m], ASAS Active id2 [-], "           + \
-                  "ASASTAS id2 [m/s], ASASTRK id2 [deg], nSecondary Conflicts id2 [-]"
+                  "ASASTAS id2 [m/s], ASASTRK id2 [deg], nSecondary Conflicts id2 [-], "           + \
+                  "Resolution Suppressed [-]"
+    
+    warning    =  "NOTE!!! Resolution Suppressed only makes sense for CR ON simulations. Ignore for CR OFF simulations."
     
     lines      = "##############################\n"    + \
                  "CFL LOG\n"                           + \
                  "Conflict Data\n"                     + \
                  "##############################\n\n"  + \
                  "Parameters [Units]:\n"               + \
-                 parameters + "\n"
+                 parameters + "\n\n" + warning + "\n\n"
     
     return lines
     
@@ -67,13 +70,15 @@ def instHeader():
                   "Longitude CPA id2 [deg], Altitude CPA id2 [m], ASAS Active id2 [-], "           + \
                   "ASASTAS id2 [m/s], ASASTRK id2 [deg], "                                         + \
                   "nTraf, nTraf Expt Area [-]"
+                  
+    warning    =  "NOTE!!! Resolution Suppressed only makes sense for CR ON simulations. Ignore for CR OFF simulations."
     
     lines      = "##############################\n"    + \
                  "INST LOG\n"                          + \
                  "Instantaneous Conflict Data\n"       + \
                  "##############################\n\n"  + \
                  "Parameters [Units]:\n"               + \
-                 parameters + "\n"
+                 parameters + "\n\n" + warning + "\n\n"
     
     return lines
     
@@ -87,9 +92,11 @@ def intHeader():
                   "ASAS Active id1 [-], ASASTAS id1 [m/s], ASASTRK id1 [deg], "                 + \
                   "Latitude id2 [deg], Longitude id2 [deg], Altitude id2 [m], "                 + \
                   "TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], "                                + \
-                  "ASAS Active id2 [-], ASASTAS id2 [m/s], ASASTRK id2 [deg]" 
+                  "ASAS Active id2 [-], ASASTAS id2 [m/s], ASASTRK id2 [deg], "                 + \
+                  "Resolution Suppressed [-]"
                   
-    warning    = "NOTE!!! 9999.9999 INDICATES THAT AN INTRUSION WAS LOGGED AFTER AN AIRCRAFT WAS DELETED!!!"
+    warning    = "NOTE!!! 9999.9999 INDICATES THAT AN INTRUSION WAS LOGGED AFTER AN AIRCRAFT WAS DELETED!!!\n" + \
+                 "NOTE!!! Resolution Suppressed only makes sense for CR ON simulations. Ignore for CR OFF simulations."
     
     lines      = "##############################\n"    + \
                  "INT LOG\n"                          + \

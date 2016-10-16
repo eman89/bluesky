@@ -192,12 +192,13 @@ def detect(dbconf, traf, simt):
         alti      = traf.alt[i]+dbconf.tcpa[i,j]*traf.vs[i]
 
         # cpa lat, lon and alt aircraft j (intruder in combi)
-        rngj      = dbconf.tcpa[i,j]*traf.gs[j]/nm
+        rngj      = dbconf.tcpa[j,i]*traf.gs[j]/nm
         latj,lonj = geo.qdrpos(traf.lat[j],traf.lon[j], traf.trk[j],rngj)
-        altj      = traf.alt[j]+dbconf.tcpa[i,j]*traf.vs[j]
+        altj      = traf.alt[j]+dbconf.tcpa[j,i]*traf.vs[j]
 
         # Update conflist_active (currently active conflicts), nconf_total (display)
         # and some variables related to CFLLOG (others updated in asasLogUpdate())
+        # and also do RESOSPAWNCHECK
         if combi not in dbconf.conflist_active and combi2 not in dbconf.conflist_active:
             dbconf.nconf_total = dbconf.nconf_total + 1            
             dbconf.conflist_active.append(combi)
@@ -213,6 +214,14 @@ def detect(dbconf, traf, simt):
             dbconf.clogloncpaid2.append(lonj)
             dbconf.clogaltcpaid2.append(altj)
             
+            # If RESOSPAWNCHECK is active, then check if this conflict cotains
+            # an aircraft that is just spawned, and if that conflict is a very short term conflict.
+            # If so, then add it to the 'conflist_resospawncheck' list
+            if dbconf.swspawncheck:
+                if abs(simt-traf.spawnTime[i]) <= dbconf.dtasas or abs(simt-traf.spawnTime[j]) <= dbconf.dtasas:
+                    if dbconf.tcpa[i,j] <= dbconf.dtlookahead*dbconf.spawncheckfactor or dbconf.tcpa[j,i] <= dbconf.dtlookahead*dbconf.spawncheckfactor:
+                        dbconf.conflist_resospawncheck.append(combi)
+                        
         # Update conflist_now (newly detected conflicts during this detection cycle)
         # and some variables related INSTLOG (others updated in asasLogUpdate())
         if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:

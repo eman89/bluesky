@@ -90,6 +90,7 @@ class ASAS():
             self.clogasastasid2    = []
             self.clogasastrkid2    = []
             self.clognsecondaryid2 = []
+            self.clogspawncheck    = []
         
         # Intlog parameter registration
         with datalog.registerLogParameters('INTLOG', self):
@@ -117,7 +118,8 @@ class ASAS():
             self.iloghdgid2        = []
             self.ilogasasactiveid2 = []
             self.ilogasastasid2    = []
-            self.ilogasastrkid2    = []       
+            self.ilogasastrkid2    = []
+            self.ilogspawncheck    = []
         
         # Create Instlog for instantaneous conflicts
         datalog.definePeriodicLogger('INSTLOG', logHeader.instHeader(), settings.instdt)
@@ -153,6 +155,7 @@ class ASAS():
             self.inslogasastrkid2    = []
             self.inslogntraf         = []
             self.inslogntrafexpt     = []
+            self.inslogspawncheck    = []
 
     def reset(self):
         """ ASAS constructor """
@@ -200,14 +203,13 @@ class ASAS():
         
         self.swspawncheck     = False                  # [-] switch to activate the RESOSPAWNCHECK command. This command prevents aircraft spawned in very short term conflicts and in intrusions from perfroming conflict resolutions.
         self.spawncheckfactor = 0.4                    # [-] factor that is multiplied with the look-ahead-time to determine what constitutes a 'very short term conflcit' 
-        
 
-        self.confpairs    = []                         # Start with emtpy database: no conflicts
         self.nconf        = 0                          # Number of detected conflicts
-        self.latowncpa    = np.array([])
+        self.latowncpa    = np.array([])               
         self.lonowncpa    = np.array([])
         self.altowncpa    = np.array([])
-
+        
+        self.confpairs               = []  # Start with emtpy database: no conflicts
         self.conflist_active         = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from this list once past CPA
         self.LOSlist_active          = []  # List of all Losses Of Separation that are still active (LOS still on-going). LOS deleted from this list when it is over.
         self.conflist_now            = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
@@ -268,6 +270,7 @@ class ASAS():
         self.clogasastasid2    = []
         self.clogasastrkid2    = []
         self.clognsecondaryid2 = []
+        self.clogspawncheck    = []
         
         # INTlog variables
         self.ilogid1exists     = []
@@ -299,6 +302,7 @@ class ASAS():
         self.ilogasasactiveid2 = []
         self.ilogasastasid2    = []
         self.ilogasastrkid2    = []
+        self.ilogspawncheck    = []
         
         #INSTLOG variables
         self.inslogi             = []
@@ -334,6 +338,7 @@ class ASAS():
         self.inslogasastrkid2    = []
         self.inslogntraf         = []
         self.inslogntrafexpt     = []
+        self.inslogspawncheck    = []
         
     def toggle(self, flag=None):
         if flag is None:
@@ -651,6 +656,8 @@ class ASAS():
         should be followed or not, based on if the aircraft pairs passed
         their CPA. """
         
+        # first assume that asas should be turned off. Do the below computations
+        # and turn it back on if conflict is not past CPA
         self.asasactive.fill(False)
     
         # Look at all conflicts, also the ones that are solved but CPA is yet to come
@@ -706,35 +713,37 @@ class ASAS():
                     # If conflict is solved, remove it from conflist_active list
                     # This is so that if a conflict between this pair of aircraft 
                     # occurs again, then that new conflict should be detected, logged
-                    # and solved (if reso is on).
+                    # and solved (if reso is on). The conflict should also be removed 
+                    # from conflist_resospwancheck list.
                     self.conflist_active.remove(conflict)
+                    self.conflist_resospawncheck.remove(conflict)
             
             # If aircraft id1 cannot be found in traffic because it has finished its
             # flight (and has been deleted), start trajectory recovery for aircraft id2
-            # And remove the conflict from the conflict_all list
+            # And remove the conflict from the conflict_all list and conflist_resospawncheck
             elif id1 < 0 and id2 >= 0:
                  iwpid2 = traf.route[id2].findact(traf,id2)
                  if iwpid2 != -1: # To avoid problems if there are no waypoints
                      traf.route[id2].direct(traf, id2, traf.route[id2].wpname[iwpid2])
                  self.conflist_active.remove(conflict)
+                 self.conflist_resospawncheck.remove(conflict)
     
             # If aircraft id2 cannot be found in traffic because it has finished its
             # flight (and has been deleted) start trajectory recovery for aircraft id1
-            # And remove the conflict from the conflict_all list
+            # And remove the conflict from the conflict_all list and conflist_resospawncheck
             elif id2 < 0 and id1 >= 0:
                 iwpid1 = traf.route[id1].findact(traf,id1)
                 if iwpid1 != -1: # To avoid problems if there are no waypoints
                     traf.route[id1].direct(traf, id1, traf.route[id1].wpname[iwpid1])
                 self.conflist_active.remove(conflict)
+                self.conflist_resospawncheck.remove(conflict)
             
             # if both ids are unknown, then delete this conflict, because both aircraft
-            # have completed their flights (and have been deleted)
+            # have completed their flights (and have been deleted) and conflist_resospawncheck
             else:
-                self.conflist_active.remove(conflict) 
-    
-    def hasLOSbeenlogged():
-        pass
-
+                self.conflist_active.remove(conflict)
+                self.conflist_resospawncheck.remove(conflict)
+        
     def create(self, trk, spd, alt):
         # ASAS info: no conflict => empty list
         self.iconf.append([])  # List of indices in 'conflicting' aircraft database

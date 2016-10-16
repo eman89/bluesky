@@ -39,6 +39,7 @@ def asasLogUpdate(dbconf, traf):
         dbconf.clogasastasid2    = []
         dbconf.clogasastrkid2    = []
         dbconf.clognsecondaryid2 = np.zeros(len(dbconf.clogid2))
+        dbconf.clogspawncheck    = np.zeros(len(dbconf.clogid1), dtype=bool)  
 
         # Update the cpa time variables
         dbconf.clogtinconf  = dbconf.tinconf[dbconf.clogi,dbconf.clogj]
@@ -77,7 +78,13 @@ def asasLogUpdate(dbconf, traf):
             if dbconf.clogid2[i] in conflist_active_flatten:
                 dbconf.clognsecondaryid2[i] = dbconf.clognsecondaryid2[i] + countconflist_active[dbconf.clogid2[i]]
                 dbconf.clognsecondaryid2[i] = dbconf.clognsecondaryid2[i] - dbconf.clogid1.count(dbconf.clogid2[i]) - dbconf.clogid2.count(dbconf.clogid2[i])
-
+        
+        # Update the resolution suppressed / reso-spawn-check active parameter
+        dbconf.clogspawncheck.fill(False)                                                               # assume everything is false at first
+        clogcombi = zip(dbconf.clogid1 ,dbconf.clogid2)                                                 # make a list of tuples with call signs of the conflicts that are to be logged
+        idx       = [i for i, item in enumerate(clogcombi) if item in dbconf.conflist_resospawncheck]   # find the index of the conflicts that are also in conflist_resospawncheck
+        dbconf.clogspawncheck[idx] = True                                                               # set these to True
+        
         # Finally, call the logger
         dbconf.cfllog.log()
     # CFLLOG-------------------------------------------------------------------
@@ -110,6 +117,7 @@ def asasLogUpdate(dbconf, traf):
     dbconf.inslogasastrkid2    = []
     dbconf.inslogntraf         = []
     dbconf.inslogntrafexpt     = []
+    dbconf.inslogspawncheck    = np.zeros(len(dbconf.inslogid1), dtype=bool) 
     
     # Update the cpa time variables
     dbconf.inslogtinconf  = dbconf.tinconf[dbconf.inslogi,dbconf.inslogj]
@@ -142,6 +150,12 @@ def asasLogUpdate(dbconf, traf):
     dbconf.inslogntraf     = [traf.ntraf]*len(dbconf.inslogi)
     dbconf.inslogntrafexpt = [traf.ntrafexpt]*len(dbconf.inslogi)
     
+    # Update the resolution suppressed / reso-spawn-check active parameter
+    dbconf.inslogspawncheck.fill(False)                                                                 # assume everything is false at first
+    inslogcombi = zip(dbconf.inslogid1, dbconf.inslogid2)                                               # make a list of tuples with call signs of the conflicts that are to be logged
+    idx         = [i for i, item in enumerate(inslogcombi) if item in dbconf.conflist_resospawncheck]   # find the index of the conflicts that are also in conflist_resospawncheck
+    dbconf.inslogspawncheck[idx] = True                                                                 # set these to True
+    
     # There is no need to manually call the logger as INSTLOG is periodic!
     # INSTLOG------------------------------------------------------------------
     
@@ -157,7 +171,7 @@ def asasLogUpdate(dbconf, traf):
     Fail = -999.999
 #    Fail = 'Fail'
     
-    if len(dbconf.ilogid1) > 0:        
+    if len(dbconf.ilogid1) > 0:   # dbconf.ilogid1 and others are updated in logLos function below     
         # Reset Varaibles
         dbconf.ilogtinconf       = []
         dbconf.ilogtoutconf      = []
@@ -179,6 +193,7 @@ def asasLogUpdate(dbconf, traf):
         dbconf.ilogasasactiveid2 = []
         dbconf.ilogasastasid2    = []
         dbconf.ilogasastrkid2    = []
+        dbconf.ilogspawncheck    = np.zeros(len(dbconf.ilogid1), dtype=bool) 
         
         # Update the conflict time variables
         dbconf.ilogtinconf  = np.where(id1exists & id2exists, dbconf.tinconf[dbconf.ilogi,dbconf.ilogj], Fail)
@@ -204,7 +219,13 @@ def asasLogUpdate(dbconf, traf):
         dbconf.iloghdgid2        = np.where(id2exists, traf.hdg[dbconf.ilogj], Fail)
         dbconf.ilogasasactiveid2 = np.where(id2exists, dbconf.asasactive[dbconf.ilogj], Fail)
         dbconf.ilogasastasid2    = np.where(id2exists, dbconf.asasspd[dbconf.ilogj], Fail)
-        dbconf.ilogasastrkid2    = np.where(id2exists, dbconf.asastrk[dbconf.ilogj], Fail) 
+        dbconf.ilogasastrkid2    = np.where(id2exists, dbconf.asastrk[dbconf.ilogj], Fail)
+        
+        # Update the resolution suppressed / reso-spawn-check active parameter
+        dbconf.ilogspawncheck.fill(False)                                                                 # assume everything is false at first
+        ilogcombi = zip(dbconf.ilogid1, dbconf.ilogid2)                                                   # make a list of tuples with call signs of the conflicts that are to be logged
+        idx       = [i for i, item in enumerate(ilogcombi) if item in dbconf.conflist_resospawncheck]     # find the index of the conflicts that are also in conflist_resospawncheck
+        dbconf.ilogspawncheck[idx] = True                                                                 # set these to True 
         
         # Finally, call the logger
         dbconf.intlog.log()   
@@ -255,7 +276,7 @@ def logLOS(dbconf, traf):
                 severity = min(Ih, Iv)
                 # Check if the severity is larger than the one logged for this LOS.
                 # If so update the severity
-                if severity > dbconf.LOSmaxsev[intid]:
+                if severity >= dbconf.LOSmaxsev[intid]:
                     dbconf.LOSmaxsev[intid]  = severity
                     dbconf.LOShmaxsev[intid] = Ih
                     dbconf.LOSvmaxsev[intid] = Iv
@@ -284,7 +305,9 @@ def logLOS(dbconf, traf):
                     dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
                     dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
                     dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
-                # Delete it completely (not from LOSlist_active)
+                # Delete it completely 
+                if intrusion in dbconf.LOSlist_logged:
+                    dbconf.LOSlist_logged.remove(intrusion)
                 dbconf.LOSlist_active.remove(intrusion)
                 del dbconf.LOSmaxsev[intid]
                 del dbconf.LOShmaxsev[intid]
@@ -302,7 +325,9 @@ def logLOS(dbconf, traf):
                 dbconf.ilogintsev.append(dbconf.LOSmaxsev[intid])
                 dbconf.iloginthsev.append(dbconf.LOShmaxsev[intid])
                 dbconf.ilogintvsev.append(dbconf.LOSvmaxsev[intid])
-            # Delete it completely (not from LOSlist_active)
+            # Delete it completely
+            if intrusion in dbconf.LOSlist_logged:
+                dbconf.LOSlist_logged.remove(intrusion)
             dbconf.LOSlist_active.remove(intrusion)
             del dbconf.LOSmaxsev[intid]
             del dbconf.LOShmaxsev[intid]
