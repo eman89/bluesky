@@ -680,14 +680,14 @@ class ASAS():
                 # Aircraft should continue to resolve until there is no horizontal 
                 # LOS. This is particularly relevant when vertical resolutions
                 # are used. 
-                dx = (traf.lat[id1] - traf.lat[id2]) * 111319.
-                dy = (traf.lon[id1] - traf.lon[id2]) * 111319.    
+                dx     = (traf.lat[id1] - traf.lat[id2]) * 111319.
+                dy     = (traf.lon[id1] - traf.lon[id2]) * 111319.
                 hdist2 = dx**2 + dy**2
-                hLOS   = hdist2 < self.R**2          
-                
+                hLOS   = hdist2 < self.R**2
+
                 # Bouncing conflicts:
                 # If two aircraft are getting in and out of conflict continously, 
-                # then they it is a bouncing conflict. ASAS should stay active until 
+                # then it is a bouncing conflict. ASAS should stay active until 
                 # the bouncing stops.
                 bouncingConflict = (abs(traf.trk[id1] - traf.trk[id2]) < 30.) & (hdist2<self.Rm**2)         
                 
