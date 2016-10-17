@@ -7,7 +7,7 @@
 # ##################################################### #
 
 # Pcall to settings file
-00:00:00.00>PCALL settingsOFF.scn
+00:00:00.00>PCALL settingsON.scn
 
 # Origin-Destination Data:
 00:00:21.87>CRE AC0001, B744, @4H, 322.53, 15000.0, 409.08
