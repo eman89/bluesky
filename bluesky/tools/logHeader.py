@@ -69,7 +69,7 @@ def instHeader():
                   "TAS id2 [m/s], VS id2 [m/s], HDG id2 [deg], Latitude CPA id2 [deg], "           + \
                   "Longitude CPA id2 [deg], Altitude CPA id2 [m], ASAS Active id2 [-], "           + \
                   "ASASTAS id2 [m/s], ASASTRK id2 [deg], "                                         + \
-                  "nTraf, nTraf Expt Area [-]"
+                  "nTraf, nTraf Expt Area [-], Resolution Suppressed [-]"
                   
     warning    =  "NOTE!!! Resolution Suppressed only makes sense for CR ON simulations. Ignore for CR OFF simulations."
     
