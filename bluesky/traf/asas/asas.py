@@ -716,7 +716,8 @@ class ASAS():
                     # and solved (if reso is on). The conflict should also be removed 
                     # from conflist_resospwancheck list.
                     self.conflist_active.remove(conflict)
-                    self.conflist_resospawncheck.remove(conflict)
+                    if conflict in self.conflist_resospawncheck:
+                        self.conflist_resospawncheck.remove(conflict)
             
             # If aircraft id1 cannot be found in traffic because it has finished its
             # flight (and has been deleted), start trajectory recovery for aircraft id2
@@ -726,7 +727,8 @@ class ASAS():
                  if iwpid2 != -1: # To avoid problems if there are no waypoints
                      traf.route[id2].direct(traf, id2, traf.route[id2].wpname[iwpid2])
                  self.conflist_active.remove(conflict)
-                 self.conflist_resospawncheck.remove(conflict)
+                 if conflict in self.conflist_resospawncheck:
+                        self.conflist_resospawncheck.remove(conflict)
     
             # If aircraft id2 cannot be found in traffic because it has finished its
             # flight (and has been deleted) start trajectory recovery for aircraft id1
@@ -736,13 +738,15 @@ class ASAS():
                 if iwpid1 != -1: # To avoid problems if there are no waypoints
                     traf.route[id1].direct(traf, id1, traf.route[id1].wpname[iwpid1])
                 self.conflist_active.remove(conflict)
-                self.conflist_resospawncheck.remove(conflict)
+                if conflict in self.conflist_resospawncheck:
+                        self.conflist_resospawncheck.remove(conflict)
             
             # if both ids are unknown, then delete this conflict, because both aircraft
             # have completed their flights (and have been deleted) and conflist_resospawncheck
             else:
                 self.conflist_active.remove(conflict)
-                self.conflist_resospawncheck.remove(conflict)
+                if conflict in self.conflist_resospawncheck:
+                        self.conflist_resospawncheck.remove(conflict)
         
     def create(self, trk, spd, alt):
         # ASAS info: no conflict => empty list
