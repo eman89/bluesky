@@ -925,11 +925,12 @@ class Traffic:
                   np.maximum(3.,np.abs(2. * simdt * np.abs(self.vs))) # 3.[m] = 10 [ft] eps alt   
                   
         # TO DO: ADD some vertical speed dynamics so that the desired VS can't be obtained instantly
+        # if asas and VNAV not active, then use the standard climb rate
         # if asas is active AND VNAV is not active it should use asasvs (which is desvs)
         # if asas is not active and VNAV is active desvs
         # if asas AND VNAV is active then use desvs
         self.vs = swaltsel*np.sign(self.desalt-self.alt)* \
-                  ((1-self.asas.asasactive)*(1-self.swvnav)*np.abs(self.desvs)*self.limvs_flag+\
+                  ((1-self.asas.asasactive)*(1-self.swvnav)*(3000.*ft/(10.*nm)*self.gs)+\
                    self.asas.asasactive*(1-self.swvnav)*np.abs(self.desvs)+\
                    (1-self.asas.asasactive)*self.swvnav*np.abs(self.desvs)+\
                    self.asas.asasactive*self.swvnav*np.abs(self.desvs))
