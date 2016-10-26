@@ -860,6 +860,9 @@ class Traffic:
         self.desspd = self.asas.asasactive*asastas           + (1-self.asas.asasactive)*self.aptas
         self.desalt = self.asas.asasactive*self.asas.asasalt + (1-self.asas.asasactive)*self.apalt
         self.desvs  = self.asas.asasactive*self.asas.asasvsp + (1-self.asas.asasactive)*self.avs
+        
+        # direction of VS is determined from the direction of the delalt.
+#        self.desvs = np.abs(self.desvs)
 
         # Compute the desired heading needed to compensate for the wind
         if self.wind.winddim>0:
