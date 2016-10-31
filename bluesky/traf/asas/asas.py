@@ -198,7 +198,7 @@ class ASAS():
         self.resoFacV     = 1.0                        # [-] set horizontal resolution factor (1.0 = 100%)
         
         self.swconfareafilt  = False                   # [-] swtich to activate the CONFAREAFILT command. This conflict filter is area based.
-        self.areafiltercode  = None                    # [-] Code for the conflict area filter that should be used (OPTION1, OPTION2, OPTION3) 
+        self.areafiltercode  = None                    # [-] Code for the conflict area filter that should be used (OPTION1, OPTION2, OPTION3, OPTION4) 
         self.areafiltershape = None                    # [-] Name of shape where area conflict filter is active 
         
         self.swspawncheck     = False                  # [-] switch to activate the RESOSPAWNCHECK command. This command prevents aircraft spawned in very short term conflicts and in intrusions from perfroming conflict resolutions.
@@ -553,13 +553,14 @@ class ASAS():
     
     def SetConfAreaFilter(self, flag=None, filtercode=None, shapename=None):
         '''Set the conflict-area-filter switch, the type of filter, and the shape where it should act'''
-        options = ["OPTION1","OPTION2","OPTION3"]       
+        options = ["OPTION1","OPTION2","OPTION3", "OPTION4"]       
         if flag is None and filtercode is None and shapename is None:
             return True , "CONFAREAFILTER ON/OFF, FILTERCODE, SHAPENAME" + \
                           "\nAvialable filter codes:" + \
                           "\n     OPTION1: CPA in shapename" + \
                           "\n     OPTION2: CPA and 1 aircraft in conflict pair in shapename" + \
                           "\n     OPTION3: CPA and both aircraft in conflict pair in shapename" + \
+                          "\n     OPTION4: Both aircraft in conflict pair in shapename" + \
                           "\nConflictAreaFilter is currently " + ("ON" if self.swconfareafilt else "OFF") + \
                           "\nFiltercode is currently " + str(self.areafiltercode) + \
                           "\nShapename  is currently " + str(self.areafiltershape)         
@@ -640,6 +641,12 @@ class ASAS():
             acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
             acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
             inarea    = np.where(np.logical_and(np.logical_and(cpainsidei,cpainsideo), np.logical_and(acinsideo,acinsidei)))
+        
+        # OPTION4: Both aircraft inside selected shape
+        elif self.areafiltercode == "OPTION4":
+            acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
+            acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
+            inarea    = np.where(np.logical_and(acinsideo,acinsidei))
             
         # Filter out the conflcits that do not match the selected "option"
         ownidx = ownidx[inarea]
