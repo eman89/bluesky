@@ -1,0 +1,193 @@
+# ########################################### #
+# ########################################### #
+# SUPER BATCH CR ON!!!!
+# Contains calls to all CR ON scnearios!
+# Number of scn files: 256!
+# ########################################### #
+# ########################################### #
+
+
+# ########################################### #
+# Batch: BatchInst383NoDest
+# Number of scn files: 16 x 2
+# Instantaneous aircraft in each scn: 383
+# ########################################### #
+
+
+
+
+#----------------- 
+# CR ON Scenarios
+#----------------- 
+00:00:00.00>SCEN Inst383-Rep1-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep1-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep2-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep2-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep3-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep3-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep4-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep4-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep5-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep5-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep6-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep6-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep7-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep7-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep8-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep8-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep9-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep9-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep10-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep10-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep11-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep11-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep12-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep12-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep13-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep13-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep14-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep14-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep15-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep15-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst383-Rep16-NoDest-CRON
+00:00:00.00>PCALL Inst383-Rep16-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+# ########################################### #
+# Batch: BatchInst490NoDest
+# Number of scn files: 16 x 2
+# Instantaneous aircraft in each scn: 490
+# ########################################### #
+
+
+
+
+#----------------- 
+# CR ON Scenarios
+#----------------- 
+00:00:00.00>SCEN Inst490-Rep1-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep1-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep2-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep2-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep3-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep3-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep4-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep4-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep5-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep5-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep6-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep6-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep7-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep7-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep8-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep8-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep9-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep9-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep10-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep10-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep11-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep11-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep12-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep12-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep13-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep13-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep14-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep14-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep15-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep15-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
+00:00:00.00>SCEN Inst490-Rep16-NoDest-CRON
+00:00:00.00>PCALL Inst490-Rep16-NoDest.scn
+00:00:00.00>PCALL settingsON.scn
+04:45:00.00>HOLD 
+
