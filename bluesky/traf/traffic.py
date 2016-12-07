@@ -278,7 +278,7 @@ class Traffic:
         # Traffic area: delete traffic when it leaves this area (so not when outside)
         self.swarea     = False
         self.areaname   = None
-        self.areadt     = 0.1  # [s] frequency of area check (simtime)
+        self.areadt     = 0.05   # [s] frequency of area check (simtime)
         self.areat0     = -100.  # last time checked
         self.inside = np.array([])
         # What to do with FIR?
@@ -884,7 +884,7 @@ class Traffic:
 
         # Update desired sates with values within the flight envelope
         # To do: add const Mach const CAS mode
-        self.desspd = np.where (self.limspd_flag, vcas2tas(self.limspd,self.alt), self.desspd )
+#        self.desspd = np.where (self.limspd_flag, vcas2tas(self.limspd,self.alt), self.desspd )
 
         # Autopilot selected altitude [m]
         self.desalt = (self.limalt < -900.)*self.desalt + (self.limalt > -900.)*self.limalt
