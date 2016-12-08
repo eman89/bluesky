@@ -1,0 +1,135 @@
+# ########################################### #
+# Batch: BatchInst293
+# Number of scn files: 10 x 2
+# Instantaneous aircraft in each scn: 293
+# ########################################### #
+
+
+#------------------ 
+# CR OFF Scenarios
+#------------------ 
+00:00:00.00>SCEN Inst293-Rep1-CROFF
+00:00:00.00>PCALL Inst293-Rep1.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep2-CROFF
+00:00:00.00>PCALL Inst293-Rep2.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep3-CROFF
+00:00:00.00>PCALL Inst293-Rep3.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep4-CROFF
+00:00:00.00>PCALL Inst293-Rep4.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep5-CROFF
+00:00:00.00>PCALL Inst293-Rep5.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep6-CROFF
+00:00:00.00>PCALL Inst293-Rep6.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep7-CROFF
+00:00:00.00>PCALL Inst293-Rep7.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep8-CROFF
+00:00:00.00>PCALL Inst293-Rep8.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep9-CROFF
+00:00:00.00>PCALL Inst293-Rep9.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep10-CROFF
+00:00:00.00>PCALL Inst293-Rep10.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsOFF.scn
+05:00:00.00>HOLD 
+
+
+
+#----------------- 
+# CR ON Scenarios
+#----------------- 
+00:00:00.00>SCEN Inst293-Rep1-CRON
+00:00:00.00>PCALL Inst293-Rep1.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep2-CRON
+00:00:00.00>PCALL Inst293-Rep2.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep3-CRON
+00:00:00.00>PCALL Inst293-Rep3.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep4-CRON
+00:00:00.00>PCALL Inst293-Rep4.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep5-CRON
+00:00:00.00>PCALL Inst293-Rep5.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep6-CRON
+00:00:00.00>PCALL Inst293-Rep6.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep7-CRON
+00:00:00.00>PCALL Inst293-Rep7.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep8-CRON
+00:00:00.00>PCALL Inst293-Rep8.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep9-CRON
+00:00:00.00>PCALL Inst293-Rep9.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
+00:00:00.00>SCEN Inst293-Rep10-CRON
+00:00:00.00>PCALL Inst293-Rep10.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settingsON.scn
+05:00:00.00>HOLD 
+
