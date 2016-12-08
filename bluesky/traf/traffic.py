@@ -909,7 +909,8 @@ class Traffic:
         swspdsel = np.abs(self.delspd) > 0.4  # <1 kts = 0.514444 m/s
 
         # acceleration: ground /standard acceleration depending on flight phase
-        ax = self.perf.acceleration(simdt)       
+#        ax = self.perf.acceleration(simdt)
+        ax = np.minimum(abs(self.delspd / max(1e-8,simdt)), self.ax)
         self.tas = swspdsel * (self.tas + ax * np.sign(self.delspd) * simdt) \
                                + (1. - swspdsel) * self.tas
 
