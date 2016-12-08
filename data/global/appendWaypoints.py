@@ -27,7 +27,7 @@ warnings.filterwarnings("ignore")
 print "Running appendWaypoints.py"
 
 #%% Initialize Variables
-interactive = False # True-> use prompts to ask user for the files to append
+interactive = True # True-> use prompts to ask user for the files to append
 
 #%% Find all .dat files
 
