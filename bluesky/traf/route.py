@@ -69,7 +69,7 @@ class Route():
         # First waypoint: own position        
         if self.nwp == 0:
             reflat = traf.lat[idx]
-            reflon = traf.on[idx]
+            reflon = traf.lon[idx]
 
         # Or last waypoint before destination
         else:
