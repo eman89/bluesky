@@ -201,30 +201,28 @@ class Autopilot(DynamicArrays):
             # Dist to waypoint where descent should start
             self.dist2vs[idx] = (self.traf.alt[idx] - self.traf.actwp.alt[idx]) / self.steepness
 
-            # Flat earth distance to next wp
-            dy = (self.traf.actwp.lat[idx] - self.traf.lat[idx])
-            dx = (self.traf.actwp.lon[idx] - self.traf.lon[idx]) * self.traf.coslat[idx]
-            legdist = 60. * nm * np.sqrt(dx * dx + dy * dy)
-
-
-            # If descent is urgent, descent with maximum steepness
-            if legdist < self.dist2vs[idx]:
-                self.alt[idx] = self.traf.actwp.alt[idx]  # dial in altitude of next waypoint as calculated
-                
-                # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
-#                t2go         = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
-#                self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
-                
-                # Static VertSpeed to decsent with constant rate
-                # protect against zero/invalid ground speed value
-                self.traf.actwp.vs[idx] = self.steepness * (self.traf.gs[idx] +
-                      (self.traf.gs[idx] < 0.2 * self.traf.tas[idx]) * self.traf.tas[idx])
-
-            else:
-                # Calculate V/S using self.steepness,
-                # protect against zero/invalid ground speed value
-                self.traf.actwp.vs[idx] = self.steepness * (self.traf.gs[idx] +
-                      (self.traf.gs[idx] < 0.2 * self.traf.tas[idx]) * self.traf.tas[idx])
+#            # Flat earth distance to next wp
+#            dy = (self.traf.actwp.lat[idx] - self.traf.lat[idx])
+#            dx = (self.traf.actwp.lon[idx] - self.traf.lon[idx]) * self.traf.coslat[idx]
+#            legdist = 60. * nm * np.sqrt(dx * dx + dy * dy)
+#
+#
+#            # If descent is urgent, descent with maximum steepness
+#            if legdist < self.dist2vs[idx]:
+#                self.alt[idx] = self.traf.actwp.alt[idx]  # dial in altitude of next waypoint as calculated
+#                
+#                # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
+##                t2go         = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
+##                self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
+#                
+#                
+#
+#            else:
+            # Static VertSpeed to decsent with constant rate
+            # protect against zero/invalid ground speed value
+            # TAB THE FOLLOWING TWO LINES IF THE ABOVE IS UNCOMMENTED!
+            self.traf.actwp.vs[idx] = self.steepness * (self.traf.gs[idx] +
+                  (self.traf.gs[idx] < 0.2 * self.traf.tas[idx]) * self.traf.tas[idx])
 
         # VNAV climb mode: climb as soon as possible (T/C logic)
         elif self.traf.alt[idx] < toalt - 10. * ft:
@@ -234,12 +232,12 @@ class Autopilot(DynamicArrays):
             self.alt[idx]    = self.traf.actwp.alt[idx]  # dial in altitude of next waypoint as calculated
             self.dist2vs[idx]  = 9999.
 
-            # Flat earth distance to next wp
-            dy = (self.traf.actwp.lat[idx] - self.traf.lat[idx])
-            dx = (self.traf.actwp.lon[idx] - self.traf.lon[idx]) * self.traf.coslat[idx]
-            legdist = 60. * nm * np.sqrt(dx * dx + dy * dy)
-            
-            # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
+#            # Flat earth distance to next wp
+#            dy = (self.traf.actwp.lat[idx] - self.traf.lat[idx])
+#            dx = (self.traf.actwp.lon[idx] - self.traf.lon[idx]) * self.traf.coslat[idx]
+#            legdist = 60. * nm * np.sqrt(dx * dx + dy * dy)
+#            
+#            # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
 #            t2go = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
 #            self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
             
