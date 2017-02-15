@@ -559,7 +559,7 @@ class Route():
  
                         # Update pointers and report whether we are ok
                         self.nwp = len(self.wplat) 
-                        idx = self.nwp-1 
+                        idx = self.nwp
             else:
                 idx = -1
                 if len(self.wplat) == 1:
@@ -595,7 +595,7 @@ class Route():
 #                # Set target altitude for autopilot
 #                if self.wptoalt[wpidx] > 0:
 #
-#                    if traf.alt[i] < self.wptoalt[i]-10.*ft:
+#                    if traf.alt[i] < self.wptoalt[wpidx]-10.*ft:
 #                        traf.actwp.alt[i] = self.wptoalt[wpidx]
 #                        traf.ap.dist2vs[i] = 9999.
 #                    else:
@@ -611,7 +611,7 @@ class Route():
                     if spd < 2.0:
                         traf.aspd[i] = mach2cas(spd, traf.alt[i])
                     else:
-                        traf.aspd[i] = cas2tas(spd, traf.alt[i]) # or is '= spd'
+                        traf.aspd[i] = spd # cas2tas(spd, traf.alt[i]) # or is '= spd' because aspd is a CAS not TAS, just like the mach case above
 
             qdr, dist = geo.qdrdist(traf.lat[i], traf.lon[i],
                                 traf.actwp.lat[i], traf.actwp.lon[i])
@@ -899,7 +899,7 @@ class Route():
         # Calculate lateral leg data
         # LNAV: Calculate leg distances and directions
 
-        for i in range(0,self.nwp-2):
+        for i in range(0,self.nwp-1):
              qdr,dist = geo.qdrdist(self.wplat[i]  ,self.wplon[i], \
                                 self.wplat[i+1],self.wplon[i+1])
              self.wpdirfrom[i] = qdr
