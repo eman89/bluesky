@@ -611,6 +611,7 @@ class Route():
                     if spd < 2.0:
                         traf.aspd[i] = mach2cas(spd, traf.alt[i])
                     else:
+                        traf.aptas[i] = spd # cas2tas(spd, traf.alt[i]) # or is '= spd' because aspd is a CAS not TAS, just like the mach case above
 
             qdr, dist = geo.qdrdist(traf.lat[i], traf.lon[i],
                                 traf.actwp.lat[i], traf.actwp.lon[i])

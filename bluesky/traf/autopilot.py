@@ -147,9 +147,22 @@ class Autopilot(DynamicArrays):
             
             # LNAV commanded track angle
             self.trk = np.where(self.traf.swlnav, qdr, self.trk)
+        
+        
+        # NOTE!!!: Airplane speed is controlled using TAS. The following code
+        # therefore computes the TAS the autopilot wants the airplane to fly
+        # with so that the CAS is constant for changes in altitude 
+        # -> i.e, used for constant CAS/Mach climb/descend
+        # Since vs = TAS*steepnees, a changing TAS is not ideal for climbing and
+        # descending with constant flight path angle. Therefore it is commented out
 
         # Below crossover altitude: CAS=const, above crossover altitude: MA = const
-        self.tas = vcas2tas(self.traf.aspd, self.traf.alt) * self.traf.belco + vmach2tas(self.traf.ama, self.traf.alt) * self.traf.abco
+#        self.tas = vcas2tas(self.traf.aspd, self.traf.alt) * self.traf.belco + vmach2tas(self.traf.ama, self.traf.alt) * self.traf.abco
+        
+        
+        # To climb and descend with constant flight path angle, keep the autopilot
+        # commanded TAS independent of altitude.
+        self.tas = self.traf.aptas
 
     def ComputeVNAV(self, idx, toalt, xtoalt):
         if not (toalt >= 0 and self.traf.swvnav[idx]):
