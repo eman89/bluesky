@@ -238,7 +238,11 @@ class Traffic(DynamicArrays):
 
         # Traffic performance data
         #(temporarily default values)
-        self.avsdef[-1] = 1500. * fpm   # default vertical speed of autopilot
+#        self.avsdef[-1] = 1500. * fpm   # default vertical speed of autopilot
+        # set the default vertical speed based on the steepness defined in autopilot
+        # protect against zero/invalid ground speed value
+        self.avsdef[-1] = self.ap.steepness * (self.gs[-1] +
+                                  (self.gs[-1] < 0.2 * self.tas[-1]) * self.tas[-1])
         self.aphi[-1]   = radians(25.)  # bank angle setting of autopilot
         self.ax[-1]     = kts           # absolute value of longitudinal accelleration
         self.bank[-1]   = radians(25.)

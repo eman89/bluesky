@@ -125,9 +125,15 @@ class Autopilot(DynamicArrays):
             #    while descending to the destination (the last waypoint)
             self.swvnavvs = np.where(self.traf.swlnav, startdescent, dist < self.traf.actwp.turndist)
 
-            #Recalculate V/S based on current altitude and distance
-            t2go = dist2wp/np.maximum(0.5,self.traf.gs)
-            self.traf.actwp.vs = (self.traf.actwp.alt-self.traf.alt)/np.maximum(1.0,t2go)
+            #Recalculate V/S based on current altitude and distance 
+            # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
+#            t2go = dist2wp/np.maximum(0.5,self.traf.gs)
+#            self.traf.actwp.vs = (self.traf.actwp.alt-self.traf.alt)/np.maximum(1.0,t2go) 
+            
+            # static VertSpeed based on steepnees. Fine when you want to descent with a constant rate 
+            # protect against zero/invalid ground speed value
+            self.traf.actwp.vs = self.steepness * (self.traf.gs +
+                                  (self.traf.gs < 0.2 * self.traf.tas) * self.traf.tas)
 
             self.vnavvs  = np.where(self.swvnavvs, self.traf.actwp.vs, self.vnavvs)
             #was: self.vnavvs  = np.where(self.swvnavvs, self.steepness * self.traf.gs, self.vnavvs)
@@ -204,14 +210,20 @@ class Autopilot(DynamicArrays):
             # If descent is urgent, descent with maximum steepness
             if legdist < self.dist2vs[idx]:
                 self.alt[idx] = self.traf.actwp.alt[idx]  # dial in altitude of next waypoint as calculated
-
-                t2go         = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
-                self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
+                
+                # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
+#                t2go         = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
+#                self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
+                
+                # Static VertSpeed to decsent with constant rate
+                # protect against zero/invalid ground speed value
+                self.traf.actwp.vs[idx] = self.steepness * (self.traf.gs[idx] +
+                      (self.traf.gs[idx] < 0.2 * self.traf.tas[idx]) * self.traf.tas[idx])
 
             else:
                 # Calculate V/S using self.steepness,
                 # protect against zero/invalid ground speed value
-                self.traf.actwp.vs[idx] = -self.steepness * (self.traf.gs[idx] +
+                self.traf.actwp.vs[idx] = self.steepness * (self.traf.gs[idx] +
                       (self.traf.gs[idx] < 0.2 * self.traf.tas[idx]) * self.traf.tas[idx])
 
         # VNAV climb mode: climb as soon as possible (T/C logic)
@@ -226,8 +238,15 @@ class Autopilot(DynamicArrays):
             dy = (self.traf.actwp.lat[idx] - self.traf.lat[idx])
             dx = (self.traf.actwp.lon[idx] - self.traf.lon[idx]) * self.traf.coslat[idx]
             legdist = 60. * nm * np.sqrt(dx * dx + dy * dy)
-            t2go = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
-            self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
+            
+            # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
+#            t2go = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
+#            self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
+            
+            # Static VertSpeed to climb with constant rate
+            # protect against zero/invalid ground speed value
+            self.traf.actwp.vs[idx] = self.steepness * (self.traf.gs[idx] +
+                      (self.traf.gs[idx] < 0.2 * self.traf.tas[idx]) * self.traf.tas[idx])
 
 
 
