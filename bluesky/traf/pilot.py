@@ -68,20 +68,20 @@ class Pilot(DynamicArrays):
 
         # Update desired sates with values within the flight envelope
         # To do: add const Mach const CAS mode
-        self.spd = np.where(self.traf.limspd_flag, vcas2tas(self.traf.limspd, self.traf.alt), self.spd)
+#        self.spd = np.where(self.traf.limspd_flag, vcas2tas(self.traf.limspd, self.traf.alt), self.spd)
 
         # Autopilot selected altitude [m]
         self.alt = np.where(self.traf.limalt > -900, self.traf.limalt, self.alt)
 
         # Autopilot selected vertical speed (V/S)
-        self.vs = np.where(self.traf.limvs > -9000, self.traf.limvs, self.vs)
+#        self.vs = np.where(self.traf.limvs > -9000, self.traf.limvs, self.vs)
 
         # To be discussed: Following change in VNAV mode only?
         # below crossover altitude: CAS=const, above crossover altitude: MA = const
         # climb/descend above crossover: Ma = const, else CAS = const
         # ama is fixed when above crossover
-        self.traf.ama = np.where(self.traf.abco * (self.traf.ama == 0.),
-                                 vcas2mach(self.traf.aspd, self.traf.alt), self.traf.ama)
+#        self.traf.ama = np.where(self.traf.abco * (self.traf.ama == 0.),
+#                                 vcas2mach(self.traf.aspd, self.traf.alt), self.traf.ama)
 
         # ama is deleted when below crossover
-        self.traf.ama = np.where(self.traf.belco, 0.0, self.traf.ama)
+#        self.traf.ama = np.where(self.traf.belco, 0.0, self.traf.ama)

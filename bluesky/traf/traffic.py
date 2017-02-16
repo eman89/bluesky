@@ -332,7 +332,7 @@ class Traffic(DynamicArrays):
     def UpdateAirSpeed(self, simdt, simt):
         # Acceleration
         self.delspd = self.pilot.spd - self.tas
-        swspdsel = np.abs(self.delspd) > 0.4  # <1 kts = 0.514444 m/s
+        swspdsel = np.abs(self.delspd) > 0.001  # <1 kts = 0.514444 m/s
         ax = self.perf.acceleration(simdt)
 
         # Update velocities
@@ -343,7 +343,7 @@ class Traffic(DynamicArrays):
         # Turning
         turnrate = np.degrees(g0 * np.tan(self.bank) / np.maximum(self.tas, self.eps))
         delhdg   = (self.pilot.hdg - self.hdg + 180.) % 360 - 180.  # [deg]
-        self.hdgsel = np.abs(delhdg) > np.abs(2. * simdt * turnrate)
+        self.hdgsel = np.abs(delhdg) > np.abs(1. * simdt * turnrate)
 
         # Update heading
         self.hdg = (self.hdg + simdt * turnrate * self.hdgsel * np.sign(delhdg)) % 360.
@@ -378,7 +378,9 @@ class Traffic(DynamicArrays):
         self.lon = self.lon + np.degrees(simdt * self.gseast / self.coslat / Rearth)
         
         # print out the flight path angle
-        print "Gamma: %s" %(np.degrees(np.arctan2(self.vs[0],self.tas[0])))
+        print "Gamma: %s" %(np.degrees(np.arctan2(self.vs,self.tas)))
+        print "TAS  : %s" %(self.tas/kts)
+        print "VS   : %s" %(self.vs/fpm)
 
     def id2idx(self, acid):
         """Find index of aircraft id"""
