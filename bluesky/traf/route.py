@@ -1,6 +1,6 @@
 from numpy import *
 from ..tools import geo
-from ..tools.aero import ft, kts, g0, nm, cas2tas, mach2cas
+from ..tools.aero import ft, kts, g0, nm, cas2tas, mach2tas
 from ..tools.misc import degto180
 from ..tools.position import txt2pos
 from ..stack.stack import Argparser
@@ -605,14 +605,17 @@ class Route():
 #                        delalt = traf.alt[i] - traf.actwp.alt[i]
 #                        traf.ap.dist2vs[i] = steepness*delalt
 
-                # Set target speed for autopilot
+                # Set target speed for autopilot. Autopilot controls TAS and
+                # scenarios is in cas/mach, so conversion needed. Use waypoint
+                # altitude for conversion, because that is the needed combination
+                # in the scenario, and not the current altitude.
                 spd = self.wpspd[wpidx]
                 if spd > 0:
                     if spd < 2.0:
-                        traf.aspd[i] = mach2cas(spd, traf.alt[i])
+                        traf.aptas[i] = mach2tas(spd, self.wpalt[wpidx])
                     else:
-                        traf.aspd[i] = spd # cas2tas(spd, traf.alt[i]) # or is '= spd' because aspd is a CAS not TAS, just like the mach case above
-
+                        traf.aptas[i] = cas2tas(spd, self.wpalt[wpidx])
+                        
             qdr, dist = geo.qdrdist(traf.lat[i], traf.lon[i],
                                 traf.actwp.lat[i], traf.actwp.lon[i])
 

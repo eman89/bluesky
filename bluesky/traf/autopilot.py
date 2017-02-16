@@ -71,8 +71,9 @@ class Autopilot(DynamicArrays):
 
             # Shift waypoints for aircraft i where necessary
             for i in self.traf.actwp.Reached(qdr, dist):
-                # Save current wp speed
+                # Save current wp speed and altitude
                 oldspd = self.traf.actwp.spd[i]
+                oldalt = self.traf.actwp.alt[i]
 
                 # Get next wp (lnavon = False if no more waypoints)
                 lat, lon, alt, spd, xtoalt, toalt, lnavon, flyby, self.traf.actwp.next_qdr[i] =  \
@@ -100,8 +101,17 @@ class Autopilot(DynamicArrays):
 
                 # VNAV spd mode: use speed of this waypoint as commanded speed
                 # while passing waypoint and save next speed for passing next wp
-                if self.traf.swvnav[i] and oldspd > 0.0:
-                    dummy, self.traf.aspd[i], self.traf.ama[i] = casormach(oldspd, self.traf.alt[i])
+#                if self.traf.swvnav[i] and oldspd > 0.0:
+##                    dummy, self.traf.aspd[i], self.traf.ama[i] = casormach(oldspd, self.traf.alt[i])
+                    
+                # The scnearios are in CAS, but control of the aircraft is in TAS, 
+                # so convert the scenario CAS to TAS! This is what the following line does.
+                # The following code has been tested for flight plans with 1 climb leg,
+                # 1 cruise leg and 1 descend leg. This type of flight plan needs origin, 
+                # ToC waypoint (with speed and alt) and destination. Performance is improved
+                # if a ToD waypoint (with speed) is optionally included. 
+                # IT MAY ALSO WORK FOR OTHER FLIGHTPLAN TYPES, BUT NEEDS TESTING!
+                self.traf.aptas[i] = vcas2tas(spd,alt) if alt>=0.0 else vcas2tas(spd,oldalt)
 
                 # VNAV = FMS ALT/SPD mode
                 self.ComputeVNAV(i, toalt, xtoalt)
@@ -147,9 +157,19 @@ class Autopilot(DynamicArrays):
             
             # LNAV commanded track angle
             self.trk = np.where(self.traf.swlnav, qdr, self.trk)
-
+        
+        # NOTE!!!: Airplane speed is controlled using TAS. The following code
+        # therefore computes the TAS the autopilot wants the airplane to fly
+        # with so that the CAS is constant for changes in altitude 
+        # -> i.e, used for constant CAS/Mach climb/descend
+        # Since vs = TAS*steepnees, a changing TAS is not ideal for climbing and
+        # descending with constant flight path angle. Therefore it is commented out
         # Below crossover altitude: CAS=const, above crossover altitude: MA = const
-        self.tas = vcas2tas(self.traf.aspd, self.traf.alt) * self.traf.belco + vmach2tas(self.traf.ama, self.traf.alt) * self.traf.abco
+#        self.tas = vcas2tas(self.traf.aspd, self.traf.alt) * self.traf.belco + vmach2tas(self.traf.ama, self.traf.alt) * self.traf.abco
+        
+        # To climb and descend with constant flight path angle, keep the autopilot
+        # commanded TAS independent of altitude        
+        self.tas = self.traf.aptas
 
     def ComputeVNAV(self, idx, toalt, xtoalt):
         if not (toalt >= 0 and self.traf.swvnav[idx]):
@@ -314,6 +334,9 @@ class Autopilot(DynamicArrays):
             return False,"SPD: Aircraft does not exist"
 
         dummy, self.traf.aspd[idx], self.traf.ama[idx] = casormach(casmach, self.traf.alt[idx])
+        
+        # Airplane control is based on TAS so convert aspd(CAS) to TAS
+        self.traf.aptas[idx] = vcas2tas(self.traf.aspd[idx],self.traf.alt[idx])
 
         # Switch off VNAV: SPD command overrides
         self.traf.swvnav[idx]   = False
