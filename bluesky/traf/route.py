@@ -613,12 +613,12 @@ class Route():
                 spd = self.wpspd[wpidx]
                 if spd > 0:
                     if spd < 2.0:
-                        traf.aptas[i] = mach2tas(spd, self.wpalt[wpidx])
+                        traf.aptas[idx] = mach2tas(spd, self.wpalt[wpidx])
                     else:
-                        traf.aptas[i] = cas2tas(spd, self.wpalt[wpidx])
+                        traf.aptas[idx] = cas2tas(spd, self.wpalt[wpidx])
                         
-            qdr, dist = geo.qdrdist(traf.lat[i], traf.lon[i],
-                                traf.actwp.lat[i], traf.actwp.lon[i])
+            qdr, dist = geo.qdrdist(traf.lat[idx], traf.lon[idx],
+                                traf.actwp.lat[idx], traf.actwp.lon[idx])
             turnrad = traf.tas[idx]*traf.tas[idx]/tan(radians(25.)) / g0 / nm  # default bank angle 25 deg
 
             traf.actwp.turndist[idx] = turnrad*abs(tan(0.5*radians(max(5., abs(degto180(qdr -
