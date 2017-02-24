@@ -314,6 +314,7 @@ class Autopilot(DynamicArrays):
             return False, ("Enter a positive altitude for STEEPNESS")        
         else:
             self.steepness = alt / (10. * nm)
+            self.traf.avsdef = self.steepness*self.traf.gs # also set the default to desired steepness
             return True, ("Steepness is set to climb/descend %s ft in 10 nautical miles" %(self.steepness*(10.*nm)/ft))
         
     def selhdg(self, idx, hdg):  # HDG command
