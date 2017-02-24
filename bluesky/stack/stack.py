@@ -569,6 +569,12 @@ def init(sim, traf, scr):
             scr.showssd,
             "Show state-space diagram (=conflict prevention display/predictive ASAS)"
         ],
+        "STEEPNESS": [
+            "STEEPNESS [altitude]",
+            "[alt]",
+            traf.ap.setSteepness,
+            "Set the amount of altitude to climb/descend in 10 nautical miles [ft]"
+        ],
         "SWRAD": [
             "SWRAD GEO/GRID/APT/VOR/WPT/LABEL/ADSBCOVERAGE/TRAIL [dt]/[value]",
             "txt,[float]",

@@ -303,7 +303,19 @@ class Autopilot(DynamicArrays):
         self.traf.avs[idx] = vspd
         # self.traf.vs[idx] = vspd
         self.traf.swvnav[idx] = False
-
+    
+    def setSteepness(self,alt=None):
+        """Set the amount of altitude to climb/descend in 10 nautical miles"""
+        
+        if alt is None:
+            return True, ("The current steepness is climb/descend %s ft in 10 nautical miles" %(self.steepness*(10.*nm)/ft))
+            
+        if alt < 0.0:
+            return False, ("Enter a positive altitude for STEEPNESS")        
+        else:
+            self.steepness = alt / (10. * nm)
+            return True, ("Steepness is set to climb/descend %s ft in 10 nautical miles" %(self.steepness*(10.*nm)/ft))
+        
     def selhdg(self, idx, hdg):  # HDG command
         """ Select heading command: HDG acid, hdg """
 
