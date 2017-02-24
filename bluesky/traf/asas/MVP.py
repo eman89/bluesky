@@ -182,7 +182,8 @@ def MVP(traf, dbconf, id1, id2):
     dabsV = abs(dcpa[2])
     	
     # Compute horizontal and vertical intrusions
-    iH = dbconf.Rm / np.abs(np.cos(np.arcsin(dbconf.Rm / dist) - np.arcsin(dabsH / dist))) - dabsH
+#    iH = dbconf.Rm / np.abs(np.cos(np.arcsin(dbconf.Rm / dist) - np.arcsin(dabsH / dist))) - dabsH
+    iH = dbconf.Rm - dabsH
     iV = dbconf.dhm - dabsV
         
     # If id1 and id2 are in intrusion, assume full intrusion to force max movement
@@ -216,22 +217,20 @@ def MVP(traf, dbconf, id1, id2):
     dv3 = np.maximum(mindv3,np.minimum(maxdv3,dv3))
 
     # combine the dv components 
-    dv = np.array([dv1,dv2,dv3])    
-
-    #Extra factor necessary! ==================================================
-    # Intruder outside ownship IPZ
-    # if dbconf.Rm<dist and dabsH<dist:
-    #     erratum=np.cos(np.arcsin(dbconf.Rm/dist)-np.arcsin(dabsH/dist))
-    #     dv_plus1 = dv[0]/erratum
-    #     dv_plus2 = dv[1]/erratum
-	   # # combine dv_plus components. Note: erratum only applies to horizontal dv components
-    #     dv_plus = np.array([dv_plus1,dv_plus2,dv[2]])		
-    # # Intruder inside ownship IPZ
-    # else: 
-    #     dv_plus=dv
+    dv = np.array([dv1,dv2,dv3])
+    
+     # Intruder outside ownship IPZ
+    if dbconf.Rm<dist and dabsH<dist:
+        erratum=np.cos(np.arcsin(dbconf.Rm/dist)-np.arcsin(dabsH/dist))
+        dv_plus1 = dv[0]/erratum
+        dv_plus2 = dv[1]/erratum
+	   # combine dv_plus components. Note: erratum only applies to horizontal dv components
+        dv_plus = np.array([dv_plus1,dv_plus2,dv[2]])		
+    # Intruder inside ownship IPZ
+    else: 
+        dv_plus=dv
           
-    # return dv_plus
-    return dv
+    return dv_plus    
     
 #============================= Priority Rules =================================    
     
