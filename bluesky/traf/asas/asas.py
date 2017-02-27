@@ -447,6 +447,97 @@ class ASAS(DynamicArrays):
         alto   = alto[inarea] 
         
         return ownidx, intidx, rngo, lato, lono, alto
+    
+    def APorASAS(self):
+        """ Decide for each aircraft in the active conflict list whether the 
+        ASAS commands should be followed or not, based on if the conflcit pairs 
+        passed their CPA. """
+        
+        # first assume that asas should be turned off. Do the below computations
+        # and turn it back on if conflict is not past CPA
+        self.asasactive.fill(False)
+    
+        # Look at all conflicts, also the ones that are solved but CPA is yet to come
+        for conflict in self.conflist_active[:]:
+            ac1      = conflict[0]
+            ac2      = conflict[1]
+            id1, id2 = self.traf.id2idx(ac1), self.traf.id2idx(ac2)
+            if id1 >= 0 and id2 >= 0:
+                # Check if conflict is past CPA
+                d = np.array([self.traf.lon[id2] - self.traf.lon[id1], self.traf.lat[id2] - self.traf.lat[id1]])
+    
+                # write velocities as vectors
+                v1 = np.array([self.traf.gseast[id1], self.traf.gsnorth[id1]])
+                v2 = np.array([self.traf.gseast[id2], self.traf.gsnorth[id2]])
+                
+                # Compute pastCPA
+                pastCPA = np.dot(d,v2-v1)>0.
+                
+                # hLOS:
+                # Aircraft should continue to resolve until there is no horizontal 
+                # LOS. This is particularly relevant when vertical resolutions
+                # are used. 
+                dx     = (self.traf.lat[id1] - self.traf.lat[id2]) * 111319.
+                dy     = (self.traf.lon[id1] - self.traf.lon[id2]) * 111319.
+                hdist2 = dx**2 + dy**2
+                hLOS   = hdist2 < self.R**2
+
+                # Bouncing conflicts:
+                # If two aircraft are getting in and out of conflict continously, 
+                # then it is a bouncing conflict. ASAS should stay active until 
+                # the bouncing stops.
+                bouncingConflict = (abs(self.traf.trk[id1] - self.traf.trk[id2]) < 30.) & (hdist2<self.Rm**2)         
+                
+                # Decide if conflict is over or not. 
+                # If not over, turn asasactive to true. 
+                # If over, then initiate recovery
+                if not pastCPA or hLOS or bouncingConflict:
+                    # Aircraft haven't passed their CPA: must follow their ASAS
+                    self.asasactive[id1] = True
+                    self.asasactive[id2] = True
+                
+                else:
+                    # Waypoint recovery after conflict
+                    # Find the next active waypoint and send the aircraft to that 
+                    # waypoint.             
+                    iwpid1 = self.traf.route[id1].findact(self.traf,id1)
+                    if iwpid1 != -1: # To avoid problems if there are no waypoints
+                        self.traf.route[id1].direct(self.traf, id1, self.traf.route[id1].wpname[iwpid1])
+                    iwpid2 = self.traf.route[id2].findact(self.traf,id2)
+                    if iwpid2 != -1: # To avoid problems if there are no waypoints
+                        self.traf.route[id2].direct(self.traf, id2, self.traf.route[id2].wpname[iwpid2])
+                    
+                    # If conflict is solved, remove it from conflist_active list
+                    # This is so that if a conflict between this pair of aircraft 
+                    # occurs again, then that new conflict should be detected, logged
+                    # and solved (if reso is on). The conflict should also be removed 
+                    # from conflist_resospwancheck list.
+                    self.conflist_active.remove(conflict)
+                    if conflict in self.conflist_resospawncheck:
+                        self.conflist_resospawncheck.remove(conflict)
+            
+            # If aircraft id1 cannot be found in traffic because it has finished its
+            # flight (and has been deleted), start trajectory recovery for aircraft id2
+            # And remove the conflict from the conflist_active list
+            elif id1 < 0 and id2 >= 0:
+                 iwpid2 = self.traf.route[id2].findact(self.traf,id2)
+                 if iwpid2 != -1: # To avoid problems if there are no waypoints
+                     self.traf.route[id2].direct(self.traf, id2, self.traf.route[id2].wpname[iwpid2])
+                 self.conflist_active.remove(conflict)
+    
+            # If aircraft id2 cannot be found in traffic because it has finished its
+            # flight (and has been deleted) start trajectory recovery for aircraft id1
+            # And remove the conflict from the conflist_active list 
+            elif id2 < 0 and id1 >= 0:
+                iwpid1 = self.traf.route[id1].findact(self.traf,id1)
+                if iwpid1 != -1: # To avoid problems if there are no waypoints
+                    self.traf.route[id1].direct(self.traf, id1, self.traf.route[id1].wpname[iwpid1])
+                self.conflist_active.remove(conflict)
+            
+            # if both ids are unknown, then delete this conflict, because both aircraft
+            # have completed their flights (and have been deleted) 
+            else:
+                self.conflist_active.remove(conflict)
 
     def create(self):
         super(ASAS, self).create()
@@ -462,10 +553,18 @@ class ASAS(DynamicArrays):
         # Scheduling: update when dt has passed
         if self.swasas and simt >= self.tasas:
             self.tasas += self.dtasas
-
-            # Conflict detection and resolution
+            
+            # Conflict detection
             self.cd.detect(self, self.traf, simt)
+            
+            # Is conflict active? 
+            self.APorASAS()
+            
+            # Conflict resolution
             self.cr.resolve(self, self.traf)
+            
+            # Update ASAS log variables
+#            asasLogUpdate(self, self.traf)
 
         # Change labels in interface
         if settings.gui == "pygame":
