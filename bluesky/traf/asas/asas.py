@@ -2,6 +2,7 @@ import numpy as np
 from ... import settings
 from ...tools.aero import ft, nm
 from ...tools.dynamicarrays import DynamicArrays, RegisterElementParameters
+from ...tools import areafilter, geo
 
 
 # Import default CD methods
@@ -94,20 +95,30 @@ class ASAS(DynamicArrays):
 
         self.resoFacH     = 1.0                        # [-] set horizontal resolution factor (1.0 = 100%)
         self.resoFacV     = 1.0                        # [-] set horizontal resolution factor (1.0 = 100%)
+        
+        self.swconfareafilt  = False                   # [-] swtich to activate the CONFAREAFILT command. This conflict filter is area based.
+        self.areafiltercode  = None                    # [-] Code for the conflict area filter that should be used (OPTION1, OPTION2, OPTION3, OPTION4, OPTION5) 
+        self.areafiltershape = None                    # [-] Name of shape where area conflict filter is active 
+        
+        self.swspawncheck     = False                  # [-] switch to activate the RESOSPAWNCHECK command. This command prevents aircraft spawned in very short term conflicts and in intrusions from perfroming conflict resolutions.
+        self.spawncheckfactor = 1.0                    # [-] factor that is multiplied with the look-ahead-time to determine what constitutes a 'very short term conflcit' 
 
-        self.confpairs    = []                         # Start with emtpy database: no conflicts
         self.nconf        = 0                          # Number of detected conflicts
         self.latowncpa    = np.array([])
         self.lonowncpa    = np.array([])
         self.altowncpa    = np.array([])
 
-        self.conflist_all = []  # List of all Conflicts
-        self.LOSlist_all  = []  # List of all Losses Of Separation
-        self.conflist_exp = []  # List of all Conflicts in experiment time
-        self.LOSlist_exp  = []  # List of all Losses Of Separation in experiment time
-        self.conflist_now = []  # List of current Conflicts
-        self.LOSlist_now  = []  # List of current Losses Of Separation
-
+        self.confpairs               = []  # Start with emtpy database: no conflicts
+        self.conflist_active         = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from this list once past CPA
+        self.LOSlist_active          = []  # List of all Losses Of Separation that are still active (LOS still on-going). LOS deleted from this list when it is over.
+        self.conflist_now            = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
+        self.LOSlist_now             = []  # List of Losses Of Separations in the current ASAS cycle.
+        self.LOSlist_logged          = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once. 
+        self.conflist_resospawncheck = []  # List of conflicts that have met the Reso Spawn Check command conditions. These conflicts will not be solved even if CR is on. 
+        
+        self.nconf_total             = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI. 
+        self.nLOS_total              = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
+        
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
         self.LOShmaxsev   = []
@@ -323,6 +334,119 @@ class ASAS(DynamicArrays):
 
         # active the switch, if there are acids in the list
         self.swresooff = len(self.resoofflst) > 0
+    
+    def SetConfAreaFilter(self, flag=None, filtercode=None, shapename=None):
+        '''Set the conflict-area-filter switch, the type of filter, and the shape where it should act'''
+        options = ["OPTION1","OPTION2","OPTION3", "OPTION4", "OPTION5"]       
+        if flag is None and filtercode is None and shapename is None:
+            return True , "CONFAREAFILTER ON/OFF, FILTERCODE, SHAPENAME" + \
+                          "\nAvialable filter codes:" + \
+                          "\n     OPTION1: CPA in shapename" + \
+                          "\n     OPTION2: CPA and 1 aircraft in conflict pair in shapename" + \
+                          "\n     OPTION3: CPA and both aircraft in conflict pair in shapename" + \
+                          "\n     OPTION4: Both aircraft in conflict pair in shapename" + \
+                          "\n     OPTION5: CPA or 1 aircraft in conflict pair in shapename" + \
+                          "\nConflictAreaFilter is currently " + ("ON" if self.swconfareafilt else "OFF") + \
+                          "\nFiltercode is currently " + str(self.areafiltercode) + \
+                          "\nShapename  is currently " + str(self.areafiltershape)         
+        if not flag:
+            self.swconfareafilt  = flag
+            self.areafiltercode  = None
+            self.areafiltershape = None
+            return True
+        else:
+            if filtercode not in options:
+                return False, "Filter code not understood. Available Options: " + str(options) 
+            elif shapename not in areafilter.areas:
+                return False, "Shape does not exist (please create shape first) or incorrectly spelt."
+            self.swconfareafilt  = flag
+            self.areafiltercode  = filtercode
+            self.areafiltershape = shapename 
+            return True
+        
+    def SetResoSpawnCheck(self, flag=None, factor=None):
+        '''Set the reso-spawn-check flag and factor. 
+        Reso-spawn-check prevents aircraft that are just spawned
+        in a very short term conflict (determined by the factor argument), or 
+        spawned in an intrusion, from performing a resolution. This is good from 
+        a resolution stabilty point of view. These conflicts/intrusions will 
+        continue to be logged, but not resolved. 
+        '''
+        if flag is None and factor is None: 
+            return True, "RESOSPAWNCHECK ON/OFF, [LOOK_AHEAD_TIME_FACTOR (>0)]" + \
+                         "\nRESOSPAWNCHECK is currently " + ("ON" if self.swspawncheck else "OFF") + \
+                         "\nLOOK_AHEAD_TIME_FACTOR is currently " + str(self.spawncheckfactor)
+        if not flag:
+            self.swspawncheck     = flag
+            self.spawncheckfactor = 1.0 # restore the reso-spawn-check factor
+        else:
+            if factor is None:
+                self.swspawncheck = flag
+                return True, "RESOSPAWNCHECK activated. LOOK_AHEAD_TIME_FACTOR equals " + str(self.spawncheckfactor)
+            elif factor<0.0:
+                return False,"LOOK_AHEAD_TIME_FACTOR must be a POSITIVE float"
+            elif factor>0.0:
+                self.swspawncheck = flag
+                self.spawncheckfactor = factor
+                return True, "RESOSPAWNCHECK activated. LOOK_AHEAD_TIME_FACTOR equals " + str(self.spawncheckfactor)
+            else:
+                return False, "LOOK_AHEAD_TIME_FACTOR not understood. Check syntax!"
+                
+    def ConfAreaFilter(self, traf, ownidx, intidx):
+        '''Checks if the conflict between ownship and intruder matches the 
+        Conflict-Area-Filter settings'''
+        
+        # Determine CPA for ownship 
+        rngo       = self.tcpa[ownidx,intidx] * traf.gs[ownidx] / nm
+        lato, lono = geo.qdrpos(traf.lat[ownidx], traf.lon[ownidx], traf.trk[ownidx], rngo)
+        alto       = traf.alt[ownidx] + self.tcpa[ownidx,intidx] * traf.vs[ownidx]
+        
+        # Determine CPA for intruder 
+        rngi       = self.tcpa[intidx,ownidx] * traf.gs[intidx] / nm
+        lati, loni = geo.qdrpos(traf.lat[intidx], traf.lon[intidx], traf.trk[intidx], rngi)
+        alti       = traf.alt[intidx] + self.tcpa[intidx,ownidx] * traf.vs[intidx]        
+
+        # Check if CPAs are inside selected shape
+        cpainsideo = areafilter.checkInside(self.areafiltershape, lato, lono, alto)
+        cpainsidei = areafilter.checkInside(self.areafiltershape, lati, loni, alti)
+    
+        # OPTION1: CPA inside selected shape 
+        if self.areafiltercode == "OPTION1":            
+            inarea = np.where(np.logical_and(cpainsidei,cpainsideo))
+            
+        # OPTION2: CPA and 1 aircraft inside selected shape
+        elif self.areafiltercode == "OPTION2":
+            acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
+            acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
+            inarea    = np.where(np.logical_and(np.logical_and(cpainsidei,cpainsideo), np.logical_or(acinsideo,acinsidei)))
+            
+        # OPTION3: CPA and both aircraft inside selected shape
+        elif self.areafiltercode == "OPTION3":
+            acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
+            acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
+            inarea    = np.where(np.logical_and(np.logical_and(cpainsidei,cpainsideo), np.logical_and(acinsideo,acinsidei)))
+        
+        # OPTION4: Both aircraft inside selected shape
+        elif self.areafiltercode == "OPTION4":
+            acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
+            acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
+            inarea    = np.where(np.logical_and(acinsideo,acinsidei))
+        
+        # OPTION5: CPA OR 1 aircraft inside selected shape
+        elif self.areafiltercode == "OPTION5":
+            acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
+            acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
+            inarea    = np.where(np.logical_or(np.logical_or(cpainsidei,cpainsideo), np.logical_or(acinsideo,acinsidei)))
+
+        # Filter out the conflcits that do not match the selected "option"
+        ownidx = ownidx[inarea]
+        intidx = intidx[inarea]
+        rngo   = rngo[inarea]
+        lato   = lato[inarea]
+        lono   = lono[inarea]
+        alto   = alto[inarea] 
+        
+        return ownidx, intidx, rngo, lato, lono, alto
 
     def create(self):
         super(ASAS, self).create()

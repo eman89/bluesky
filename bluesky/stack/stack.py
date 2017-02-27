@@ -218,6 +218,12 @@ def init(sim, traf, scr):
             lambda name, *coords: areafilter.defineArea(scr, name, 'CIRCLE', coords),
             "Define a circle-shaped area"
         ],
+        "CONFAREAFILTER": [
+            "CONFAREAFILTER [ON/OFF, filtercode, shapename]",
+            "[onoff, txt, txt]",
+            traf.asas.SetConfAreaFilter,
+            "Filter out conflicts outside desired area"
+        ],
         "CRE": [
             "CRE acid,type,lat,lon,hdg,alt,spd",
             "txt,txt,latlon,hdg,alt,spd",
@@ -514,6 +520,12 @@ def init(sim, traf, scr):
             "[string]",
             traf.asas.SetResooff,
             "Switch for conflict resolution module"
+        ],
+        "RESOSPAWNCHECK": [
+            "RESOSPAWNCHECK [ON/OFF factor]",
+            "[onoff, float]",
+            traf.asas.SetResoSpawnCheck,
+            "Supress CR short term conflicts for just spawned aircraft"
         ],
         "RMETHH": [
             "RMETHH [method]",
