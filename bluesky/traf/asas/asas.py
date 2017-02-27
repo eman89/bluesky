@@ -502,6 +502,8 @@ class ASAS(DynamicArrays):
                     # waypoint.             
                     iwpid1 = self.traf.ap.route[id1].findact(self.traf,id1)
                     if iwpid1 != -1: # To avoid problems if there are no waypoints
+                        import pdb
+                        pdb.set_trace()
                         self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
                     iwpid2 = self.traf.ap.route[id2].findact(self.traf,id2)
                     if iwpid2 != -1: # To avoid problems if there are no waypoints
