@@ -27,14 +27,22 @@ def resolve(dbconf, traf):
         for conflict in dbconf.conflist_now:
             
             # Determine ac indexes from callsigns
-            ac1, ac2 = conflict.split(" ")
+            ac1      = conflict[0]
+            ac2      = conflict[1]            
             id1, id2 = traf.id2idx(ac1), traf.id2idx(ac2)
             
             # If A/C indexes are found, then apply MVP on this conflict pair
             # Then use the MVP computed resolution to subtract and add dv_mvp 
             # to id1 and id2, respectively
             if id1 > -1 and id2 > -1:
-                dv_mvp = MVP(traf, dbconf, id1, id2)
+                
+                # Check if this conflict is in conflist_resospawncheck
+                # If so, then there should be no resolution for this conflict
+                # Otherwise, resolve it!
+                if conflict in dbconf.conflist_resospawncheck:
+                    dv_mvp = np.array([0.0,0.0,0.0]) # no resolution 
+                else:
+                    dv_mvp = MVP(traf, dbconf, id1, id2)
                 
                 # Use priority rules if activated
                 if dbconf.swprio:
@@ -70,7 +78,14 @@ def resolve(dbconf, traf):
             # If A/C indexes are found, then apply MVP on this conflict pair
             # Because ADSB is ON, this is done for each aircraft separately
             if id1 >-1 and id2 > -1:
-                dv_mvp   = MVP(traf, dbconf, id1, id2)
+                
+                # Check if this conflict is in conflist_resospawncheck
+                # If so, then there should be no resolution for this conflict
+                # Otherwise, resolve it!
+                if confpair in dbconf.conflist_resospawncheck:
+                    dv_mvp = np.array([0.0,0.0,0.0])
+                else:
+                    dv_mvp = MVP(traf, dbconf, id1, id2)
                 
                 # Use priority rules if activated
                 if dbconf.swprio:

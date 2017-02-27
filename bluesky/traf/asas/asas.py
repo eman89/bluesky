@@ -455,7 +455,7 @@ class ASAS(DynamicArrays):
         
         # first assume that asas should be turned off. Do the below computations
         # and turn it back on if conflict is not past CPA
-        self.asasactive.fill(False)
+        self.active.fill(False)
     
         # Look at all conflicts, also the ones that are solved but CPA is yet to come
         for conflict in self.conflist_active[:]:
@@ -489,23 +489,23 @@ class ASAS(DynamicArrays):
                 bouncingConflict = (abs(self.traf.trk[id1] - self.traf.trk[id2]) < 30.) & (hdist2<self.Rm**2)         
                 
                 # Decide if conflict is over or not. 
-                # If not over, turn asasactive to true. 
+                # If not over, turn active to true. 
                 # If over, then initiate recovery
                 if not pastCPA or hLOS or bouncingConflict:
                     # Aircraft haven't passed their CPA: must follow their ASAS
-                    self.asasactive[id1] = True
-                    self.asasactive[id2] = True
+                    self.active[id1] = True
+                    self.active[id2] = True
                 
                 else:
                     # Waypoint recovery after conflict
                     # Find the next active waypoint and send the aircraft to that 
                     # waypoint.             
-                    iwpid1 = self.traf.route[id1].findact(self.traf,id1)
+                    iwpid1 = self.traf.ap.route[id1].findact(self.traf,id1)
                     if iwpid1 != -1: # To avoid problems if there are no waypoints
-                        self.traf.route[id1].direct(self.traf, id1, self.traf.route[id1].wpname[iwpid1])
-                    iwpid2 = self.traf.route[id2].findact(self.traf,id2)
+                        self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
+                    iwpid2 = self.traf.ap.route[id2].findact(self.traf,id2)
                     if iwpid2 != -1: # To avoid problems if there are no waypoints
-                        self.traf.route[id2].direct(self.traf, id2, self.traf.route[id2].wpname[iwpid2])
+                        self.traf.ap.route[id2].direct(self.traf, id2, self.traf.ap.route[id2].wpname[iwpid2])
                     
                     # If conflict is solved, remove it from conflist_active list
                     # This is so that if a conflict between this pair of aircraft 
@@ -520,18 +520,18 @@ class ASAS(DynamicArrays):
             # flight (and has been deleted), start trajectory recovery for aircraft id2
             # And remove the conflict from the conflist_active list
             elif id1 < 0 and id2 >= 0:
-                 iwpid2 = self.traf.route[id2].findact(self.traf,id2)
+                 iwpid2 = self.traf.ap.route[id2].findact(self.traf,id2)
                  if iwpid2 != -1: # To avoid problems if there are no waypoints
-                     self.traf.route[id2].direct(self.traf, id2, self.traf.route[id2].wpname[iwpid2])
+                     self.traf.ap.route[id2].direct(self.traf, id2, self.traf.ap.route[id2].wpname[iwpid2])
                  self.conflist_active.remove(conflict)
     
             # If aircraft id2 cannot be found in traffic because it has finished its
             # flight (and has been deleted) start trajectory recovery for aircraft id1
             # And remove the conflict from the conflist_active list 
             elif id2 < 0 and id1 >= 0:
-                iwpid1 = self.traf.route[id1].findact(self.traf,id1)
+                iwpid1 = self.traf.ap.route[id1].findact(self.traf,id1)
                 if iwpid1 != -1: # To avoid problems if there are no waypoints
-                    self.traf.route[id1].direct(self.traf, id1, self.traf.route[id1].wpname[iwpid1])
+                    self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
                 self.conflist_active.remove(conflict)
             
             # if both ids are unknown, then delete this conflict, because both aircraft

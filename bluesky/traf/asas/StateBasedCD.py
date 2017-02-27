@@ -4,6 +4,7 @@ State-based conflict detection
 
 """
 import numpy as np
+import gc
 from ...tools import geo
 from ...tools.aero import nm
 
@@ -12,16 +13,18 @@ def detect(dbconf, traf, simt):
     if not dbconf.swasas:
         return
 
-    # Reset lists before new CD
+     # Reset lists before new CD
     dbconf.iconf        = [[] for ac in range(traf.ntraf)]
     dbconf.nconf        = 0
-    dbconf.confpairs    = []
+    
+    dbconf.rngowncpa    = []
     dbconf.latowncpa    = []
     dbconf.lonowncpa    = []
     dbconf.altowncpa    = []
 
     dbconf.LOSlist_now  = []
     dbconf.conflist_now = []
+    dbconf.confpairs    = []
 
     # Horizontal conflict ---------------------------------------------------------
 
@@ -57,14 +60,12 @@ def detect(dbconf, traf, simt):
     adsbu = traf.adsb.gs * np.sin(adsbtrkrad).reshape((1, len(adsbtrkrad)))  # m/s
     adsbv = traf.adsb.gs * np.cos(adsbtrkrad).reshape((1, len(adsbtrkrad)))  # m/s
 
+    # Compute relative velocity
     du = dbconf.u - adsbu.T  # Speed du[i,j] is perceived eastern speed of i to j
     dv = dbconf.v - adsbv.T  # Speed dv[i,j] is perceived northern speed of i to j
-
     dv2 = du * du + dv * dv
     dv2 = np.where(np.abs(dv2) < 1e-6, 1e-6, dv2)  # limit lower absolute value
-
     vrel = np.sqrt(dv2)
-
     dbconf.tcpa = -(du * dbconf.dx + dv * dbconf.dy) / dv2 + 1e9 * I
 
     # Calculate CPA positions
@@ -81,9 +82,7 @@ def detect(dbconf, traf, simt):
     # Calculate times of entering and leaving horizontal conflict
     dxinhor = np.sqrt(np.maximum(0., R2 - dcpa2))  # half the distance travelled inzide zone
     dtinhor = dxinhor / vrel
-
     tinhor = np.where(swhorconf, dbconf.tcpa - dtinhor, 1e8)  # Set very large if no conf
-
     touthor = np.where(swhorconf, dbconf.tcpa + dtinhor, -1e8)  # set very large if no conf
     # swhorconf = swhorconf*(touthor>0)*(tinhor<dbconf.dtlook)
 
@@ -92,6 +91,7 @@ def detect(dbconf, traf, simt):
     # Vertical crossing of disk (-dh,+dh)
     alt = traf.alt.reshape((1, traf.ntraf))
     adsbalt = traf.adsb.alt.reshape((1, traf.ntraf))
+    
     if traf.adsb.transnoise:
         # error in the determined altitude of other a/c
         alterror = np.random.normal(0, traf.adsb.transerror[2], traf.alt.shape)  # degrees
@@ -101,10 +101,7 @@ def detect(dbconf, traf, simt):
 
 
     vs = traf.vs.reshape(1, len(traf.vs))
-
-
     avs = traf.adsb.vs.reshape(1, len(traf.adsb.vs))
-
     dvs = vs - avs.T
 
     # Check for passing through each others zone
@@ -112,14 +109,14 @@ def detect(dbconf, traf, simt):
     tcrosshi = (dbconf.dalt + dbconf.dh) / -dvs
     tcrosslo = (dbconf.dalt - dbconf.dh) / -dvs
 
-    tinver = np.minimum(tcrosshi, tcrosslo)
+    tinver  = np.minimum(tcrosshi, tcrosslo)
     toutver = np.maximum(tcrosshi, tcrosslo)
 
     # Combine vertical and horizontal conflict-------------------------------------
     dbconf.tinconf = np.maximum(tinver, tinhor)
-
     dbconf.toutconf = np.minimum(toutver, touthor)
 
+    # Boolean matrix of conflict or no conflict for each ac
     swconfl = swhorconf * (dbconf.tinconf <= dbconf.toutconf) * \
         (dbconf.toutconf > 0.) * (dbconf.tinconf < dbconf.dtlookahead) \
         * (1. - I)
@@ -128,91 +125,103 @@ def detect(dbconf, traf, simt):
     # Update conflict lists
     # ----------------------------------------------------------------------
     if len(swconfl) == 0:
-        return
-    # Calculate CPA positions of traffic in lat/lon?
-
+        return    
     # Select conflicting pairs: each a/c gets their own record
-    confidxs            = np.where(swconfl)
-    iown                = confidxs[0]
-    ioth                = confidxs[1]
-
-    # Store result
-    dbconf.nconf        = len(confidxs[0])
-
+    confidxs = np.where(swconfl)
+    ownidx   = confidxs[0]
+    intidx   = confidxs[1]
+    
+    # Do conflict area filtering
+    if dbconf.swconfareafilt:
+        ownidx, intidx, dbconf.rngowncpa, dbconf.latowncpa, dbconf.lonowncpa, dbconf.altowncpa \
+                            = dbconf.ConfAreaFilter(traf, ownidx, intidx)
+    else:
+        # Determine CPA for ownship 
+        dbconf.rngowncpa = dbconf.tcpa [ownidx,intidx] * traf.gs [ownidx] / nm
+        dbconf.latowncpa, \
+        dbconf.lonowncpa = geo.qdrpos(traf.lat[ownidx], traf.lon[ownidx], traf.trk [ownidx], dbconf.rngowncpa)
+        dbconf.altowncpa = traf.alt [ownidx] + dbconf.tcpa [ownidx,intidx] * traf.vs[ownidx]
+        
+    # Number of CURRENTLY detected conflicts. All these conflicts satisfy the conflict-area-filter settings.
+    dbconf.nconf = len(ownidx) 
+    
+    # Add to Conflict and LOS lists--------------------------------------------
     for idx in range(dbconf.nconf):
-        i = iown[idx]
-        j = ioth[idx]
+        gc.disable()        
+        
+        # Determine idx of conflciting aircaft
+        i = ownidx[idx]
+        j = intidx[idx]
         if i == j:
             continue
-
+        
         dbconf.iconf[i].append(idx)
+        
+        # Append all conflicts to confpairs list. This is used if ADSB is active
+        # to solve conflicts.
         dbconf.confpairs.append((traf.id[i], traf.id[j]))
+        
+        # Combinations of conflicting aircraft
+        # NB: if only one A/C detects a conflict, it is also added to these lists
+        combi  = (traf.id[i],traf.id[j])
+        combi2 = (traf.id[j],traf.id[i])
 
-        rng        = dbconf.tcpa[i, j] * traf.gs[i] / nm
-        lato, lono = geo.qdrpos(traf.lat[i], traf.lon[i], traf.trk[i], rng)
-        alto       = traf.alt[i] + dbconf.tcpa[i, j] * traf.vs[i]
+        # cpa lat, lon and alt aircraft i (ownship in combi)
+        rngi      = dbconf.tcpa[i,j]*traf.gs[i]/nm
+        lati,loni = geo.qdrpos(traf.lat[i],traf.lon[i], traf.trk[i],rngi)
+        alti      = traf.alt[i]+dbconf.tcpa[i,j]*traf.vs[i]
 
-        dbconf.latowncpa.append(lato)
-        dbconf.lonowncpa.append(lono)
-        dbconf.altowncpa.append(alto)
+        # cpa lat, lon and alt aircraft j (intruder in combi)
+        rngj      = dbconf.tcpa[j,i]*traf.gs[j]/nm
+        latj,lonj = geo.qdrpos(traf.lat[j],traf.lon[j], traf.trk[j],rngj)
+        altj      = traf.alt[j]+dbconf.tcpa[j,i]*traf.vs[j]
 
-        dx = (traf.lat[i] - traf.lat[j]) * 111319.
-        dy = (traf.lon[i] - traf.lon[j]) * 111319.
-
+        # Update conflist_active (currently active conflicts), nconf_total (GUI)
+        # and some variables related to CFLLOG (others updated in asasLogUpdate())
+        # and also do RESOSPAWNCHECK
+        if combi not in dbconf.conflist_active and combi2 not in dbconf.conflist_active:
+            dbconf.nconf_total = dbconf.nconf_total + 1            
+            dbconf.conflist_active.append(combi)
+           
+            # If RESOSPAWNCHECK is active, then check if this conflict cotains
+            # an aircraft that is just spawned, and if that conflict is a very short term conflict.
+            # If so, then add it to the 'conflist_resospawncheck' list
+            if dbconf.swspawncheck:
+                if abs(simt-traf.spawnTime[i]) <= dbconf.dtasas or abs(simt-traf.spawnTime[j]) <= dbconf.dtasas:
+                    if dbconf.tcpa[i,j] <= dbconf.dtlookahead*dbconf.spawncheckfactor or dbconf.tcpa[j,i] <= dbconf.dtlookahead*dbconf.spawncheckfactor:
+                        dbconf.conflist_resospawncheck.append(combi)
+                        
+        # Update conflist_now (newly detected conflicts during this detection cycle)
+        # and some variables related INSTLOG (others updated in asasLogUpdate())
+        if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
+            dbconf.conflist_now.append(combi)
+                                                
+        # Check if a LOS occured
+        dx     = (traf.lat[i] - traf.lat[j]) * 111319.
+        dy     = (traf.lon[i] - traf.lon[j]) * 111319.
         hdist2 = dx**2 + dy**2
         hLOS   = hdist2 < dbconf.R**2
         vdist  = abs(traf.alt[i] - traf.alt[j])
         vLOS   = vdist < dbconf.dh
-        LOS    = (hLOS & vLOS)
-
-        # Add to Conflict and LOSlist, to count total conflicts and LOS
-
-        # NB: if only one A/C detects a conflict, it is also added to these lists
-        combi = str(traf.id[i]) + " " + str(traf.id[j])
-        combi2 = str(traf.id[j]) + " " + str(traf.id[i])
-
-        experimenttime = simt > 2100 and simt < 5700  # These parameters may be
-        # changed to count only conflicts within a given expirement time window
-
-        if combi not in dbconf.conflist_all and combi2 not in dbconf.conflist_all:
-            dbconf.conflist_all.append(combi)
-
-        if combi not in dbconf.conflist_exp and combi2 not in dbconf.conflist_exp and experimenttime:
-            dbconf.conflist_exp.append(combi)
-
-        if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
-            dbconf.conflist_now.append(combi)
-
-        if LOS:
-            if combi not in dbconf.LOSlist_all and combi2 not in dbconf.LOSlist_all:
-                dbconf.LOSlist_all.append(combi)
+        isLOS  = (hLOS & vLOS)
+        
+        if isLOS:
+            # Update LOS lists: LOSlist_active (all LOS that are active) and nLOS_total (GUI)
+            if combi not in dbconf.LOSlist_active and combi2 not in dbconf.LOSlist_active:
+                dbconf.nLOS_total = dbconf.nLOS_total + 1                
+                dbconf.LOSlist_active.append(combi)
                 dbconf.LOSmaxsev.append(0.)
                 dbconf.LOShmaxsev.append(0.)
                 dbconf.LOSvmaxsev.append(0.)
-
-            if combi not in dbconf.LOSlist_exp and combi2 not in dbconf.LOSlist_exp and experimenttime:
-                dbconf.LOSlist_exp.append(combi)
-
+            
+            # LOSlist_now (newly detected conflicts during this detection cycle)
             if combi not in dbconf.LOSlist_now and combi2 not in dbconf.LOSlist_now:
                 dbconf.LOSlist_now.append(combi)
+            
+            # NOTE: Logging for LOS done in logLOS() in asasLogUpdate.py
+            #       This is because a LOS is only logged when its severity is 
+            #       highest.
+            #       Some variables for conflicts are also logged in asasLogUpdate
+            #       but some are logged here are  as they are based on lists (easier here in loop)
 
-            # Now, we measure intrusion and store it if it is the most severe
-            Ih = 1.0 - np.sqrt(hdist2) / dbconf.R
-            Iv = 1.0 - vdist / dbconf.dh
-            severity = min(Ih, Iv)
-
-            try:  # Only continue if combi is found in LOSlist (and not combi2)
-                idx = dbconf.LOSlist_all.index(combi)
-            except:
-                idx = -1
-
-            if idx >= 0:
-                if severity > dbconf.LOSmaxsev[idx]:
-                    dbconf.LOSmaxsev[idx]  = severity
-                    dbconf.LOShmaxsev[idx] = Ih
-                    dbconf.LOSvmaxsev[idx] = Iv
-
-    # Convert to numpy arrays for vectorisation
-    dbconf.latowncpa = np.array(dbconf.latowncpa)
-    dbconf.lonowncpa = np.array(dbconf.lonowncpa)
-    dbconf.altowncpa = np.array(dbconf.altowncpa)
+        gc.enable()
