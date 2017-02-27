@@ -27,7 +27,7 @@ class Pilot(DynamicArrays):
         super(Pilot, self).create()
 
         self.alt[-1] = self.traf.alt[-1]
-        self.spd[-1] = tas2eas(self.traf.tas[-1], self.traf.alt[-1])
+        self.spd[-1] = self.traf.tas[-1] # tas2eas(self.traf.tas[-1], self.traf.alt[-1])
         self.hdg[-1] = self.traf.hdg[-1]
         self.trk[-1] = self.traf.trk[-1]
 
