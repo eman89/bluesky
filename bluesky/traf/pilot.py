@@ -1,6 +1,7 @@
 import numpy as np
 from ..tools.aero import tas2eas, vcas2tas, vcas2mach
 from ..tools.dynamicarrays import DynamicArrays, RegisterElementParameters
+from ..tools import datalog
 
 
 class Pilot(DynamicArrays):
@@ -10,12 +11,17 @@ class Pilot(DynamicArrays):
         self.asas = self.traf.asas
 
         with RegisterElementParameters(self):
+            # Register the following parameters for SNAP logging
+            with datalog.registerLogParameters('SNAPLOG', self):
+                # Desired aircraft states
+                self.alt = np.array([])  # desired altitude [m]
+                self.spd = np.array([])  # desired speed [m/s]
+                self.trk = np.array([])  # desired track angle [deg]
+                self.vs  = np.array([])  # desired vertical speed [m/s]
+            
             # Desired aircraft states
-            self.alt = np.array([])  # desired altitude [m]
             self.hdg = np.array([])  # desired heading [deg]
-            self.trk = np.array([])  # desired track angle [deg]
-            self.vs  = np.array([])  # desired vertical speed [m/s]
-            self.spd = np.array([])  # desired speed [m/s]
+                
 
     def create(self):
         super(Pilot, self).create()

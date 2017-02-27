@@ -18,6 +18,9 @@
 # PCALL area settings
 00:00:00.00>PCALL areaDefiniton.scn
 
+# PCALL Simulation settings 
+00:00:00.00>PCALL settingsTest.scn
+
 # Origin-Destination Data:
 
 # AC0001 Direct Distance = 244.3 NM

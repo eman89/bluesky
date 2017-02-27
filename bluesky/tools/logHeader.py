@@ -90,8 +90,6 @@ def snapHeader():
                "AP SPD (TAS) [m/s], " + \
                "AP TRK [deg], " + \
                "AP VS [m/s], " + \
-               "LNAV Active [bool], " + \
-               "VNAV Active [bool], " + \
                "Origin Lat [deg], " + \
                "Origin Lon [deg]" + \
                "Destination Lat [deg], " + \
@@ -100,10 +98,10 @@ def snapHeader():
   lines      = "#######################################################\n" + \
                "SNAP LOG\n" + \
                "Airspace Snapshot Data\n" + \
-               "DT: %s [s]\n" + \
+               "DT: %s [s]\n" %(settings.snapdt) + \
                "#######################################################\n\n" + \
                "Parameters [Units]:\n" + \
-               parameters + "\n" %(settings.snapdt)
+               parameters + "\n"
 
   return lines
   

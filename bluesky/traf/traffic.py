@@ -1,7 +1,7 @@
 import numpy as np
 from math import *
 from random import random, randint
-from ..tools import datalog
+from ..tools import datalog, logHeader
 from ..tools.misc import latlon2txt
 from ..tools.aero import fpm, kts, ft, g0, Rearth, \
                          vatmos,  vtas2cas, vtas2mach, casormach
@@ -57,53 +57,60 @@ class Traffic(DynamicArrays):
 
         # Define the periodic loggers
         # ToDo: explain what these line sdo in comments (type of logs?)
-        datalog.definePeriodicLogger('SNAPLOG', 'SNAPLOG logfile.', settings.snapdt)
+        datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
         datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
         datalog.definePeriodicLogger('SKYLOG', 'SKYLOG logfile.', settings.skydt)
 
         with RegisterElementParameters(self):
 
-            # Register the following parameters for logging
+            # Register the following parameters for SNAP logging
             with datalog.registerLogParameters('SNAPLOG', self):
                 # Aircraft Info
-                self.id      = []  # identifier (string)
-                self.type    = []  # aircaft type (string)
+                self.id        = []           # identifier (string)
+                self.spawnTime = np.array([]) # aircraft creation times [s]
 
                 # Positions
                 self.lat     = np.array([])  # latitude [deg]
                 self.lon     = np.array([])  # longitude [deg]
                 self.alt     = np.array([])  # altitude [m]
-                self.hdg     = np.array([])  # traffic heading [deg]
-                self.trk     = np.array([])  # track angle [deg]
-
+                
                 # Velocities
                 self.tas     = np.array([])  # true airspeed [m/s]
-                self.gs      = np.array([])  # ground speed [m/s]
-                self.gsnorth = np.array([])  # ground speed [m/s]
-                self.gseast  = np.array([])  # ground speed [m/s]
-                self.cas     = np.array([])  # calibrated airspeed [m/s]
-                self.M       = np.array([])  # mach number
                 self.vs      = np.array([])  # vertical speed [m/s]
-
-                # Atmosphere
-                self.p       = np.array([])  # air pressure [N/m2]
-                self.rho     = np.array([])  # air density [kg/m3]
-                self.Temp    = np.array([])  # air temperature [K]
-                self.dtemp   = np.array([])  # delta t for non-ISA conditions
-
-                # Traffic autopilot settings
-                self.aspd   = np.array([])  # selected spd(CAS) [m/s]
-                self.aptas  = np.array([])  # just for initializing
-                self.ama    = np.array([])  # selected spd above crossover altitude (Mach) [-]
-                self.apalt  = np.array([])  # selected alt[m]
-                self.avs    = np.array([])  # selected vertical speed [m/s]
                 
-                # Flight Statistics Data
-                self.spawnTime = np.array([]) # aircraft creation times [s]
+                # Heading
+                self.hdg     = np.array([])  # traffic heading [deg]
+
+            # Aircraft Info
+            self.type      = []           # aircaft type (string)
+            
+            # Positions
+            self.trk     = np.array([])  # track angle [deg]
+            
+            # Velocities
+            self.gs      = np.array([])  # ground speed [m/s]
+            self.gsnorth = np.array([])  # ground speed [m/s]
+            self.gseast  = np.array([])  # ground speed [m/s]
+            self.cas     = np.array([])  # calibrated airspeed [m/s]
+            self.M       = np.array([])  # mach number
 
             # Whether to perform LNAV and VNAV
             self.swlnav   = np.array([], dtype=np.bool)
             self.swvnav   = np.array([], dtype=np.bool)
+            
+            # Traffic autopilot settings
+            self.aspd   = np.array([])  # selected spd(CAS) [m/s]
+            self.aptas  = np.array([])  # just for initializing
+            self.ama    = np.array([])  # selected spd above crossover altitude (Mach) [-]
+            self.apalt  = np.array([])  # selected alt[m]
+            self.avs    = np.array([])  # selected vertical speed [m/s]
+            
+            # Atmosphere
+            self.p       = np.array([])  # air pressure [N/m2]
+            self.rho     = np.array([])  # air density [kg/m3]
+            self.Temp    = np.array([])  # air temperature [K]
+            self.dtemp   = np.array([])  # delta t for non-ISA conditions
+
 
             # Flight Models
             self.asas   = ASAS(self)

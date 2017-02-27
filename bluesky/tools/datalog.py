@@ -234,9 +234,12 @@ class CSVLogger:
                     return False, 'Turn ' + self.name + ' on with optional dt'
 
             self.open(makeLogfileName(self.name))
-
+            # print out on BlueSky Console when a log is switched ON
+            return True, self.name + " ON" + (". dt [s] = " + str(self.dt) if self.dt>0 else " ") 
         elif args[0] == 'OFF':
             self.reset()
+            #print out to BlueSky Console that logger is switched off
+            return True, self.name + " OFF"
         elif args[0] == 'LISTVARS':
             return True, 'Logger ' + self.name + ' has variables: ' \
                 + self.listallvarnames()

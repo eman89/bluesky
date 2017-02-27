@@ -1,0 +1,5 @@
+# Logging on
+00:00:00.00>SNAPLOG ON 15
+
+# Logging off
+01:00:00.00>SNAPLOG OFF
