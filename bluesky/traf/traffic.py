@@ -97,6 +97,9 @@ class Traffic(DynamicArrays):
                 self.ama    = np.array([])  # selected spd above crossover altitude (Mach) [-]
                 self.apalt  = np.array([])  # selected alt[m]
                 self.avs    = np.array([])  # selected vertical speed [m/s]
+                
+                # Flight Statistics Data
+                self.spawnTime = np.array([]) # aircraft creation times [s]
 
             # Whether to perform LNAV and VNAV
             self.swlnav   = np.array([], dtype=np.bool)
@@ -180,7 +183,7 @@ class Traffic(DynamicArrays):
 
             self.create(acid, actype, aclat, aclon, achdg, acalt, acspd)
 
-    def create(self, acid=None, actype="B744", aclat=None, aclon=None, achdg=None, acalt=None, casmach=None):
+    def create(self, sim, acid=None, actype="B744", aclat=None, aclon=None, achdg=None, acalt=None, casmach=None):
         """Create an aircraft"""
 
         # Check if not already exist
@@ -262,6 +265,9 @@ class Traffic(DynamicArrays):
         # Miscallaneous
         self.coslat[-1] = cos(radians(aclat))  # Cosine of latitude for flat-earth aproximations
         self.eps[-1] = 0.01
+        
+        # Flight Statistics
+        self.spawnTime[-1] = sim.simt
 
         # ----- Submodules of Traffic -----
         self.ap.create()
@@ -298,7 +304,7 @@ class Traffic(DynamicArrays):
         # Update only if there is traffic ---------------------
         if self.ntraf == 0:
             return
-
+        
         #---------- Atmosphere --------------------------------
         self.p, self.rho, self.Temp = vatmos(self.alt)
 

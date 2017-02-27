@@ -227,7 +227,7 @@ def init(sim, traf, scr):
         "CRE": [
             "CRE acid,type,lat,lon,hdg,alt,spd",
             "txt,txt,latlon,hdg,alt,spd",
-            traf.create,
+            lambda *args: traf.create(sim, *args),
             "Create an aircraft"
         ],
         "DEFWPT": [
