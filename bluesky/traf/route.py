@@ -609,13 +609,16 @@ class Route():
                 # Set target speed for autopilot. Autopilot controls TAS and
                 # scenarios is in cas/mach, so conversion needed. Use waypoint
                 # altitude for conversion, because that is the needed combination
-                # in the scenario, and not the current altitude.
+                # in the scenario, and not the current altitude. If altitude is 
+                # not specified for a waypoint, then use the altidue for the
+                # previous waypoint's altitude. This works well for routes with
+                # 1 climb, 1 cruise and 1 descend leg. Same logic used in autopilot.update()
                 spd = self.wpspd[wpidx]
                 if spd > 0:
                     if spd < 2.0:
-                        traf.aptas[idx] = mach2tas(spd, self.wpalt[wpidx])
+                        traf.aptas[idx] = mach2tas(spd, self.wpalt[wpidx]) if self.wpalt[wpidx] >= 0.0 else mach2tas(spd, self.wpalt[wpidx-1])
                     else:
-                        traf.aptas[idx] = cas2tas(spd, self.wpalt[wpidx])
+                        traf.aptas[idx] = cas2tas(spd, self.wpalt[wpidx]) if self.wpalt[wpidx] >= 0.0 else cas2tas(spd, self.wpalt[wpidx-1])
                         
             qdr, dist = geo.qdrdist(traf.lat[idx], traf.lon[idx],
                                 traf.actwp.lat[idx], traf.actwp.lon[idx])

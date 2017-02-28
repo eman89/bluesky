@@ -111,6 +111,7 @@ class Autopilot(DynamicArrays):
                 # ToC waypoint (with speed and alt) and destination. Performance is improved
                 # if a ToD waypoint (with speed) is optionally included. 
                 # IT MAY ALSO WORK FOR OTHER FLIGHTPLAN TYPES, BUT NEEDS TESTING!
+                # Same logic used in route.direct()
                 self.traf.aptas[i] = vcas2tas(spd,alt) if alt>=0.0 else vcas2tas(spd,oldalt)
 
                 # VNAV = FMS ALT/SPD mode
@@ -127,13 +128,13 @@ class Autopilot(DynamicArrays):
             dist2wp   = 60. * nm * np.sqrt(dx * dx + dy * dy)
 
             # VNAV logic: descend as late as possible, climb as soon as possible
-            startdescent = self.traf.swvnav * ((dist2wp < self.dist2vs)+(self.traf.actwp.alt > self.traf.alt))
+            startdescent = self.traf.swvnav * ((dist2wp <= self.dist2vs)+(self.traf.actwp.alt > self.traf.alt))
             
             # If not lnav:Climb/descend if doing so before lnav/vnav was switched off
             #    (because there are no more waypoints). This is needed
             #    to continue descending when you get into a conflict
             #    while descending to the destination (the last waypoint)
-            self.swvnavvs = np.where(self.traf.swlnav, startdescent, dist < self.traf.actwp.turndist)
+            self.swvnavvs = np.where(self.traf.swlnav, startdescent, dist <= self.traf.actwp.turndist)
 
             #Recalculate V/S based on current altitude and distance 
             # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
