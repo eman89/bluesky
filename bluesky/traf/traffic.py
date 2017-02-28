@@ -391,10 +391,10 @@ class Traffic(DynamicArrays):
         self.lon = self.lon + np.degrees(simdt * self.gseast / self.coslat / Rearth)
         
 #        # print out the flight path angle
-        print "Gamma: %s" %(np.degrees(np.arctan2(self.vs,self.tas)))
+#        print "Gamma: %s" %(np.degrees(np.arctan2(self.vs,self.tas)))
 #        print "TAS  : %s" %(self.tas/kts)
 #        print "VS   : %s" %(self.vs/fpm)
-        print
+#        print
 
     def id2idx(self, acid):
         """Find index of aircraft id"""

@@ -198,7 +198,7 @@ class CSVLogger:
                 txtdata = [str(self.simt)] + [num2txt(col) for col in varlist]
 
             # log the data to file
-            np.savetxt(self.file, np.vstack(txtdata).T, delimiter=',', newline='\n', fmt='%s')
+            np.savetxt(self.file, np.vstack(txtdata).T, delimiter=',', newline='\n', fmt='%-13s')
 
     def reset(self):
         self.dt         = self.default_dt

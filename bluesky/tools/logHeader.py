@@ -86,14 +86,15 @@ def snapHeader():
                "TAS [m/s], " + \
                "Vertical Speed [m/s], " + \
                "Heading [deg], " + \
-               "AP ALT [m], " + \
-               "AP SPD (TAS) [m/s], " + \
-               "AP TRK [deg], " + \
-               "AP VS [m/s], " + \
                "Origin Lat [deg], " + \
                "Origin Lon [deg]" + \
                "Destination Lat [deg], " + \
-               "Destination Lon [deg]"
+               "Destination Lon [deg], " + \
+               "ASAS Active [bool], " + \
+               "Pilot ALT [m], " + \
+               "Pilot SPD (TAS) [m/s], " + \
+               "Pilot HDG [deg], " + \
+               "Pilot VS [m/s]" 
 
   lines      = "#######################################################\n" + \
                "SNAP LOG\n" + \

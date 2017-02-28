@@ -2,7 +2,7 @@ import numpy as np
 from ... import settings
 from ...tools.aero import ft, nm
 from ...tools.dynamicarrays import DynamicArrays, RegisterElementParameters
-from ...tools import areafilter, geo
+from ...tools import areafilter, geo, datalog
 
 
 # Import default CD methods
@@ -45,11 +45,15 @@ class ASAS(DynamicArrays):
             # ASAS info per aircraft:
             self.iconf    = []            # index in 'conflicting' aircraft database
 
-            self.active   = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not
             self.trk      = np.array([])  # heading provided by the ASAS [deg]
             self.spd      = np.array([])  # speed provided by the ASAS (eas) [m/s]
             self.alt      = np.array([])  # speed alt by the ASAS [m]
             self.vs       = np.array([])  # speed vspeed by the ASAS [m/s]
+            
+            # Register the following parameters for SNAP logging
+            with datalog.registerLogParameters('SNAPLOG', self):
+                self.active   = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not
+                
 
         # All ASAS variables are initialized in the reset function
         self.reset()

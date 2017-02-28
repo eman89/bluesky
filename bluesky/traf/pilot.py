@@ -16,12 +16,11 @@ class Pilot(DynamicArrays):
                 # Desired aircraft states
                 self.alt = np.array([])  # desired altitude [m]
                 self.spd = np.array([])  # desired speed [m/s]
-                self.trk = np.array([])  # desired track angle [deg]
                 self.vs  = np.array([])  # desired vertical speed [m/s]
+                self.hdg = np.array([])  # desired heading [deg]
             
             # Desired aircraft states
-            self.hdg = np.array([])  # desired heading [deg]
-                
+            self.trk = np.array([])  # desired track angle [deg]
 
     def create(self):
         super(Pilot, self).create()
