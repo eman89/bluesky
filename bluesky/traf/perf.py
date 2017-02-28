@@ -346,7 +346,7 @@ class Perf():
         coeffBS.coeff()
 
         # Flight performance scheduling
-        self.dt  = 0.1           # [s] update interval of performance limits
+        self.dt  = 1.0          # [s] update interval of performance limits
         self.t0  = -self.dt  # [s] last time checked (in terms of simt)
         self.warned2 = False        # Flag: Did we warn for default engine parameters yet?
 
@@ -683,15 +683,17 @@ class Perf():
                   self.climb, self.descent, self.traf.delspd)
 
 
-        # determine vertical speed
-        swvs = (np.abs(self.traf.pilot.spd) > self.traf.eps)
-        vspd = swvs * self.traf.pilot.spd + (1. - swvs) * self.traf.avs * np.sign(self.traf.delalt)
-        swaltsel = np.abs(self.traf.delalt) > np.abs(2. * self.dt * np.abs(vspd))
-        self.traf.vs = swaltsel * vspd  
+        # determine vertical speed. 
+        # THIS IS NOT NEEDED, SINCE TRAF.VS IS UPDATED BEFORE
+        # THE PERFORMANCE IS UPDATED. SO THERES NO NEED TO DO IT TWICE!
+#        swvs = (np.abs(self.traf.pilot.vs) > self.traf.eps)
+#        vspd = swvs * self.traf.pilot.vs + (1. - swvs) * self.traf.avs * np.sign(self.traf.delalt)
+#        swaltsel = np.abs(self.traf.delalt) > np.abs(2. * self.dt * np.abs(vspd))
+#        self.traf.vs = swaltsel * vspd  
 
         # determine thrust
         self.Thr = (((self.traf.vs*self.mass*g0)/(self.ESF*np.maximum(self.traf.eps, self.traf.tas))) + self.D) 
-
+        
         # maximum thrust jet (Bruenig et al., p. 66): 
         mt_jet = self.rThr*(self.traf.rho/rho0)**0.75
 
