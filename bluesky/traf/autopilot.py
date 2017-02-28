@@ -1,7 +1,7 @@
 import numpy as np
 from math import sin, cos, radians
 
-from ..tools import geo
+from ..tools import geo, datalog
 from ..tools.position import txt2pos
 from ..tools.aero import ft, nm, vcas2tas, vtas2cas, vmach2tas, casormach
 from route import Route
@@ -37,6 +37,15 @@ class Autopilot(DynamicArrays):
             # Traffic navigation information
             self.orig = []  # Four letter code of origin airport
             self.dest = []  # Four letter code of destination airport
+            
+            # Register the following parameters for SNAP logging
+            with datalog.registerLogParameters('SNAPLOG', self):
+                
+                # Latitude and longitude of origin and destination [deg]
+                self.origlat = np.array([])
+                self.origlon = np.array([])
+                self.destlat = np.array([])
+                self.destlon = np.array([])
 
         # Route objects
         self.route = []
@@ -395,6 +404,11 @@ class Autopilot(DynamicArrays):
 
         if cmd == "DEST":
             self.dest[idx] = name
+            
+            # update the destination lat/lon variables
+            self.destlat[idx] = lat
+            self.destlon[idx] = lon
+            
             iwp = route.addwpt(self.traf, idx, self.dest[idx], route.dest,
                                lat, lon, 0.0, self.traf.cas[idx])
             # If only waypoint: activate
@@ -416,6 +430,11 @@ class Autopilot(DynamicArrays):
         # Origin: bookkeeping only for now, store in route as origin
         else:
             self.orig[idx] = name
+            
+            # update the origin lat/lon logging variables
+            self.origlat[idx] = lat
+            self.origlon[idx] = lon
+            
             apidx = self.traf.navdb.getaptidx(name)
     
             if apidx < 0:

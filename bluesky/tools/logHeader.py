@@ -5,7 +5,6 @@ Contains functions to write the header for the different log files
 
 '''
 
-from .. import settings
 
 def skyHeader():    
     parameters =  "SimTime [s], "  + \
@@ -22,10 +21,9 @@ def skyHeader():
     lines      = "#######################################################\n" + \
                  "SKY LOG\n" + \
                  "Instantaneous Summary Data For Entire Simulation Area\n" + \
-                 "DT: %s [s]\n" + \
                  "#######################################################\n\n" + \
                  "Parameters [Units]:\n" + \
-                 parameters + "\n" %(settings.skydt)    
+                 parameters + "\n" 
                  
     return lines
 
@@ -45,10 +43,9 @@ def smodelHeader():
     lines      = "#######################################################\n" + \
                  "SMODEL LOG\n" + \
                  "Instantaneous Summary Data For Square Analysis Area\n" + \
-                 "DT: %s [s]\n" + \
                  "#######################################################\n\n" + \
                  "Parameters [Units]:\n" + \
-                 parameters + "\n" %(settings.skydt)    
+                 parameters + "\n"    
                  
     return lines
 
@@ -68,10 +65,9 @@ def cmodelHeader():
     lines      = "#######################################################\n" + \
                  "CMODEL LOG\n" + \
                  "Instantaneous Summary Data For Circular Analysis Area\n" + \
-                 "DT: %s [s]\n" + \
                  "#######################################################\n\n" + \
                  "Parameters [Units]:\n" + \
-                 parameters + "\n" %(settings.skydt)    
+                 parameters + "\n"  
                  
     return lines
 
@@ -99,7 +95,7 @@ def snapHeader():
   lines      = "#######################################################\n" + \
                "SNAP LOG\n" + \
                "Airspace Snapshot Data\n" + \
-               "DT: %s [s]\n" %(settings.snapdt) + \
+               "DT: %s [s]\n" + \
                "#######################################################\n\n" + \
                "Parameters [Units]:\n" + \
                parameters + "\n"
@@ -135,7 +131,6 @@ def flstHeader():
   lines      = "#######################################################\n" + \
                "FLST LOG\n" + \
                "Flight Statistics\n" + \
-               "Event Based Log at Flight Deletion" + \
                "#######################################################\n\n" + \
                "Parameters [Units]:\n" + \
                parameters + "\n"
@@ -175,7 +170,6 @@ def cflHeader():
   lines      = "#######################################################\n" + \
                "CFL LOG\n" + \
                "Conflict Log\n" + \
-               "Event Based Log at the instant of conflict detection" + \
                "#######################################################\n\n" + \
                "Parameters [Units]:\n" + \
                parameters + "\n"
@@ -215,10 +209,9 @@ def instHeader():
   lines      = "#######################################################\n" + \
                "INST LOG\n" + \
                "Instantaneous Conflict Log\n" + \
-               "DT: %s [s]\n" + \
                "#######################################################\n\n" + \
                "Parameters [Units]:\n" + \
-               parameters + "\n" %(settings.instdt)
+               parameters + "\n"
 
   return lines
 
@@ -258,7 +251,6 @@ def intHeader():
   lines      = "#######################################################\n" + \
                "INT LOG\n" + \
                "Intrusion Log\n" + \
-               "Event Based Log at the instant of max intrusion severity" + \
                "#######################################################\n\n" + \
                "Parameters [Units]:\n" + \
                parameters + "\n"

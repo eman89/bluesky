@@ -113,8 +113,8 @@ class Traffic(DynamicArrays):
 
 
             # Flight Models
-            self.asas   = ASAS(self)
             self.ap     = Autopilot(self)
+            self.asas   = ASAS(self)
             self.pilot  = Pilot(self)
             self.adsb   = ADSB(self)
             self.trails = Trails(self)

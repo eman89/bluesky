@@ -14,6 +14,7 @@
 
 # Sim speed setting
 00:00:00.00>FF
+00:00:00.00>DT 0.05
 
 # PCALL area settings
 00:00:00.00>PCALL areaDefiniton.scn
