@@ -43,9 +43,6 @@ class Area:
             # Update self.inside with the new inside
             self.inside = inside
             
-            # Log the flight statistics for the aircraft about to be deleted
-            self.traf.logFLST(t, delAircraftidx)
-            
             # delete all aicraft in delAircraftidx and log their flight statistics
             for acid in [self.traf.id[idx] for idx in delAircraftidx]:
                 self.traf.delete(acid)

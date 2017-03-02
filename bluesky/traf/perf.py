@@ -746,9 +746,7 @@ class Perf():
         self.post_flight = np.where(self.descent, True, self.post_flight)
         
         # when landing, we would like to stop the aircraft.
-        # NOT NEEDED FOR EMMANUELS EXPTs
-#        self.traf.aspd = np.where((self.traf.alt <0.5)*(self.post_flight)*self.pf_flag, 0.0, self.traf.aspd)
-        
+        self.traf.aspd = np.where((self.traf.alt <0.5)*(self.post_flight)*self.pf_flag, 0.0, self.traf.aspd)
         # the impulse for reducing the speed to 0 should only be given once,
         # otherwise taxiing will be impossible afterwards
         self.pf_flag = np.where ((self.traf.alt <0.5)*(self.post_flight), False, self.pf_flag)
