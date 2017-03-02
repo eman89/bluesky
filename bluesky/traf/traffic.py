@@ -56,11 +56,13 @@ class Traffic(DynamicArrays):
         self.wind = WindSim()
 
         # Define the periodic loggers
-        # ToDo: explain what these line sdo in comments (type of logs?)
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
         datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
         datalog.definePeriodicLogger('SKYLOG', 'SKYLOG logfile.', settings.skydt)
-
+        
+        # Define event based loggers
+        self.flstlog = datalog.defineLogger("FLSTLOG", logHeader.flstHeader())    
+        
         with RegisterElementParameters(self):
 
             # Register the following parameters for SNAP logging
@@ -80,9 +82,14 @@ class Traffic(DynamicArrays):
                 
                 # Heading
                 self.hdg     = np.array([])  # traffic heading [deg]
+            
+            # Efficiency related variables
+            self.distance2D = np.array([])   # Horizontal flight distance [m]
+            self.distance3D = np.array([])   # 3D flight distance [m]
+            self.work       = np.array([])   # Work Done [J]
 
             # Aircraft Info
-            self.type      = []           # aircaft type (string)
+            self.type    = []            # aircaft type (string)
             
             # Positions
             self.trk     = np.array([])  # track angle [deg]
@@ -144,9 +151,33 @@ class Traffic(DynamicArrays):
             # Miscallaneous
             self.coslat = np.array([])  # Cosine of latitude for computations
             self.eps    = np.array([])  # Small nonzero numbers
-
+            
         # Default bank angles per flight phase
         self.bphase = np.deg2rad(np.array([15, 35, 35, 35, 15, 45]))
+        
+        # Register the following parameters for FLST logging
+        with datalog.registerLogParameters('FLSTLOG', self):
+            self.flogid = []
+            self.flogspawntime = []
+            self.flogflightime = []
+            self.flogdistance2D = []
+            self.flogdistance3D = []
+            self.flogwork = []
+            self.floglat = []
+            self.floglon = []
+            self.flogalt = []
+            self.flogtas = []
+            self.flogvs = []
+            self.floghdg = []
+            self.flogoriglat = []
+            self.flogoriglon = []
+            self.flogdestlat = []
+            self.flogdestlon = []
+            self.flogasasactive = []
+            self.flogpilotalt = []
+            self.flogpilottas = []
+            self.flogpilotvs = []
+            self.flogpilothdg = []
 
         self.reset(navdb)
 
@@ -333,6 +364,9 @@ class Traffic(DynamicArrays):
 
         #---------- Performance Update ------------------------
         self.perf.perf(simt)
+        
+        #---------- Flight Efficiency Update-------------------
+        self.UpdateEfficiency(simdt)
 
         #---------- Simulate Turbulence -----------------------
         self.Turbulence.Woosh(simdt)
@@ -384,18 +418,36 @@ class Traffic(DynamicArrays):
             self.trk = np.degrees(np.arctan2(self.gseast, self.gsnorth)) % 360.
 
     def UpdatePosition(self, simdt):
-        # Update position
+        # Update position 
         self.alt = np.where(self.swaltsel, self.alt + self.vs * simdt, self.pilot.alt)
         self.lat = self.lat + np.degrees(simdt * self.gsnorth / Rearth)
         self.coslat = np.cos(np.deg2rad(self.lat))
         self.lon = self.lon + np.degrees(simdt * self.gseast / self.coslat / Rearth)
         
-#        # print out the flight path angle
+        # print out the flight path angle
 #        print "Gamma: %s" %(np.degrees(np.arctan2(self.vs,self.tas)))
 #        print "TAS  : %s" %(self.tas/kts)
 #        print "VS   : %s" %(self.vs/fpm)
 #        print
-
+    
+    def UpdateEfficiency(self, simdt):
+        # Update flight efficiency metrics
+        
+        # Horizontal distance [m]
+        self.distance2D = self.distance2D + (simdt*self.gs)
+        
+        # 3D distance [m]
+        resultantspd = np.sqrt(self.gs*self.gs + self.vs*self.vs)
+        self.distance3D = self.distance3D + (simdt*resultantspd)
+        
+        # Work Done [MJ] = Force * distance; distance = spd*time
+        self.work = self.work + (self.perf.Thr*simdt*resultantspd)
+        
+        print "GS = %s" %(self.gs)
+        print "VS = %s" %(self.vs)
+        print "RS = %s" %(resultantspd)
+        print
+        
     def id2idx(self, acid):
         """Find index of aircraft id"""
         try:
@@ -640,3 +692,60 @@ class Traffic(DynamicArrays):
                 scr.echo(lines[:-1])  # exclude final newline
             else:
                 return False,"No airway legs found for ",key
+    
+    def logFLST(self, simt, delAircraftidx):
+        # Updates the arrays that are used for FLST logging
+        # FLST statistics logged when aircraft are deleted
+        # delAircraftidx = index of aircraft to be deleted
+    
+        if len(delAircraftidx)>0:
+            
+            # Reset variables
+            self.flogid = []
+            self.flogspawntime = []
+            self.flogflightime = []
+            self.flogdistance2D = []
+            self.flogdistance3D = []
+            self.flogwork = []
+            self.floglat = []
+            self.floglon = []
+            self.flogalt = []
+            self.flogtas = []
+            self.flogvs = []
+            self.floghdg = []
+            self.flogoriglat = []
+            self.flogoriglon = []
+            self.flogdestlat = []
+            self.flogdestlon = []
+            self.flogasasactive = []
+            self.flogpilotalt = []
+            self.flogpilottas = []
+            self.flogpilotvs = []
+            self.flogpilothdg = []
+            
+            # Update FLST arrays
+            self.flogid = np.array(self.id)[delAircraftidx]
+            self.flogspawntime = self.spawnTime[delAircraftidx]
+            self.flogflightime = simt - self.spawnTime[delAircraftidx]
+            self.flogdistance2D = self.distance2D[delAircraftidx]
+            self.flogdistance3D = self.distance3D[delAircraftidx]
+            self.flogwork = self.work[delAircraftidx]
+            self.floglat = self.lat[delAircraftidx]
+            self.floglon = self.lon[delAircraftidx]
+            self.flogalt = self.alt[delAircraftidx]
+            self.flogtas = self.tas[delAircraftidx]
+            self.flogvs  = self.vs[delAircraftidx]
+            self.floghdg = self.hdg[delAircraftidx]
+            self.flogoriglat = self.ap.origlat[delAircraftidx]
+            self.flogoriglon = self.ap.origlon[delAircraftidx]
+            self.flogdestlat = self.ap.destlat[delAircraftidx]
+            self.flogdestlon = self.ap.destlon[delAircraftidx]
+            self.flogasasactive = self.asas.active[delAircraftidx]
+            self.flogpilotalt = self.pilot.alt[delAircraftidx]
+            self.flogpilottas = self.pilot.spd[delAircraftidx]
+            self.flogpilotvs = self.pilot.vs[delAircraftidx]
+            self.flogpilothdg = self.pilot.hdg[delAircraftidx]
+            
+            # Call the logger
+            self.flstlog.log()
+            
