@@ -174,7 +174,7 @@ class CSVLogger:
         columns = ['simt']
         for logset in self.selvars:
             columns += logset[1]
-        self.file.write('# ' + str.join(', ', columns) + '\n')
+#        self.file.write('# ' + str.join(', ', columns) + '\n')
 
     def isopen(self):
         return self.file is not None
