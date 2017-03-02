@@ -138,33 +138,35 @@ def flstHeader():
 
 
 def cflHeader():
-  parameters = "Simulation Time  [s], " + \
+  parameters = "Simulation Time [s], " + \
                "Call sign id1 [-], " + \
-               "tinconf id1   [s], " + \
-               "toutconf id1  [s], " + \
-               "tcpa id1  [s], " + \
+               "tinconf id1  [s], " + \
+               "toutconf id1 [s], " + \
+               "tcpa id1 [s], " + \
                "Latitude id1 [deg], " + \
                "Longitude id1 [deg], " + \
-               "Altitude id1  [m], " + \
-               "Latitude cpa id1  [deg], " + \
-               "Longitude cpa id1 [deg], " + \
-               "Altitude cpa id1  [m], " + \
+               "Altitude id1 [m], " + \
                "TAS id1 [m/s], " + \
                "Vertical speed id1  [m/s], " + \
                "Heading id1 [deg], " + \
+               "Latitude cpa id1 [deg], " + \
+               "Longitude cpa id1 [deg], " + \
+               "Altitude cpa id1 [m], " + \
+               "ASAS active id1 [bool], " + \
                "Call sign id2 [-], " + \
                "tinconf id2 [s], " + \
-               "toutconf id2  [s], " + \
-               "tcpa id2  [s, " + \
-               "Latitude id2  [deg], " + \
+               "toutconf id2 [s], " + \
+               "tcpa id2 [s], " + \
+               "Latitude id2 [deg], " + \
                "Longitude id2 [deg], " + \
-               "Altitude id2  [m], " + \
-               "Latitude cpa id2  [deg], " + \
-               "Longitude cpa id2 [deg], " + \
-               "Altitude cpa id2  [m], " + \
+               "Altitude id2 [m], " + \
                "TAS id2 [m/s], " + \
-               "Vertical speed id2  [m/s], " + \
-               "Heading id2 [deg]"
+               "Vertical speed id2 [m/s], " + \
+               "Heading id2 [deg], " + \
+               "Latitude cpa id2 [deg], " + \
+               "Longitude cpa id2 [deg], " + \
+               "Altitude cpa id2 [m], " + \
+               "ASAS active id2 [bool]"
 
   lines      = "#######################################################\n" + \
                "CFL LOG\n" + \
@@ -177,33 +179,35 @@ def cflHeader():
 
 
 def instHeader():
-  parameters = "Simulation Time  [s], " + \
+  parameters = "Simulation Time [s], " + \
                "Call sign id1 [-], " + \
-               "tinconf id1   [s], " + \
-               "toutconf id1  [s], " + \
-               "tcpa id1  [s], " + \
+               "tinconf id1  [s], " + \
+               "toutconf id1 [s], " + \
+               "tcpa id1 [s], " + \
                "Latitude id1 [deg], " + \
                "Longitude id1 [deg], " + \
-               "Altitude id1  [m], " + \
-               "Latitude cpa id1  [deg], " + \
-               "Longitude cpa id1 [deg], " + \
-               "Altitude cpa id1  [m], " + \
+               "Altitude id1 [m], " + \
                "TAS id1 [m/s], " + \
                "Vertical speed id1  [m/s], " + \
                "Heading id1 [deg], " + \
+               "Latitude cpa id1 [deg], " + \
+               "Longitude cpa id1 [deg], " + \
+               "Altitude cpa id1 [m], " + \
+               "ASAS active id1 [bool], " + \
                "Call sign id2 [-], " + \
                "tinconf id2 [s], " + \
-               "toutconf id2  [s], " + \
-               "tcpa id2  [s, " + \
-               "Latitude id2  [deg], " + \
+               "toutconf id2 [s], " + \
+               "tcpa id2 [s], " + \
+               "Latitude id2 [deg], " + \
                "Longitude id2 [deg], " + \
-               "Altitude id2  [m], " + \
-               "Latitude cpa id2  [deg], " + \
-               "Longitude cpa id2 [deg], " + \
-               "Altitude cpa id2  [m], " + \
+               "Altitude id2 [m], " + \
                "TAS id2 [m/s], " + \
-               "Vertical speed id2  [m/s], " + \
-               "Heading id2 [deg]"
+               "Vertical speed id2 [m/s], " + \
+               "Heading id2 [deg], " + \
+               "Latitude cpa id2 [deg], " + \
+               "Longitude cpa id2 [deg], " + \
+               "Altitude cpa id2 [m], " + \
+               "ASAS active id2 [bool]"
 
   lines      = "#######################################################\n" + \
                "INST LOG\n" + \
@@ -216,33 +220,35 @@ def instHeader():
 
 
 def intHeader():
-  parameters = "Simulation Time  [s], " + \
+  parameters = parameters = "Simulation Time [s], " + \
                "Call sign id1 [-], " + \
-               "tinconf id1   [s], " + \
-               "toutconf id1  [s], " + \
-               "tcpa id1  [s], " + \
+               "tinconf id1  [s], " + \
+               "toutconf id1 [s], " + \
+               "tcpa id1 [s], " + \
                "Latitude id1 [deg], " + \
                "Longitude id1 [deg], " + \
-               "Altitude id1  [m], " + \
-               "Latitude cpa id1  [deg], " + \
-               "Longitude cpa id1 [deg], " + \
-               "Altitude cpa id1  [m], " + \
+               "Altitude id1 [m], " + \
                "TAS id1 [m/s], " + \
                "Vertical speed id1  [m/s], " + \
                "Heading id1 [deg], " + \
+               "Latitude cpa id1 [deg], " + \
+               "Longitude cpa id1 [deg], " + \
+               "Altitude cpa id1 [m], " + \
+               "ASAS active id1 [bool], " + \
                "Call sign id2 [-], " + \
                "tinconf id2 [s], " + \
-               "toutconf id2  [s], " + \
-               "tcpa id2  [s, " + \
-               "Latitude id2  [deg], " + \
+               "toutconf id2 [s], " + \
+               "tcpa id2 [s], " + \
+               "Latitude id2 [deg], " + \
                "Longitude id2 [deg], " + \
-               "Altitude id2  [m], " + \
-               "Latitude cpa id2  [deg], " + \
-               "Longitude cpa id2 [deg], " + \
-               "Altitude cpa id2  [m], " + \
+               "Altitude id2 [m], " + \
                "TAS id2 [m/s], " + \
-               "Vertical speed id2  [m/s], " + \
+               "Vertical speed id2 [m/s], " + \
                "Heading id2 [deg], " + \
+               "Latitude cpa id2 [deg], " + \
+               "Longitude cpa id2 [deg], " + \
+               "Altitude cpa id2 [m], " + \
+               "ASAS active id2 [bool], " + \
                "Max Intrusion Severity [-], " + \
                "Horiz Intrusion at Max IS [-], " + \
                "Vert Intrusion at Max IS [-]"
