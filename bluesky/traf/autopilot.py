@@ -121,7 +121,9 @@ class Autopilot(DynamicArrays):
                 # if a ToD waypoint (with speed) is optionally included. 
                 # IT MAY ALSO WORK FOR OTHER FLIGHTPLAN TYPES, BUT NEEDS TESTING!
                 # Same logic used in route.direct()
-                self.traf.aptas[i] = vcas2tas(spd,alt) if alt>=0.0 else vcas2tas(spd,oldalt)
+                desspd = spd if spd >= 0.0 else oldspd
+                desalt = alt if alt >= 0.0 else oldalt
+                self.traf.aptas[i] = vcas2tas(desspd,desalt)
 
                 # VNAV = FMS ALT/SPD mode
                 self.ComputeVNAV(i, toalt, xtoalt)

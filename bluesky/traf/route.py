@@ -613,12 +613,13 @@ class Route():
                 # not specified for a waypoint, then use the altidue for the
                 # previous waypoint's altitude. This works well for routes with
                 # 1 climb, 1 cruise and 1 descend leg. Same logic used in autopilot.update()
-                spd = self.wpspd[wpidx]
-                if spd > 0:
-                    if spd < 2.0:
-                        traf.aptas[idx] = mach2tas(spd, self.wpalt[wpidx]) if self.wpalt[wpidx] >= 0.0 else mach2tas(spd, self.wpalt[wpidx-1])
+                desspd = self.wpspd[wpidx] if self.wpspd[wpidx] >= 0.0 else self.wpspd[wpidx-1]
+                desalt = self.wpalt[wpidx] if self.wpalt[wpidx] >= 0.0 else self.wpalt[wpidx-1]
+                if desspd > 0:
+                    if desspd < 2.0:
+                        traf.aptas[idx] = mach2tas(desspd, desalt)
                     else:
-                        traf.aptas[idx] = cas2tas(spd, self.wpalt[wpidx]) if self.wpalt[wpidx] >= 0.0 else cas2tas(spd, self.wpalt[wpidx-1])
+                        traf.aptas[idx] = cas2tas(desspd, desalt)
                         
             qdr, dist = geo.qdrdist(traf.lat[idx], traf.lon[idx],
                                 traf.actwp.lat[idx], traf.actwp.lon[idx])
