@@ -443,11 +443,6 @@ class Traffic(DynamicArrays):
         # Work Done [MJ] = Force * distance; distance = spd*time
         self.work = self.work + (self.perf.Thr*simdt*resultantspd)
         
-        print "GS = %s" %(self.gs)
-        print "VS = %s" %(self.vs)
-        print "RS = %s" %(resultantspd)
-        print
-        
     def id2idx(self, acid):
         """Find index of aircraft id"""
         try:
