@@ -220,7 +220,7 @@ def instHeader():
 
 
 def intHeader():
-  parameters = parameters = "Simulation Time [s], " + \
+  parameters = "Simulation Time [s], " + \
                "Call sign id1 [-], " + \
                "tinconf id1  [s], " + \
                "toutconf id1 [s], " + \
