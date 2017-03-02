@@ -89,8 +89,8 @@ def snapHeader():
                "ASAS Active [bool], " + \
                "Pilot ALT [m], " + \
                "Pilot SPD (TAS) [m/s], " + \
-               "Pilot HDG [deg], " + \
-               "Pilot VS [m/s]" 
+               "Pilot VS [m/s], " + \
+               "Pilot HDG [deg]"
 
   lines      = "#######################################################\n" + \
                "SNAP LOG\n" + \
@@ -108,10 +108,8 @@ def flstHeader():
                "Call sign [-], " + \
                "Spawn Time [s], " + \
                "Flight time [s], " + \
-               "Direct Distance 2D [m], " + \
                "Actual Distance 2D [m], " + \
                "Actual Distance 3D [m], " + \
-               "Distance to Destination [m], " + \
                "Work Done [J], " + \
                "Latitude [deg], " + \
                "Longitude [deg], " + \
@@ -119,14 +117,15 @@ def flstHeader():
                "TAS [m/s], " + \
                "Vertical Speed [m/s], " + \
                "Heading [deg], " + \
-               "AP ALT [m], " + \
-               "AP SPD (TAS) [m/s], " + \
-               "AP TRK [deg], " + \
-               "AP VS [m/s], " + \
                "Origin Lat [deg], " + \
-               "Origin Lon [deg],  " + \
+               "Origin Lon [deg]" + \
                "Destination Lat [deg], " + \
-               "Destination Lon [deg]"
+               "Destination Lon [deg], " + \
+               "ASAS Active [bool], " + \
+               "Pilot ALT [m], " + \
+               "Pilot SPD (TAS) [m/s], " + \
+               "Pilot HDG [deg], " + \
+               "Pilot VS [m/s]" 
 
   lines      = "#######################################################\n" + \
                "FLST LOG\n" + \
