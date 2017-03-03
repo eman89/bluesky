@@ -8,15 +8,15 @@ Contains functions to write the header for the different log files
 
 def skyHeader():    
     parameters =  "SimTime [s], "  + \
+                  "N Total Inst Aircraft [-], " + \
                   "N Cruising Aircraft [-], " + \
                   "N Climbing/Descending (C/D) Aicraft [-], " + \
-                  "N Total Inst Aircraft [-], " + \
+                  "Average Absolute Climb Angle for All Aircraft [deg], " + \
+                  "Average Absolute Climb Angle for C/D Aircraft [deg], " + \
+                  "N Total Conflicts [-], " + \
                   "N Cruise-Cruise Conflicts [-], " + \
                   "N Cruise-C/D Conflicts [-], " + \
-                  "N C/D-C/D Conflicts [-], " + \
-                  "N Total Conflicts [-], " + \
-                  "Average Absolute Climb Angle for C/D Aircraft [deg], " + \
-                  "Average Absolute Climb Angle for All Aircraft [deg]"
+                  "N C/D-C/D Conflicts [-]"            
     
     lines      = "#######################################################\n" + \
                  "SKY LOG\n" + \
@@ -118,7 +118,7 @@ def flstHeader():
                "Vertical Speed [m/s], " + \
                "Heading [deg], " + \
                "Origin Lat [deg], " + \
-               "Origin Lon [deg]" + \
+               "Origin Lon [deg], " + \
                "Destination Lat [deg], " + \
                "Destination Lon [deg], " + \
                "ASAS Active [bool], " + \

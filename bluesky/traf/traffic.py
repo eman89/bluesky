@@ -57,11 +57,44 @@ class Traffic(DynamicArrays):
 
         # Define the periodic loggers
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
-        datalog.definePeriodicLogger('SKYLOG', 'SKYLOG logfile.', settings.skydt)
+        datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
         
         # Define event based loggers
         self.flstlog = datalog.defineLogger("FLSTLOG", logHeader.flstHeader())    
         
+        # Register the following parameters for SKY logging
+        with datalog.registerLogParameters('SKYLOG', self):
+            self.ntraf = 0
+            self.ntrafCruising = 0
+            self.ntrafVS = 0
+            self.gammaAll = 0.0 # [deg]            
+            self.gammaVS = 0.0 # [deg]
+        
+        # Register the following parameters for FLST logging
+        with datalog.registerLogParameters('FLSTLOG', self):
+            self.flogid = []
+            self.flogspawntime = []
+            self.flogflightime = []
+            self.flogdistance2D = []
+            self.flogdistance3D = []
+            self.flogwork = []
+            self.floglat = []
+            self.floglon = []
+            self.flogalt = []
+            self.flogtas = []
+            self.flogvs = []
+            self.floghdg = []
+            self.flogoriglat = []
+            self.flogoriglon = []
+            self.flogdestlat = []
+            self.flogdestlon = []
+            self.flogasasactive = []
+            self.flogpilotalt = []
+            self.flogpilottas = []
+            self.flogpilotvs = []
+            self.flogpilothdg = []            
+        
+        # Register the following parameters as Dynamic Arrays 
         with RegisterElementParameters(self):
 
             # Register the following parameters for SNAP logging
@@ -86,6 +119,9 @@ class Traffic(DynamicArrays):
             self.distance2D = np.array([])   # Horizontal flight distance [m]
             self.distance3D = np.array([])   # 3D flight distance [m]
             self.work       = np.array([])   # Work Done [J]
+            
+            # Flight path angle [deg]
+            self.gamma = np.array([])
 
             # Aircraft Info
             self.type    = []            # aircaft type (string)
@@ -116,7 +152,6 @@ class Traffic(DynamicArrays):
             self.rho     = np.array([])  # air density [kg/m3]
             self.Temp    = np.array([])  # air temperature [K]
             self.dtemp   = np.array([])  # delta t for non-ISA conditions
-
 
             # Flight Models
             self.ap     = Autopilot(self)
@@ -154,37 +189,19 @@ class Traffic(DynamicArrays):
         # Default bank angles per flight phase
         self.bphase = np.deg2rad(np.array([15, 35, 35, 35, 15, 45]))
         
-        # Register the following parameters for FLST logging
-        with datalog.registerLogParameters('FLSTLOG', self):
-            self.flogid = []
-            self.flogspawntime = []
-            self.flogflightime = []
-            self.flogdistance2D = []
-            self.flogdistance3D = []
-            self.flogwork = []
-            self.floglat = []
-            self.floglon = []
-            self.flogalt = []
-            self.flogtas = []
-            self.flogvs = []
-            self.floghdg = []
-            self.flogoriglat = []
-            self.flogoriglon = []
-            self.flogdestlat = []
-            self.flogdestlon = []
-            self.flogasasactive = []
-            self.flogpilotalt = []
-            self.flogpilottas = []
-            self.flogpilotvs = []
-            self.flogpilothdg = []
-
         self.reset(navdb)
 
     def reset(self, navdb):
         # This ensures that the traffic arrays (which size is dynamic)
         # are all reset as well, so all lat,lon,sdp etc but also objects adsb
         super(Traffic, self).reset()
+
+        # SKY Log count variables reset 
         self.ntraf = 0
+        self.ntrafCruising = 0
+        self.ntrafVS = 0
+        self.gammaAll = 0.0 # [deg]            
+        self.gammaVS = 0.0 # [deg]
 
         # Reset models
         self.wind.clear()
@@ -203,6 +220,9 @@ class Traffic(DynamicArrays):
         # Insert your BADA files to the folder "BlueSky/data/coefficients/BADA"
         # for working with EUROCONTROL`s Base of Aircraft Data revision 3.12
         self.perf    = Perf(self)
+        
+        # VS threshold to determine which aircraft are cruising aircraft [m/s]
+        self.cruiseLimVS = 25.0*fpm
 
     def mcreate(self, count, actype=None, alt=None, spd=None, dest=None, area=None):
         """ Create multiple random aircraft in a specified area """
@@ -305,6 +325,14 @@ class Traffic(DynamicArrays):
         
         # Flight Statistics
         self.spawnTime[-1] = sim.simt
+        
+        # Efficiency related variables
+        self.distance2D[-1] = 0.0   # Horizontal flight distance [m]
+        self.distance3D[-1] = 0.0   # 3D flight distance [m]
+        self.work[-1]       = 0.0   # Work Done [J]
+        
+        # Flight path angle [deg]
+        self.gamma[-1] = np.degrees(np.arctan2(self.vs[-1],self.tas[-1]))
 
         # ----- Submodules of Traffic -----
         self.ap.create()
@@ -364,15 +392,19 @@ class Traffic(DynamicArrays):
         #---------- Performance Update ------------------------
         self.perf.perf(simt)
         
-        #---------- Flight Efficiency Update-------------------
-        self.UpdateEfficiency(simdt)
-
         #---------- Simulate Turbulence -----------------------
         self.Turbulence.Woosh(simdt)
 
         #---------- Aftermath ---------------------------------
         self.trails.update(simt)
         self.area.check(simt)
+        
+        #---------- Flight Efficiency Update ------------------
+        self.UpdateEfficiency(simdt)
+        
+        #---------- SKY/MODEL Logs Traf Count Update ----------
+        self.UpdateTrafCountSkyLog()
+        
         return
 
     def UpdateAirSpeed(self, simdt, simt):
@@ -422,6 +454,9 @@ class Traffic(DynamicArrays):
         self.lat = self.lat + np.degrees(simdt * self.gsnorth / Rearth)
         self.coslat = np.cos(np.deg2rad(self.lat))
         self.lon = self.lon + np.degrees(simdt * self.gseast / self.coslat / Rearth)
+        
+        # Update flight path angle [deg]
+        self.gamma = np.degrees(np.arctan2(self.vs,self.tas))
         
         # print out the flight path angle
 #        print "Gamma: %s" %(np.degrees(np.arctan2(self.vs,self.tas)))
@@ -743,3 +778,11 @@ class Traffic(DynamicArrays):
             # Call the logger
             self.flstlog.log()
             
+    def UpdateTrafCountSkyLog(self):
+        # Update intantaneous traffic counts and average flight path angles for Sky Log
+        # note ntraf is already updated in traf.create() and traf.delete()
+        self.ntrafCruising = len(self.vs[np.abs(self.vs) <= self.cruiseLimVS])
+        self.ntrafVS = self.ntraf - self.ntrafCruising
+        self.gammaAll = np.average(np.abs(self.gamma)) # deg
+        self.gammaVS = np.average(np.abs(self.gamma[np.abs(self.vs) > self.cruiseLimVS])) # [deg]
+        

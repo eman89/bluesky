@@ -64,6 +64,13 @@ class ASAS(DynamicArrays):
         # Create periodic ASAS loggers
         datalog.definePeriodicLogger('INSTLOG', logHeader.instHeader(), settings.instdt)
         
+        # Register the following parameters for SKY logging
+        with datalog.registerLogParameters('SKYLOG', self):
+            self.ncfl = 0
+            self.ncflCruising = 0
+            self.ncflCruisingVS = 0
+            self.ncflVS = 0            
+        
         # Register the following parameters for CFL logging
         with datalog.registerLogParameters('CFLLOG', self):
             self.clogid1 = []
@@ -226,6 +233,12 @@ class ASAS(DynamicArrays):
         self.LOSmaxsev    = []
         self.LOShmaxsev   = []
         self.LOSvmaxsev   = []
+        
+        # Reset Sky log asas parameters
+        self.ncfl = 0
+        self.ncflCruising = 0
+        self.ncflCruisingVS = 0
+        self.ncflVS = 0 
 
     def toggle(self, flag=None):
         if flag is None:

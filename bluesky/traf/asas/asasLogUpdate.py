@@ -1,8 +1,28 @@
 import numpy as np
 import gc
-
+from ...tools.aero import fpm
 
 def asasLogUpdate(dbconf, traf):
+    
+    # SKYLOG START ------------------------------------------------------------
+    
+    # Total number of instantaneous conflicts
+    dbconf.ncfl = len(dbconf.conflist_now)
+    
+    # vertical speeds of aircraft in the instantaneous conflict lists 
+    vsid1 = traf.vs[dbconf.instlogi]
+    vsid2 = traf.vs[dbconf.instlogj]
+        
+    # Number of instantaneous conflicts between cruising aircraft
+    dbconf.ncflCruising = sum((np.abs(vsid1)<=traf.cruiseLimVS)*(np.abs(vsid2)<=traf.cruiseLimVS))
+    
+    # Number of instantaneous conflicts between cruising and C/D aircraft 
+    dbconf.ncflCruisingVS = sum((np.abs(vsid1)<=traf.cruiseLimVS)*(np.abs(vsid2)>traf.cruiseLimVS)) + sum((np.abs(vsid1)>(25.0*fpm))*(np.abs(vsid2)<=(25.0*fpm)))
+    
+    # Number of instantaneous conflicts between C/D aircraft
+    dbconf.ncflVS = sum((np.abs(vsid1)>traf.cruiseLimVS)*(np.abs(vsid2)>traf.cruiseLimVS)) 
+    
+    # SKYLOG END --------------------------------------------------------------
         
     # CFLLOG  START -----------------------------------------------------------
     # NOTE: some of the varaibles (which are based on lists ) are updated 
