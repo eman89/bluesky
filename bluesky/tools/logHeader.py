@@ -231,9 +231,6 @@ def intHeader():
                "TAS id1 [m/s], " + \
                "Vertical speed id1  [m/s], " + \
                "Heading id1 [deg], " + \
-               "Latitude cpa id1 [deg], " + \
-               "Longitude cpa id1 [deg], " + \
-               "Altitude cpa id1 [m], " + \
                "ASAS active id1 [bool], " + \
                "Call sign id2 [-], " + \
                "tinconf id2 [s], " + \
@@ -245,9 +242,6 @@ def intHeader():
                "TAS id2 [m/s], " + \
                "Vertical speed id2 [m/s], " + \
                "Heading id2 [deg], " + \
-               "Latitude cpa id2 [deg], " + \
-               "Longitude cpa id2 [deg], " + \
-               "Altitude cpa id2 [m], " + \
                "ASAS active id2 [bool], " + \
                "Max Intrusion Severity [-], " + \
                "Horiz Intrusion at Max IS [-], " + \

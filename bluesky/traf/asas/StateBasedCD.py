@@ -13,7 +13,7 @@ def detect(dbconf, traf, simt):
     if not dbconf.swasas:
         return
 
-     # Reset lists before new CD
+     # Reset asas lists before new CD
     dbconf.iconf        = [[] for ac in range(traf.ntraf)]
     dbconf.nconf        = 0
     
@@ -25,6 +25,29 @@ def detect(dbconf, traf, simt):
     dbconf.LOSlist_now  = []
     dbconf.conflist_now = []
     dbconf.confpairs    = []
+    
+    # Reset (some) asas logging lists before new CD
+    dbconf.clogi         = []
+    dbconf.clogj         = []
+    dbconf.clogid1       = []
+    dbconf.clogid2       = []
+    dbconf.cloglatcpaid1 = []
+    dbconf.clogloncpaid1 = []
+    dbconf.clogaltcpaid1 = []
+    dbconf.cloglatcpaid2 = []
+    dbconf.clogloncpaid2 = []
+    dbconf.clogaltcpaid2 = []
+    
+    dbconf.instlogi         = []
+    dbconf.instlogj         = []
+    dbconf.instlogid1       = []
+    dbconf.instlogid2       = []
+    dbconf.instloglatcpaid1 = []
+    dbconf.instlogloncpaid1 = []
+    dbconf.instlogaltcpaid1 = []
+    dbconf.instloglatcpaid2 = []
+    dbconf.instlogloncpaid2 = []
+    dbconf.instlogaltcpaid2 = []
 
     # Horizontal conflict ---------------------------------------------------------
 
@@ -182,6 +205,17 @@ def detect(dbconf, traf, simt):
         if combi not in dbconf.conflist_active and combi2 not in dbconf.conflist_active:
             dbconf.nconf_total = dbconf.nconf_total + 1            
             dbconf.conflist_active.append(combi)
+            # Now get the stuff you need for the CFLLOG variables!
+            dbconf.clogi.append(i)
+            dbconf.clogj.append(j)
+            dbconf.clogid1.append(combi[0])
+            dbconf.clogid2.append(combi[1])
+            dbconf.cloglatcpaid1.append(lati)
+            dbconf.clogloncpaid1.append(loni)
+            dbconf.clogaltcpaid1.append(alti)
+            dbconf.cloglatcpaid2.append(latj)
+            dbconf.clogloncpaid2.append(lonj)
+            dbconf.clogaltcpaid2.append(altj)
            
             # If RESOSPAWNCHECK is active, then check if this conflict cotains
             # an aircraft that is just spawned, and if that conflict is a very short term conflict.
@@ -195,6 +229,17 @@ def detect(dbconf, traf, simt):
         # and some variables related INSTLOG (others updated in asasLogUpdate())
         if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
             dbconf.conflist_now.append(combi)
+            # Now get the stuff you need for the INSTLOG variables!
+            dbconf.instlogi.append(i)
+            dbconf.instlogj.append(j)
+            dbconf.instlogid1.append(combi[0])
+            dbconf.instlogid2.append(combi[1])
+            dbconf.instloglatcpaid1.append(lati)
+            dbconf.instlogloncpaid1.append(loni)
+            dbconf.instlogaltcpaid1.append(alti)
+            dbconf.instloglatcpaid2.append(latj)
+            dbconf.instlogloncpaid2.append(lonj)
+            dbconf.instlogaltcpaid2.append(altj)
                                                 
         # Check if a LOS occured
         dx     = (traf.lat[i] - traf.lat[j]) * 111319.

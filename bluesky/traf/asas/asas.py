@@ -2,7 +2,8 @@ import numpy as np
 from ... import settings
 from ...tools.aero import ft, nm
 from ...tools.dynamicarrays import DynamicArrays, RegisterElementParameters
-from ...tools import areafilter, geo, datalog
+from ...tools import areafilter, geo, datalog, logHeader
+from asasLogUpdate import asasLogUpdate
 
 
 # Import default CD methods
@@ -40,7 +41,9 @@ class ASAS(DynamicArrays):
         asas.CRmethods[name] = module
 
     def __init__(self, traf):
+    
         self.traf = traf
+        
         with RegisterElementParameters(self):
             # ASAS info per aircraft:
             self.iconf    = []            # index in 'conflicting' aircraft database
@@ -53,8 +56,104 @@ class ASAS(DynamicArrays):
             # Register the following parameters for SNAP logging
             with datalog.registerLogParameters('SNAPLOG', self):
                 self.active   = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not
-                
+            
+        # Create event based ASAS loggers
+        self.cfllog = datalog.defineLogger("CFLLOG", logHeader.cflHeader())
+        self.intlog = datalog.defineLogger("INTLOG", logHeader.intHeader())
+        
+        # Create periodic ASAS loggers
+        datalog.definePeriodicLogger('INSTLOG', logHeader.instHeader(), settings.instdt)
+        
+        # Register the following parameters for CFL logging
+        with datalog.registerLogParameters('CFLLOG', self):
+            self.clogid1 = []
+            self.clogtinconfid1 = []
+            self.clogtoutconfid1 = []
+            self.clogtcpaid1 = []
+            self.cloglatid1 = []
+            self.cloglonid1 = []
+            self.clogaltid1 = []
+            self.clogtasid1 = []
+            self.clogvsid1 = []
+            self.cloghdgid1 = []
+            self.cloglatcpaid1 = []
+            self.clogloncpaid1 = []
+            self.clogaltcpaid1 = []
+            self.clogasasactiveid1 = []
+            self.clogid2 = []
+            self.clogtinconfid2 = []
+            self.clogtoutconfid2 = []
+            self.clogtcpaid2 = []
+            self.cloglatid2 = []
+            self.cloglonid2 = []
+            self.clogaltid2 = []
+            self.clogtasid2 = []
+            self.clogvsid2 = []
+            self.cloghdgid2 = []
+            self.cloglatcpaid2 = []
+            self.clogloncpaid2 = []
+            self.clogaltcpaid2 = []
+            self.clogasasactiveid2 = []
+        
+        # Register the following parameters for INT logging
+        with datalog.registerLogParameters('INTLOG', self):
+            self.ilogid1 = []
+            self.ilogtinconfid1 = []
+            self.ilogtoutconfid1 = []
+            self.ilogtcpaid1 = []
+            self.iloglatid1 = []
+            self.iloglonid1 = []
+            self.ilogaltid1 = []
+            self.ilogtasid1 = []
+            self.ilogvsid1 = []
+            self.iloghdgid1 = []
+            self.ilogasasactiveid1 = []
+            self.ilogid2 = []
+            self.ilogtinconfid2 = []
+            self.ilogtoutconfid2 = []
+            self.ilogtcpaid2 = []
+            self.iloglatid2 = []
+            self.iloglonid2 = []
+            self.ilogaltid2 = []
+            self.ilogtasid2 = []
+            self.ilogvsid2 = []
+            self.iloghdgid2 = []
+            self.ilogasasactiveid2 = []
+            self.ilogintsev    = []
+            self.iloginthsev   = []
+            self.ilogintvsev   = []
 
+        # Register the following parameters for CFL logging
+        with datalog.registerLogParameters('INSTLOG', self):
+            self.instlogid1 = []
+            self.instlogtinconfid1 = []
+            self.instlogtoutconfid1 = []
+            self.instlogtcpaid1 = []
+            self.instloglatid1 = []
+            self.instloglonid1 = []
+            self.instlogaltid1 = []
+            self.instlogtasid1 = []
+            self.instlogvsid1 = []
+            self.instloghdgid1 = []
+            self.instloglatcpaid1 = []
+            self.instlogloncpaid1 = []
+            self.instlogaltcpaid1 = []
+            self.instlogasasactiveid1 = []
+            self.instlogid2 = []
+            self.instlogtinconfid2 = []
+            self.instlogtoutconfid2 = []
+            self.instlogtcpaid2 = []
+            self.instloglatid2 = []
+            self.instloglonid2 = []
+            self.instlogaltid2 = []
+            self.instlogtasid2 = []
+            self.instlogvsid2 = []
+            self.instloghdgid2 = []
+            self.instloglatcpaid2 = []
+            self.instlogloncpaid2 = []
+            self.instlogaltcpaid2 = []
+            self.instlogasasactiveid2 = []
+        
         # All ASAS variables are initialized in the reset function
         self.reset()
 
@@ -568,7 +667,7 @@ class ASAS(DynamicArrays):
             self.cr.resolve(self, self.traf)
             
             # Update ASAS log variables
-#            asasLogUpdate(self, self.traf)
+            asasLogUpdate(self, self.traf)
 
         # Change labels in interface
         if settings.gui == "pygame":

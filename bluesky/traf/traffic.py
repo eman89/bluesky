@@ -57,7 +57,6 @@ class Traffic(DynamicArrays):
 
         # Define the periodic loggers
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
-        datalog.definePeriodicLogger('INSTLOG', 'INSTLOG logfile.', settings.instdt)
         datalog.definePeriodicLogger('SKYLOG', 'SKYLOG logfile.', settings.skydt)
         
         # Define event based loggers
