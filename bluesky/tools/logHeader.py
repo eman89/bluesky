@@ -30,15 +30,15 @@ def skyHeader():
 
 def smodelHeader():    
     parameters =  "SimTime [s], "  + \
+                  "N Total Inst Aircraft [-], " + \
                   "N Cruising Aircraft [-], " + \
                   "N Climbing/Descending (C/D) Aicraft [-], " + \
-                  "N Total Inst Aircraft [-], " + \
+                  "Average Absolute Climb Angle for All Aircraft [deg], " + \
+                  "Average Absolute Climb Angle for C/D Aircraft [deg], " + \
+                  "N Total Conflicts [-], " + \
                   "N Cruise-Cruise Conflicts [-], " + \
                   "N Cruise-C/D Conflicts [-], " + \
-                  "N C/D-C/D Conflicts [-], " + \
-                  "N Total Conflicts [-], " + \
-                  "Average Absolute Climb Angle for C/D Aircraft [deg], " + \
-                  "Average Absolute Climb Angle for All Aircraft [deg]"
+                  "N C/D-C/D Conflicts [-]" 
     
     lines      = "#######################################################\n" + \
                  "SMODEL LOG\n" + \
@@ -52,15 +52,15 @@ def smodelHeader():
 
 def cmodelHeader():    
     parameters =  "SimTime [s], "  + \
+                  "N Total Inst Aircraft [-], " + \
                   "N Cruising Aircraft [-], " + \
                   "N Climbing/Descending (C/D) Aicraft [-], " + \
-                  "N Total Inst Aircraft [-], " + \
+                  "Average Absolute Climb Angle for All Aircraft [deg], " + \
+                  "Average Absolute Climb Angle for C/D Aircraft [deg], " + \
+                  "N Total Conflicts [-], " + \
                   "N Cruise-Cruise Conflicts [-], " + \
                   "N Cruise-C/D Conflicts [-], " + \
-                  "N C/D-C/D Conflicts [-], " + \
-                  "N Total Conflicts [-], " + \
-                  "Average Absolute Climb Angle for C/D Aircraft [deg], " + \
-                  "Average Absolute Climb Angle for All Aircraft [deg]"
+                  "N C/D-C/D Conflicts [-]" 
     
     lines      = "#######################################################\n" + \
                  "CMODEL LOG\n" + \

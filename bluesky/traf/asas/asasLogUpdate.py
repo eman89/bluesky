@@ -1,6 +1,6 @@
 import numpy as np
 import gc
-from ...tools.aero import fpm
+from ...tools import areafilter
 
 def asasLogUpdate(dbconf, traf):
     
@@ -17,12 +17,41 @@ def asasLogUpdate(dbconf, traf):
     dbconf.ncflCruising = sum((np.abs(vsid1)<=traf.cruiseLimVS)*(np.abs(vsid2)<=traf.cruiseLimVS))
     
     # Number of instantaneous conflicts between cruising and C/D aircraft 
-    dbconf.ncflCruisingVS = sum((np.abs(vsid1)<=traf.cruiseLimVS)*(np.abs(vsid2)>traf.cruiseLimVS)) + sum((np.abs(vsid1)>(25.0*fpm))*(np.abs(vsid2)<=(25.0*fpm)))
+    dbconf.ncflCruisingVS = sum((np.abs(vsid1)<=traf.cruiseLimVS)*(np.abs(vsid2)>traf.cruiseLimVS)) + \
+                                sum((np.abs(vsid1)>traf.cruiseLimVS)*(np.abs(vsid2)<=traf.cruiseLimVS))
     
     # Number of instantaneous conflicts between C/D aircraft
     dbconf.ncflVS = sum((np.abs(vsid1)>traf.cruiseLimVS)*(np.abs(vsid2)>traf.cruiseLimVS)) 
     
     # SKYLOG END --------------------------------------------------------------
+    
+    # SMODELLOG START ---------------------------------------------------------
+    if 'SQUAREMODELAREA' in areafilter.areas:
+        sinside = areafilter.checkInside('SQUAREMODELAREA', traf.lat, traf.lon, traf.alt)
+        
+        # Total number of instantaneous conflicts inside square area
+        
+        # IDEA: USE METHOD SIMLAR TO OPTION 4 OF CONFAREAFILTER!
+        
+        dbconf.smodncfl = 0
+        
+        
+        
+        
+        
+        dbconf.smodncflCruising = 0
+        dbconf.smodncflCruisingVS = 0
+        dbconf.smodncflVS = 0
+    
+    
+    # SMODELLOG END -----------------------------------------------------------
+    
+    
+    # CMODELLOG START ---------------------------------------------------------
+    if 'CIRCLEMODELAREA' in areafilter.areas:
+        cinside = areafilter.checkInside('CIRCLEMODELAREA', traf.lat, traf.lon, traf.alt)
+    
+    # CMODELLOG END -----------------------------------------------------------
         
     # CFLLOG  START -----------------------------------------------------------
     # NOTE: some of the varaibles (which are based on lists ) are updated 

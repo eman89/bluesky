@@ -1,7 +1,7 @@
 import numpy as np
 from math import *
 from random import random, randint
-from ..tools import datalog, logHeader
+from ..tools import datalog, logHeader, areafilter
 from ..tools.misc import latlon2txt
 from ..tools.aero import fpm, kts, ft, g0, Rearth, \
                          vatmos,  vtas2cas, vtas2mach, casormach
@@ -58,6 +58,8 @@ class Traffic(DynamicArrays):
         # Define the periodic loggers
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
         datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
+        datalog.definePeriodicLogger('SMODELLOG', logHeader.skyHeader(), settings.skydt)
+        datalog.definePeriodicLogger('CMODELLOG', logHeader.skyHeader(), settings.skydt)
         
         # Define event based loggers
         self.flstlog = datalog.defineLogger("FLSTLOG", logHeader.flstHeader())    
@@ -69,6 +71,22 @@ class Traffic(DynamicArrays):
             self.ntrafVS = 0
             self.gammaAll = 0.0 # [deg]            
             self.gammaVS = 0.0 # [deg]
+        
+        # Register the following parameters for SMODELLOG logging
+        with datalog.registerLogParameters('SMODELLOG', self):
+            self.smodntraf = 0
+            self.smodntrafCruising = 0
+            self.smodntrafVS = 0
+            self.smodgammaAll = 0.0 # [deg]            
+            self.smodgammaVS = 0.0 # [deg]
+        
+        # Register the following parameters for CMODELLOG logging
+        with datalog.registerLogParameters('CMODELLOG', self):
+            self.cmodntraf = 0
+            self.cmodntrafCruising = 0
+            self.cmodntrafVS = 0
+            self.cmodgammaAll = 0.0 # [deg]            
+            self.cmodgammaVS = 0.0 # [deg]
         
         # Register the following parameters for FLST logging
         with datalog.registerLogParameters('FLSTLOG', self):
@@ -202,6 +220,20 @@ class Traffic(DynamicArrays):
         self.ntrafVS = 0
         self.gammaAll = 0.0 # [deg]            
         self.gammaVS = 0.0 # [deg]
+        
+        # SMODEL Log count variables reset
+        self.smodntraf = 0
+        self.smodntrafCruising = 0
+        self.smodntrafVS = 0
+        self.smodgammaAll = 0.0 # [deg]            
+        self.smodgammaVS = 0.0 # [deg]
+        
+        # CMODEL Log count variables reset
+        self.cmodntraf = 0
+        self.cmodntrafCruising = 0
+        self.cmodntrafVS = 0
+        self.cmodgammaAll = 0.0 # [deg]            
+        self.cmodgammaVS = 0.0 # [deg]
 
         # Reset models
         self.wind.clear()
@@ -404,6 +436,8 @@ class Traffic(DynamicArrays):
         
         #---------- SKY/MODEL Logs Traf Count Update ----------
         self.UpdateTrafCountSkyLog()
+        self.UpdateTrafCountSModelLog()
+        self.UpdateTrafCountCModelLog()
         
         return
 
@@ -781,8 +815,64 @@ class Traffic(DynamicArrays):
     def UpdateTrafCountSkyLog(self):
         # Update intantaneous traffic counts and average flight path angles for Sky Log
         # note ntraf is already updated in traf.create() and traf.delete()
+        
+        # Number of intantaneous cruising aircraft
         self.ntrafCruising = len(self.vs[np.abs(self.vs) <= self.cruiseLimVS])
+        
+        # Number of instantaneous climbing and descending aircraft
         self.ntrafVS = self.ntraf - self.ntrafCruising
+        
+         # Average of absolute flight path angle for all aircraft [deg]
         self.gammaAll = np.average(np.abs(self.gamma)) # deg
+        
+        # Average of absolute flight path angle for climbing/descending aircraft [deg]
         self.gammaVS = np.average(np.abs(self.gamma[np.abs(self.vs) > self.cruiseLimVS])) # [deg]
+        
+    def UpdateTrafCountSModelLog(self):
+        # Update instantaneous traffic counts and average flight path angles for 
+        # aircraft inside the predefined square analysis area
+        
+        if 'SQUAREMODELAREA' in areafilter.areas:
+            inside = areafilter.checkInside('SQUAREMODELAREA', self.lat, self.lon, self.alt)
+            
+            # Total number of instantaneous aircraft inside area
+            self.smodntraf = sum(inside)
+            
+            # Number of intantaneous cruising aircraft inside area
+            vsinside = self.vs[inside==True] 
+            self.smodntrafCruising = len(vsinside[np.abs(vsinside) <= self.cruiseLimVS])
+            
+            # Number of instantaneous climbing and descending aircraft inside area
+            self.smodntrafVS = self.smodntraf - self.smodntrafCruising
+            
+            # Average of absolute flight path angle for all aircraft inside area [deg]
+            gammainside = self.gamma[inside==True]
+            self.smodgammaAll = np.average(np.abs(gammainside))           
+            
+            # Average of absolute flight path angle for climbing/descending aircraft inside area [deg]
+            self.smodgammaVS = np.average(np.abs(gammainside[np.abs(vsinside) > self.cruiseLimVS]))
+            
+    def UpdateTrafCountCModelLog(self):
+        # Update instantaneous traffic counts and average flight path angles for 
+        # aircraft inside the predefined circular analysis area
+        
+        if 'CIRCLEMODELAREA' in areafilter.areas:
+            inside = areafilter.checkInside('CIRCLEMODELAREA', self.lat, self.lon, self.alt)
+            
+            # Total number of instantaneous aircraft inside area
+            self.cmodntraf = len(inside[inside==True])
+            
+            # Number of intantaneous cruising aircraft inside area
+            vsinside = self.vs[inside==True] 
+            self.cmodntrafCruising = len(vsinside[np.abs(vsinside) <= self.cruiseLimVS])
+            
+            # Number of instantaneous climbing and descending aircraft inside area
+            self.cmodntrafVS = self.cmodntraf - self.cmodntrafCruising
+            
+            # Average of absolute flight path angle for all aircraft inside area [deg]
+            gammainside = self.gamma[inside==True]
+            self.cmodgammaAll = np.average(np.abs(gammainside))           
+            
+            # Average of absolute flight path angle for climbing/descending aircraft inside area [deg]
+            self.cmodgammaVS = np.average(np.abs(gammainside[np.abs(vsinside) > self.cruiseLimVS]))
         
