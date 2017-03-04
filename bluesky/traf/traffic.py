@@ -58,8 +58,8 @@ class Traffic(DynamicArrays):
         # Define the periodic loggers
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
         datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
-        datalog.definePeriodicLogger('SMODELLOG', logHeader.skyHeader(), settings.skydt)
-        datalog.definePeriodicLogger('CMODELLOG', logHeader.skyHeader(), settings.skydt)
+        datalog.definePeriodicLogger('SMODELLOG', logHeader.smodelHeader(), settings.skydt)
+        datalog.definePeriodicLogger('CMODELLOG', logHeader.cmodelHeader(), settings.skydt)
         
         # Define event based loggers
         self.flstlog = datalog.defineLogger("FLSTLOG", logHeader.flstHeader())    
@@ -823,10 +823,10 @@ class Traffic(DynamicArrays):
         self.ntrafVS = self.ntraf - self.ntrafCruising
         
          # Average of absolute flight path angle for all aircraft [deg]
-        self.gammaAll = np.average(np.abs(self.gamma)) # deg
+        self.gammaAll = np.average(np.abs(self.gamma)) if self.ntraf > 0 else 0
         
         # Average of absolute flight path angle for climbing/descending aircraft [deg]
-        self.gammaVS = np.average(np.abs(self.gamma[np.abs(self.vs) > self.cruiseLimVS])) # [deg]
+        self.gammaVS = np.average(np.abs(self.gamma[np.abs(self.vs) > self.cruiseLimVS])) if self.ntrafVS > 0 else 0
         
     def UpdateTrafCountSModelLog(self):
         # Update instantaneous traffic counts and average flight path angles for 
@@ -847,10 +847,10 @@ class Traffic(DynamicArrays):
             
             # Average of absolute flight path angle for all aircraft inside area [deg]
             gammainside = self.gamma[inside==True]
-            self.smodgammaAll = np.average(np.abs(gammainside))           
+            self.smodgammaAll = np.average(np.abs(gammainside)) if self.smodntraf > 0 else 0       
             
             # Average of absolute flight path angle for climbing/descending aircraft inside area [deg]
-            self.smodgammaVS = np.average(np.abs(gammainside[np.abs(vsinside) > self.cruiseLimVS]))
+            self.smodgammaVS = np.average(np.abs(gammainside[np.abs(vsinside) > self.cruiseLimVS])) if self.smodntrafVS > 0 else 0
             
     def UpdateTrafCountCModelLog(self):
         # Update instantaneous traffic counts and average flight path angles for 
@@ -871,8 +871,8 @@ class Traffic(DynamicArrays):
             
             # Average of absolute flight path angle for all aircraft inside area [deg]
             gammainside = self.gamma[inside==True]
-            self.cmodgammaAll = np.average(np.abs(gammainside))           
+            self.cmodgammaAll = np.average(np.abs(gammainside)) if self.cmodntraf > 0 else 0         
             
             # Average of absolute flight path angle for climbing/descending aircraft inside area [deg]
-            self.cmodgammaVS = np.average(np.abs(gammainside[np.abs(vsinside) > self.cruiseLimVS]))
+            self.cmodgammaVS = np.average(np.abs(gammainside[np.abs(vsinside) > self.cruiseLimVS])) if self.cmodntrafVS > 0 else 0
         
