@@ -860,7 +860,7 @@ class Traffic(DynamicArrays):
             inside = areafilter.checkInside('CIRCLEMODELAREA', self.lat, self.lon, self.alt)
             
             # Total number of instantaneous aircraft inside area
-            self.cmodntraf = len(inside[inside==True])
+            self.cmodntraf = sum(inside)
             
             # Number of intantaneous cruising aircraft inside area
             vsinside = self.vs[inside==True] 
