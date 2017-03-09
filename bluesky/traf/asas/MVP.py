@@ -148,7 +148,7 @@ def resolve(dbconf, traf):
     dbconf.trk = newtrack
     dbconf.spd = newgscapped
     dbconf.vs  = vscapped
-        
+    
     # To update asasalt, tinconf is used. tinconf is a really big value if there is 
     # no conflict. If there is a conflict, tinconf will be between 0 and the lookahead
     # time. Therefore, asasalt should only be updated for those aircraft that have a 
@@ -163,8 +163,6 @@ def resolve(dbconf, traf):
     # using the auto pilot vertical speed (traf.avs) using the code in line 106 (asasalttemp) when only
     # horizontal resolutions are allowed.
     dbconf.alt = dbconf.alt*(1-dbconf.swresohoriz) + traf.apalt*dbconf.swresohoriz
-    
-    
     
            
 #=================================== Modified Voltage Potential ===============
