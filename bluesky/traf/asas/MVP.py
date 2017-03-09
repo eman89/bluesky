@@ -164,6 +164,13 @@ def resolve(dbconf, traf):
     # horizontal resolutions are allowed.
     dbconf.alt = dbconf.alt*(1-dbconf.swresohoriz) + traf.apalt*dbconf.swresohoriz
     
+    # NOTE:
+    # WHEN PRIORITY IS ON, THE ABOVE LINES DON'T WORK WELL WHEN CLIMBING/DESCENDING
+    # HAVE PRIORITY BECAUSE WE ARE UPDATING DBCONF.ALT for all aircraft in conflict
+    # THIS CAN BE FIXED BY CHECKING if dv FOR any aircraft is 0. FOR THOSE AIRCRAFT,
+    # FOLLOW THE AUTOPILOT GUIDANCE. THIS IS ALSO THE OVERSHOOTING BUSINESS NEEDED FOR 
+    # LAYERS -> CONDITION 2 IS REQUIRED BELOW!
+    
            
 #=================================== Modified Voltage Potential ===============
            
