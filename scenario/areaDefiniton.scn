@@ -4,9 +4,11 @@
 #   2. 'SQUAREMODELAREA' -> name of square area for model logging 
 #   3. 'CIRCLEMODELAREA' -> name of circular area for model logging
 # Note: All areas have a 'top' and 'bottom' altitude
+#       and slight offsets have been added to prevent probelms
+#       due to rounding inaccuracies in BlueSky
 # ############################################################## #
 
-00:00:00.00>BOX,SIMAREA,-3.33108722832,-3.33108722832,3.33108722832,3.33108722832,11700.0,1.0
+00:00:00.00>BOX,SIMAREA,-3.33108722832,-3.33108722832,3.33108722832,3.33108722832,11800.0,1.0
 00:00:00.00>AREA,SIMAREA 
-00:00:00.00>BOX,SQUAREMODELAREA,-2.49831542124,-2.49831542124,2.49831542124,2.49831542124,11700.0,4000.0
-00:00:00.00>CIRCLE,CIRCLEMODELAREA,0.0,0.0,150.0,11700.0,4000.0
+00:00:00.00>BOX,SQUAREMODELAREA,-2.49831542124,-2.49831542124,2.49831542124,2.49831542124,11710.0,3990.0
+00:00:00.00>CIRCLE,CIRCLEMODELAREA,0.0,0.0,150.0,11710.0,3990.0
