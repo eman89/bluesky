@@ -30,9 +30,16 @@ def asasLogUpdate(dbconf, traf):
     # Only do anything is SQUAREMODELAREA exists!
     if 'SQUAREMODELAREA' in areafilter.areas:
         
-        # Determine the idx of the aircraft that have a conflict and are in the square area
-        insmodelareaid1 = areafilter.checkInside('SQUAREMODELAREA', traf.lat[dbconf.instlogi], traf.lon[dbconf.instlogi], traf.alt[dbconf.instlogi])
-        insmodelareaid2 = areafilter.checkInside('SQUAREMODELAREA', traf.lat[dbconf.instlogj], traf.lon[dbconf.instlogj], traf.alt[dbconf.instlogj])
+#        # Determine the idx of the aircraft that have a conflict and are in the square area (POSITION BASED FILTERING)
+#        insmodelareaid1 = areafilter.checkInside('SQUAREMODELAREA', traf.lat[dbconf.instlogi], traf.lon[dbconf.instlogi], traf.alt[dbconf.instlogi])
+#        insmodelareaid2 = areafilter.checkInside('SQUAREMODELAREA', traf.lat[dbconf.instlogj], traf.lon[dbconf.instlogj], traf.alt[dbconf.instlogj])
+#        insmodelarea = list(np.where(np.logical_and(insmodelareaid1,insmodelareaid2))[0])
+#        id1smodelarea = list(np.asarray(dbconf.instlogi)[insmodelarea])
+#        id2smodelarea = list(np.asarray(dbconf.instlogj)[insmodelarea])
+        
+        # Determine the idx of the aircraft that have a conflict and are in the square area (CPA BASED FILTERING)
+        insmodelareaid1 = areafilter.checkInside('SQUAREMODELAREA', np.asarray(dbconf.instloglatcpaid1), np.asarray(dbconf.instlogloncpaid1), np.asarray(dbconf.instlogaltcpaid1))
+        insmodelareaid2 = areafilter.checkInside('SQUAREMODELAREA', np.asarray(dbconf.instloglatcpaid2), np.asarray(dbconf.instlogloncpaid2), np.asarray(dbconf.instlogaltcpaid2))
         insmodelarea = list(np.where(np.logical_and(insmodelareaid1,insmodelareaid2))[0])
         id1smodelarea = list(np.asarray(dbconf.instlogi)[insmodelarea])
         id2smodelarea = list(np.asarray(dbconf.instlogj)[insmodelarea])
@@ -63,10 +70,17 @@ def asasLogUpdate(dbconf, traf):
     # Only do anything is CIRCLEMODELAREA exists!
     if 'CIRCLEMODELAREA' in areafilter.areas:
         
-        # Determine the idx of the aircraft that have a conflict and are in the circle area
-        incmodelareaid1 = areafilter.checkInside('CIRCLEMODELAREA', traf.lat[dbconf.instlogi], traf.lon[dbconf.instlogi], traf.alt[dbconf.instlogi])
-        incmodelareaid2 = areafilter.checkInside('CIRCLEMODELAREA', traf.lat[dbconf.instlogj], traf.lon[dbconf.instlogj], traf.alt[dbconf.instlogj])
-        incmodelarea = list(np.where(np.logical_and(incmodelareaid1,incmodelareaid2))[0])
+#        # Determine the idx of the aircraft that have a conflict and are in the circle area (POSITION BASED FILTERING)
+#        incmodelareaid1 = areafilter.checkInside('CIRCLEMODELAREA', traf.lat[dbconf.instlogi], traf.lon[dbconf.instlogi], traf.alt[dbconf.instlogi])
+#        incmodelareaid2 = areafilter.checkInside('CIRCLEMODELAREA', traf.lat[dbconf.instlogj], traf.lon[dbconf.instlogj], traf.alt[dbconf.instlogj])
+#        incmodelarea = list(np.where(np.logical_and(incmodelareaid1,incmodelareaid2))[0])
+#        id1cmodelarea = list(np.asarray(dbconf.instlogi)[incmodelarea])
+#        id2cmodelarea = list(np.asarray(dbconf.instlogj)[incmodelarea])
+        
+        # Determine the idx of the aircraft that have a conflict and are in the square area (CPA BASED FILTERING)
+        incmodelareaid1 = areafilter.checkInside('CIRCLEMODELAREA', np.asarray(dbconf.instloglatcpaid1), np.asarray(dbconf.instlogloncpaid1), np.asarray(dbconf.instlogaltcpaid1))
+        incmodelareaid2 = areafilter.checkInside('CIRCLEMODELAREA', np.asarray(dbconf.instloglatcpaid2), np.asarray(dbconf.instlogloncpaid2), np.asarray(dbconf.instlogaltcpaid2))
+        incmodelarea  = list(np.where(np.logical_and(incmodelareaid1,incmodelareaid2))[0])
         id1cmodelarea = list(np.asarray(dbconf.instlogi)[incmodelarea])
         id2cmodelarea = list(np.asarray(dbconf.instlogj)[incmodelarea])
         
