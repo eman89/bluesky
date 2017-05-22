@@ -16,6 +16,7 @@ Methods:
 Created by  : Jacco M. Hoekstra (TU Delft)
 """
 from math import *
+from glob import glob
 import numpy as np
 from random import seed
 import os
@@ -852,6 +853,16 @@ def openfile(fname, absrel='ABS', mergeWithExisting=False):
 
     # The entire filename, possibly with added path and extension
     scenfile = os.path.join(path, scenname + ext)
+
+    # Case insensitive file matching
+    def iglob(pattern):
+        def either(c):
+            return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
+        return glob(''.join(map(either, pattern)))
+
+    filematch = iglob(scenfile)
+    if len(filematch) == 1:
+        scenfile = filematch[0]
 
     print "Opening ", scenfile
 
