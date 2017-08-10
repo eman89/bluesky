@@ -1,0 +1,15 @@
+# ############################################################## #
+# Area Definitions:
+#    1. DeletionArea -> if aircraft fly outside this are, then they are deleted
+#    2. CDArea -> Conflict Detection is performed for all aircraft inside this area
+#    3. SimArea -> Area in which aircraft are spawned. This area is only for visual purposes
+# Note: All areas, except SimArea, have a 'top' and 'bottom' altitude
+#       and slight offsets have been added to prevent probelms
+#       due to rounding inaccuracies and vertical CR in BlueSky
+# ############################################################## #
+
+00:00:00.00>BOX,DeletionArea,-6.66217445665,-6.66217445665,6.66217445665,6.66217445665,14000.0,3000.0
+00:00:00.00>AREA,DeletionArea 
+00:00:00.00>BOX,CDArea,-6.66217445665,-6.66217445665,6.66217445665,6.66217445665,14000.0,1000.0
+00:00:00.00>BOX,SimArea,-3.33108722832,-3.33108722832,3.33108722832,3.33108722832
+
