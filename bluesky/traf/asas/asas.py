@@ -242,6 +242,7 @@ class ASAS(DynamicArrays):
         
         self.nconf_total             = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI. 
         self.nLOS_total              = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
+        self.nconf_now               = 0   # Number of conflicts that are detected in the current asas cycle. Used for display on GUI.
         
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []

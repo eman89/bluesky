@@ -1,6 +1,6 @@
 import numpy as np
 import gc
-from ...tools import areafilter
+#from ...tools import areafilter
 
 def asasLogUpdate(dbconf, traf):
     

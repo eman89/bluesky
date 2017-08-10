@@ -256,7 +256,7 @@ class Traffic(DynamicArrays):
         # VS threshold to determine which aircraft are cruising aircraft [m/s]
         self.cruiseLimVS = 25.0*fpm
 
-    def mcreate(self, count, actype=None, alt=None, spd=None, dest=None, area=None):
+    def mcreate(self, sim, count, actype=None, alt=None, spd=None, dest=None, area=None):
         """ Create multiple random aircraft in a specified area """
         idbase = chr(randint(65, 90)) + chr(randint(65, 90))
         if actype is None:
@@ -270,7 +270,7 @@ class Traffic(DynamicArrays):
             acalt = (randint(2000, 39000) * ft) if alt is None else alt
             acspd = (randint(250, 450) * kts) if spd is None else spd
 
-            self.create(acid, actype, aclat, aclon, achdg, acalt, acspd)
+            self.create(sim, acid, actype, aclat, aclon, achdg, acalt, acspd)
 
     def create(self, sim, acid=None, actype="B744", aclat=None, aclon=None, achdg=None, acalt=None, casmach=None):
         """Create an aircraft"""

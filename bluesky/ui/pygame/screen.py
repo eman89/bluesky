@@ -840,7 +840,7 @@ class Screen:
             self.fontsys.printat(self.win, 10+240, 18, \
                                  "Total LOS = " + str(len(traf.asas.LOSlist_all)))
             self.fontsys.printat(self.win, 10+240, 34, \
-                                 "#Con      = " + str(len(traf.asas.conflist_now)))
+                                 "#Con      = " + str(traf.asas.nconf_now))
             self.fontsys.printat(self.win, 10+240, 50, \
                                  "Total Con = " + str(len(traf.asas.conflist_all)))                                 
 

@@ -398,7 +398,7 @@ def init(sim, traf, scr):
         "MCRE": [
             "MCRE n, [type/*, alt/*, spd/*, dest/*]",
             "int,[txt,alt,spd,txt]",
-            lambda *args: traf.mcreate(*args, area=scr.getviewlatlon()),
+            lambda *args: traf.mcreate(sim, *args, area=scr.getviewlatlon()),
             "Multiple random create of n aircraft in current view"
         ],
         "METRIC": [
