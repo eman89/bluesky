@@ -27,67 +27,67 @@ def asasLogUpdate(dbconf, traf):
     
     # SMODELLOG START ---------------------------------------------------------
     
-    # Only do anything is SQUAREMODELAREA exists!
-    if 'SQUAREMODELAREA' in areafilter.areas:
-        
-        # Determine the idx of the aircraft that have a conflict and are in the square area (POSITION BASED 'OR' FILTERING)
-        insmodelareaid1 = areafilter.checkInside('SQUAREMODELAREA', traf.lat[dbconf.instlogi], traf.lon[dbconf.instlogi], traf.alt[dbconf.instlogi])
-        insmodelareaid2 = areafilter.checkInside('SQUAREMODELAREA', traf.lat[dbconf.instlogj], traf.lon[dbconf.instlogj], traf.alt[dbconf.instlogj])
-        insmodelarea  = list(np.where(np.logical_or(insmodelareaid1,insmodelareaid2))[0])
-        id1smodelarea = list(np.asarray(dbconf.instlogi)[insmodelarea])
-        id2smodelarea = list(np.asarray(dbconf.instlogj)[insmodelarea])
-        
-        
-        # Total number of instantaneous conflicts inside square area
-        dbconf.smodncfl = len(id1smodelarea)
-        
-        # vertical speeds of aircraft in the instantaneous conflict lists that are also in the square area
-        vssmodelid1 = traf.vs[id1smodelarea]
-        vssmodelid2 = traf.vs[id2smodelarea]
-        
-        # Number of instantaneous conflicts between cruising aircraft inside square area
-        dbconf.smodncflCruising = sum((np.abs(vssmodelid1)<=traf.cruiseLimVS)*(np.abs(vssmodelid2)<=traf.cruiseLimVS))
-        
-        # Number of instantaneous conflicts between cruising and C/D aircraft inside square area 
-        dbconf.smodncflCruisingVS = sum((np.abs(vssmodelid1)<=traf.cruiseLimVS)*(np.abs(vssmodelid2)>traf.cruiseLimVS)) + \
-                                        sum((np.abs(vssmodelid1)>traf.cruiseLimVS)*(np.abs(vssmodelid2)<=traf.cruiseLimVS))
-                                        
-        # Number of instantaneous conflicts between C/D aircraft inside square area                                       
-        dbconf.smodncflVS = sum((np.abs(vssmodelid1)>traf.cruiseLimVS)*(np.abs(vssmodelid2)>traf.cruiseLimVS))
-    
+#    # Only do anything is SQUAREMODELAREA exists!
+#    if 'SQUAREMODELAREA' in areafilter.areas:
+#        
+#        # Determine the idx of the aircraft that have a conflict and are in the square area (POSITION BASED 'OR' FILTERING)
+#        insmodelareaid1 = areafilter.checkInside('SQUAREMODELAREA', traf.lat[dbconf.instlogi], traf.lon[dbconf.instlogi], traf.alt[dbconf.instlogi])
+#        insmodelareaid2 = areafilter.checkInside('SQUAREMODELAREA', traf.lat[dbconf.instlogj], traf.lon[dbconf.instlogj], traf.alt[dbconf.instlogj])
+#        insmodelarea  = list(np.where(np.logical_or(insmodelareaid1,insmodelareaid2))[0])
+#        id1smodelarea = list(np.asarray(dbconf.instlogi)[insmodelarea])
+#        id2smodelarea = list(np.asarray(dbconf.instlogj)[insmodelarea])
+#        
+#        
+#        # Total number of instantaneous conflicts inside square area
+#        dbconf.smodncfl = len(id1smodelarea)
+#        
+#        # vertical speeds of aircraft in the instantaneous conflict lists that are also in the square area
+#        vssmodelid1 = traf.vs[id1smodelarea]
+#        vssmodelid2 = traf.vs[id2smodelarea]
+#        
+#        # Number of instantaneous conflicts between cruising aircraft inside square area
+#        dbconf.smodncflCruising = sum((np.abs(vssmodelid1)<=traf.cruiseLimVS)*(np.abs(vssmodelid2)<=traf.cruiseLimVS))
+#        
+#        # Number of instantaneous conflicts between cruising and C/D aircraft inside square area 
+#        dbconf.smodncflCruisingVS = sum((np.abs(vssmodelid1)<=traf.cruiseLimVS)*(np.abs(vssmodelid2)>traf.cruiseLimVS)) + \
+#                                        sum((np.abs(vssmodelid1)>traf.cruiseLimVS)*(np.abs(vssmodelid2)<=traf.cruiseLimVS))
+#                                        
+#        # Number of instantaneous conflicts between C/D aircraft inside square area                                       
+#        dbconf.smodncflVS = sum((np.abs(vssmodelid1)>traf.cruiseLimVS)*(np.abs(vssmodelid2)>traf.cruiseLimVS))
+#    
     
     # SMODELLOG END -----------------------------------------------------------
     
     
     # CMODELLOG START ---------------------------------------------------------
     
-    # Only do anything is CIRCLEMODELAREA exists!
-    if 'CIRCLEMODELAREA' in areafilter.areas:
-        
-        # Determine the idx of the aircraft that have a conflict and are in the circle area (POSITION BASED 'OR' FILTERING)
-        incmodelareaid1 = areafilter.checkInside('CIRCLEMODELAREA', traf.lat[dbconf.instlogi], traf.lon[dbconf.instlogi], traf.alt[dbconf.instlogi])
-        incmodelareaid2 = areafilter.checkInside('CIRCLEMODELAREA', traf.lat[dbconf.instlogj], traf.lon[dbconf.instlogj], traf.alt[dbconf.instlogj])
-        incmodelarea  = list(np.where(np.logical_or(incmodelareaid1,incmodelareaid2))[0])
-        id1cmodelarea = list(np.asarray(dbconf.instlogi)[incmodelarea])
-        id2cmodelarea = list(np.asarray(dbconf.instlogj)[incmodelarea])
-        
-        
-        # Total number of instantaneous conflicts inside circle area
-        dbconf.cmodncfl = len(id1cmodelarea)
-        
-        # vertical speeds of aircraft in the instantaneous conflict lists that are also in the circle area
-        vscmodelid1 = traf.vs[id1cmodelarea]
-        vscmodelid2 = traf.vs[id2cmodelarea]
-        
-        # Number of instantaneous conflicts between cruising aircraft inside circle area
-        dbconf.cmodncflCruising = sum((np.abs(vscmodelid1)<=traf.cruiseLimVS)*(np.abs(vscmodelid2)<=traf.cruiseLimVS))
-        
-        # Number of instantaneous conflicts between cruising and C/D aircraft inside circle area
-        dbconf.cmodncflCruisingVS = sum((np.abs(vscmodelid1)<=traf.cruiseLimVS)*(np.abs(vscmodelid2)>traf.cruiseLimVS)) + \
-                                        sum((np.abs(vscmodelid1)>traf.cruiseLimVS)*(np.abs(vscmodelid2)<=traf.cruiseLimVS))
-                                        
-        # Number of instantaneous conflicts between C/D aircraft inside circle area                                      
-        dbconf.cmodncflVS = sum((np.abs(vscmodelid1)>traf.cruiseLimVS)*(np.abs(vscmodelid2)>traf.cruiseLimVS))
+#    # Only do anything is CIRCLEMODELAREA exists!
+#    if 'CIRCLEMODELAREA' in areafilter.areas:
+#        
+#        # Determine the idx of the aircraft that have a conflict and are in the circle area (POSITION BASED 'OR' FILTERING)
+#        incmodelareaid1 = areafilter.checkInside('CIRCLEMODELAREA', traf.lat[dbconf.instlogi], traf.lon[dbconf.instlogi], traf.alt[dbconf.instlogi])
+#        incmodelareaid2 = areafilter.checkInside('CIRCLEMODELAREA', traf.lat[dbconf.instlogj], traf.lon[dbconf.instlogj], traf.alt[dbconf.instlogj])
+#        incmodelarea  = list(np.where(np.logical_or(incmodelareaid1,incmodelareaid2))[0])
+#        id1cmodelarea = list(np.asarray(dbconf.instlogi)[incmodelarea])
+#        id2cmodelarea = list(np.asarray(dbconf.instlogj)[incmodelarea])
+#        
+#        
+#        # Total number of instantaneous conflicts inside circle area
+#        dbconf.cmodncfl = len(id1cmodelarea)
+#        
+#        # vertical speeds of aircraft in the instantaneous conflict lists that are also in the circle area
+#        vscmodelid1 = traf.vs[id1cmodelarea]
+#        vscmodelid2 = traf.vs[id2cmodelarea]
+#        
+#        # Number of instantaneous conflicts between cruising aircraft inside circle area
+#        dbconf.cmodncflCruising = sum((np.abs(vscmodelid1)<=traf.cruiseLimVS)*(np.abs(vscmodelid2)<=traf.cruiseLimVS))
+#        
+#        # Number of instantaneous conflicts between cruising and C/D aircraft inside circle area
+#        dbconf.cmodncflCruisingVS = sum((np.abs(vscmodelid1)<=traf.cruiseLimVS)*(np.abs(vscmodelid2)>traf.cruiseLimVS)) + \
+#                                        sum((np.abs(vscmodelid1)>traf.cruiseLimVS)*(np.abs(vscmodelid2)<=traf.cruiseLimVS))
+#                                        
+#        # Number of instantaneous conflicts between C/D aircraft inside circle area                                      
+#        dbconf.cmodncflVS = sum((np.abs(vscmodelid1)>traf.cruiseLimVS)*(np.abs(vscmodelid2)>traf.cruiseLimVS))
     
     # CMODELLOG END -----------------------------------------------------------
         

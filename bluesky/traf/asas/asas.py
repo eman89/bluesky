@@ -71,19 +71,19 @@ class ASAS(DynamicArrays):
             self.ncflCruisingVS = 0
             self.ncflVS = 0
         
-        # Register the following parameters for SModel logging
-        with datalog.registerLogParameters('SMODELLOG', self):
-            self.smodncfl = 0
-            self.smodncflCruising = 0
-            self.smodncflCruisingVS = 0
-            self.smodncflVS = 0
-        
-        # Register the following parameters for CModel logging
-        with datalog.registerLogParameters('CMODELLOG', self):
-            self.cmodncfl = 0
-            self.cmodncflCruising = 0
-            self.cmodncflCruisingVS = 0
-            self.cmodncflVS = 0
+#        # Register the following parameters for SModel logging
+#        with datalog.registerLogParameters('SMODELLOG', self):
+#            self.smodncfl = 0
+#            self.smodncflCruising = 0
+#            self.smodncflCruisingVS = 0
+#            self.smodncflVS = 0
+#        
+#        # Register the following parameters for CModel logging
+#        with datalog.registerLogParameters('CMODELLOG', self):
+#            self.cmodncfl = 0
+#            self.cmodncflCruising = 0
+#            self.cmodncflCruisingVS = 0
+#            self.cmodncflVS = 0
         
         # Register the following parameters for CFL logging
         with datalog.registerLogParameters('CFLLOG', self):

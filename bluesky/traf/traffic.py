@@ -58,8 +58,8 @@ class Traffic(DynamicArrays):
         # Define the periodic loggers
         datalog.definePeriodicLogger('SNAPLOG', logHeader.snapHeader(), settings.snapdt)
         datalog.definePeriodicLogger('SKYLOG', logHeader.skyHeader(), settings.skydt)
-        datalog.definePeriodicLogger('SMODELLOG', logHeader.smodelHeader(), settings.skydt)
-        datalog.definePeriodicLogger('CMODELLOG', logHeader.cmodelHeader(), settings.skydt)
+#        datalog.definePeriodicLogger('SMODELLOG', logHeader.smodelHeader(), settings.skydt)
+#        datalog.definePeriodicLogger('CMODELLOG', logHeader.cmodelHeader(), settings.skydt)
         
         # Define event based loggers
         self.flstlog = datalog.defineLogger("FLSTLOG", logHeader.flstHeader())    
@@ -72,21 +72,21 @@ class Traffic(DynamicArrays):
             self.gammaAll = 0.0 # [deg]            
             self.gammaVS = 0.0 # [deg]
         
-        # Register the following parameters for SMODELLOG logging
-        with datalog.registerLogParameters('SMODELLOG', self):
-            self.smodntraf = 0
-            self.smodntrafCruising = 0
-            self.smodntrafVS = 0
-            self.smodgammaAll = 0.0 # [deg]            
-            self.smodgammaVS = 0.0 # [deg]
-        
-        # Register the following parameters for CMODELLOG logging
-        with datalog.registerLogParameters('CMODELLOG', self):
-            self.cmodntraf = 0
-            self.cmodntrafCruising = 0
-            self.cmodntrafVS = 0
-            self.cmodgammaAll = 0.0 # [deg]            
-            self.cmodgammaVS = 0.0 # [deg]
+#        # Register the following parameters for SMODELLOG logging
+#        with datalog.registerLogParameters('SMODELLOG', self):
+#            self.smodntraf = 0
+#            self.smodntrafCruising = 0
+#            self.smodntrafVS = 0
+#            self.smodgammaAll = 0.0 # [deg]            
+#            self.smodgammaVS = 0.0 # [deg]
+#        
+#        # Register the following parameters for CMODELLOG logging
+#        with datalog.registerLogParameters('CMODELLOG', self):
+#            self.cmodntraf = 0
+#            self.cmodntrafCruising = 0
+#            self.cmodntrafVS = 0
+#            self.cmodgammaAll = 0.0 # [deg]            
+#            self.cmodgammaVS = 0.0 # [deg]
         
         # Register the following parameters for FLST logging
         with datalog.registerLogParameters('FLSTLOG', self):
@@ -436,8 +436,8 @@ class Traffic(DynamicArrays):
         
         #---------- SKY/MODEL Logs Traf Count Update ----------
         self.UpdateTrafCountSkyLog()
-        self.UpdateTrafCountSModelLog()
-        self.UpdateTrafCountCModelLog()
+#        self.UpdateTrafCountSModelLog()
+#        self.UpdateTrafCountCModelLog()
         
         return
 
