@@ -1,0 +1,37 @@
+# Project 3 Batch Test 
+
+00:00:00.00>SCEN Project3Test1On
+00:00:00.00>PCALL Project3Test1.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settings-Baseline-ON.scn
+03:00:00.00>HOLD 
+
+00:00:00.00>SCEN Project3Test1Off
+00:00:00.00>PCALL Project3Test1.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settings-Baseline-OFF.scn
+03:00:00.00>HOLD 
+
+00:00:00.00>SCEN Project3Test2On
+00:00:00.00>PCALL Project3Test2.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settings-Baseline-ON.scn
+03:00:00.00>HOLD 
+
+00:00:00.00>SCEN Project3Test2Off
+00:00:00.00>PCALL Project3Test2.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settings-Baseline-OFF.scn
+03:00:00.00>HOLD 
+
+00:00:00.00>SCEN Project3Test3On
+00:00:00.00>PCALL Project3Test3.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settings-Baseline-ON.scn
+03:00:00.00>HOLD 
+
+00:00:00.00>SCEN Project3Test3Off
+00:00:00.00>PCALL Project3Test3.scn
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL settings-Baseline-OFF.scn
+03:00:00.00>HOLD 
