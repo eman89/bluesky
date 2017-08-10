@@ -209,6 +209,7 @@ def MVP(traf, dbconf, id1, id2):
     iV = dbconf.dhm - dabsV
         
     # If id1 and id2 are in intrusion, assume full intrusion to force max movement
+    # The following is commented out for Project 3. Resolutions should can the same in all conflict cases. 
 #    if drel[0] < dbconf.Rm or drel[1] < dbconf.Rm:
 #        iH = dbconf.Rm
 #    if drel[2] < dbconf.dhm:
