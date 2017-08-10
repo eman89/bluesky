@@ -48,6 +48,10 @@ def detect(dbconf, traf, simt):
     dbconf.instloglatcpaid2 = []
     dbconf.instlogloncpaid2 = []
     dbconf.instlogaltcpaid2 = []
+    
+    # Reset variable for keeping track of number of current conflicts for display on GUI.
+    dbconf.nconf_now = 0.0
+    
 
     # Horizontal conflict ---------------------------------------------------------
 
@@ -170,7 +174,7 @@ def detect(dbconf, traf, simt):
     
     # Add to Conflict and LOS lists--------------------------------------------
     for idx in range(dbconf.nconf):
-        gc.disable()        
+        gc.disable()
         
         # Determine idx of conflciting aircaft
         i = ownidx[idx]
@@ -203,19 +207,23 @@ def detect(dbconf, traf, simt):
         # and some variables related to CFLLOG (others updated in asasLogUpdate())
         # and also do RESOSPAWNCHECK
         if combi not in dbconf.conflist_active and combi2 not in dbconf.conflist_active:
-            dbconf.nconf_total = dbconf.nconf_total + 1            
-            dbconf.conflist_active.append(combi)
-            # Now get the stuff you need for the CFLLOG variables!
-            dbconf.clogi.append(i)
-            dbconf.clogj.append(j)
-            dbconf.clogid1.append(combi[0])
-            dbconf.clogid2.append(combi[1])
-            dbconf.cloglatcpaid1.append(lati)
-            dbconf.clogloncpaid1.append(loni)
-            dbconf.clogaltcpaid1.append(alti)
-            dbconf.cloglatcpaid2.append(latj)
-            dbconf.clogloncpaid2.append(lonj)
-            dbconf.clogaltcpaid2.append(altj)
+            dbconf.nconf_total = dbconf.nconf_total + 1    
+            # Check if conflict tcpa and tinconf is greater than 0. only log 
+            # if condition met
+            if dbconf.tcpa[i,j] >= 0 and  dbconf.tcpa[j,i] >= 0 and \
+                dbconf.tinconf[i,j] >= 0 and  dbconf.tinconf[j,i] >= 0: 
+                    dbconf.conflist_active.append(combi)
+                    # Now get the stuff you need for the CFLLOG variables!
+                    dbconf.clogi.append(i)
+                    dbconf.clogj.append(j)
+                    dbconf.clogid1.append(combi[0])
+                    dbconf.clogid2.append(combi[1])
+                    dbconf.cloglatcpaid1.append(lati)
+                    dbconf.clogloncpaid1.append(loni)
+                    dbconf.clogaltcpaid1.append(alti)
+                    dbconf.cloglatcpaid2.append(latj)
+                    dbconf.clogloncpaid2.append(lonj)
+                    dbconf.clogaltcpaid2.append(altj)
            
             # If RESOSPAWNCHECK is active, then check if this conflict cotains
             # an aircraft that is just spawned, and if that conflict is a very short term conflict.
@@ -228,18 +236,23 @@ def detect(dbconf, traf, simt):
         # Update conflist_now (newly detected conflicts during this detection cycle)
         # and some variables related INSTLOG (others updated in asasLogUpdate())
         if combi not in dbconf.conflist_now and combi2 not in dbconf.conflist_now:
-            dbconf.conflist_now.append(combi)
-            # Now get the stuff you need for the INSTLOG variables!
-            dbconf.instlogi.append(i)
-            dbconf.instlogj.append(j)
-            dbconf.instlogid1.append(combi[0])
-            dbconf.instlogid2.append(combi[1])
-            dbconf.instloglatcpaid1.append(lati)
-            dbconf.instlogloncpaid1.append(loni)
-            dbconf.instlogaltcpaid1.append(alti)
-            dbconf.instloglatcpaid2.append(latj)
-            dbconf.instlogloncpaid2.append(lonj)
-            dbconf.instlogaltcpaid2.append(altj)
+            # Check if conflict tcpa and tinconf is greater than 0. only log 
+            # and resolve if condition met
+            dbconf.nconf_now = dbconf.nconf_now + 1.0 # not a LOS, update it now
+            if dbconf.tcpa[i,j] >= 0 and  dbconf.tcpa[j,i] >= 0 and \
+                dbconf.tinconf[i,j] >= 0 and  dbconf.tinconf[j,i] >= 0:
+                    dbconf.conflist_now.append(combi)
+                    # Now get the stuff you need for the INSTLOG variables!
+                    dbconf.instlogi.append(i)
+                    dbconf.instlogj.append(j)
+                    dbconf.instlogid1.append(combi[0])
+                    dbconf.instlogid2.append(combi[1])
+                    dbconf.instloglatcpaid1.append(lati)
+                    dbconf.instlogloncpaid1.append(loni)
+                    dbconf.instlogaltcpaid1.append(alti)
+                    dbconf.instloglatcpaid2.append(latj)
+                    dbconf.instlogloncpaid2.append(lonj)
+                    dbconf.instlogaltcpaid2.append(altj)
                                                 
         # Check if a LOS occured
         dx     = (traf.lat[i] - traf.lat[j]) * 111319.
@@ -251,9 +264,10 @@ def detect(dbconf, traf, simt):
         isLOS  = (hLOS & vLOS)
         
         if isLOS:
+            dbconf.nconf_now  = dbconf.nconf_now-0.5 # to prevent unnecessary double counting for GUI counter
             # Update LOS lists: LOSlist_active (all LOS that are active) and nLOS_total (GUI)
-            if combi not in dbconf.LOSlist_active and combi2 not in dbconf.LOSlist_active:
-                dbconf.nLOS_total = dbconf.nLOS_total + 1                
+            if combi not in dbconf.LOSlist_active and combi2 not in dbconf.LOSlist_active:                
+                dbconf.nLOS_total = dbconf.nLOS_total + 1  
                 dbconf.LOSlist_active.append(combi)
                 dbconf.LOSmaxsev.append(0.)
                 dbconf.LOShmaxsev.append(0.)
@@ -262,11 +276,13 @@ def detect(dbconf, traf, simt):
             # LOSlist_now (newly detected conflicts during this detection cycle)
             if combi not in dbconf.LOSlist_now and combi2 not in dbconf.LOSlist_now:
                 dbconf.LOSlist_now.append(combi)
+                
             
             # NOTE: Logging for LOS done in logLOS() in asasLogUpdate.py
             #       This is because a LOS is only logged when its severity is 
             #       highest.
             #       Some variables for conflicts are also logged in asasLogUpdate
             #       but some are logged here are  as they are based on lists (easier here in loop)
-
+        
         gc.enable()
+#    dbconf.nconf_now = int(dbconf.nconf_now)
