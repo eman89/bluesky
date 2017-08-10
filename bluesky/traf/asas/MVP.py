@@ -209,12 +209,12 @@ def MVP(traf, dbconf, id1, id2):
     iV = dbconf.dhm - dabsV
         
     # If id1 and id2 are in intrusion, assume full intrusion to force max movement
-    if drel[0] < dbconf.Rm or drel[1] < dbconf.Rm:
-        iH = dbconf.Rm
-    if drel[2] < dbconf.dhm:
-        iV = dbconf.dhm
+#    if drel[0] < dbconf.Rm or drel[1] < dbconf.Rm:
+#        iH = dbconf.Rm
+#    if drel[2] < dbconf.dhm:
+#        iV = dbconf.dhm
     
-    # Exception handlers for head-on conflicts
+    # Exception handlers for head-on conflicts. Algthough this is an excpetion there is no choice because of the divide by zero problem.
     # This is done to prevent division by zero in the next step
     if dabsH <= 10.:
         dabsH = 10.
