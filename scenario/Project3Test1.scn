@@ -9,7 +9,7 @@
 
 # PCALL settings and area definition
 00:00:00.00>PCALL areaDefiniton.scn
-00:00:00.00>PCALL settings-DoubleSep-OFF.scn
+00:00:00.00>PCALL settings-Baseline-OFF.scn
 
 
 # Origin-Destination Data:

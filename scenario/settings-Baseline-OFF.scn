@@ -1,6 +1,6 @@
 # BlueSky Settings for Project 3
 # Baseline-OFF
-# Simulation and Analysis Area Definitions are 'PCALL'ed from areaDefinition.scn
+# Area Definitions are 'PCALL'ed from areaDefinition.scn
 
 # Display Settings:
 00:00:00.00>PAN 0.0 0.0
@@ -15,7 +15,7 @@
 00:00:00.00>STEEPNESS 3000.0
 
 # ASAS Settings:
-00:00:00.00>ASAS OFF
+00:00:00.00>ASAS ON
 00:00:00.00>RESO OFF
 00:00:00.00>DTLOOK 300.0
 00:00:00.00>DTNOLOOK 1.0
@@ -27,9 +27,6 @@
 
 # Switch On Flight Stats Log:
 00:00:00.00>FLSTLOG ON
-
-# Switch On ASAS (CD)
-00:45:00.00>ASAS ON
 
 # Switch On Snapshot Log:
 01:00:00.00>SNAPLOG ON 15
