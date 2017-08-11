@@ -29,7 +29,7 @@
 00:00:00.00>FLSTLOG ON
 
 # Switch On ASAS (CD)
-00:30:00.00>ASAS ON
+00:45:00.00>ASAS ON
 
 # Switch On Snapshot Log:
 01:00:00.00>SNAPLOG ON 15

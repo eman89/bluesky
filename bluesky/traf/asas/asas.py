@@ -617,7 +617,7 @@ class ASAS(DynamicArrays):
                 # If two aircraft are getting in and out of conflict continously, 
                 # then it is a bouncing conflict. ASAS should stay active until 
                 # the bouncing stops.
-                bouncingConflict = (abs(self.traf.trk[id1] - self.traf.trk[id2]) < 30.) & (hdist2<self.Rm**2)         
+                bouncingConflict = (abs(self.traf.trk[id1] - self.traf.trk[id2]) < 15.) & (hdist2<self.Rm**2)         
                 
                 # Decide if conflict is over or not. 
                 # If not over, turn active to true. 

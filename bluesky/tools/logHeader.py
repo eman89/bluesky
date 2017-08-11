@@ -171,6 +171,7 @@ def cflHeader():
   lines      = "#######################################################\n" + \
                "CFL LOG\n" + \
                "Conflict Log\n" + \
+               "Conflicts are logged at the first moment of detection\n" + \
                "#######################################################\n\n" + \
                "Parameters [Units]:\n" + \
                parameters + "\n"
@@ -212,6 +213,7 @@ def instHeader():
   lines      = "#######################################################\n" + \
                "INST LOG\n" + \
                "Instantaneous Conflict Log\n" + \
+               "All conflicts in airspace are logged periodically\n" + \
                "#######################################################\n\n" + \
                "Parameters [Units]:\n" + \
                parameters + "\n"
@@ -247,10 +249,11 @@ def intHeader():
                "Horiz Intrusion at Max IS [-], " + \
                "Vert Intrusion at Max IS [-]"
 
-  lines      = "#######################################################\n" + \
+  lines      = "########################################################\n" + \
                "INT LOG\n" + \
                "Intrusion Log\n" + \
-               "#######################################################\n\n" + \
+               "Intrusions are logged at the moment of maximum severity\n" + \
+               "########################################################\n\n" + \
                "Parameters [Units]:\n" + \
                parameters + "\n"
 
