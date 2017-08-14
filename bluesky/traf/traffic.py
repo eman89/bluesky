@@ -493,10 +493,12 @@ class Traffic(DynamicArrays):
         self.gamma = np.degrees(np.arctan2(self.vs,self.tas))
         
         # print out the flight path angle
-#        print "Gamma: %s" %(np.degrees(np.arctan2(self.vs,self.tas)))
-#        print "TAS  : %s" %(self.tas/kts)
-#        print "VS   : %s" %(self.vs/fpm)
-#        print
+        print "Gamma:     %s" %(self.gamma)
+        print "TAS  :     %s" %(self.tas/kts)
+        print "VS:        %s" %(self.vs/fpm)
+        print "ALT:       %s" %(self.alt/ft)
+        print "Pilot Alt: %s" %(self.pilot.alt/ft)
+        print
     
     def UpdateEfficiency(self, simdt):
         # Update flight efficiency metrics
