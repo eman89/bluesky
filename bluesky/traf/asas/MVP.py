@@ -5,7 +5,7 @@ Created on Tue Mar 03 16:50:19 2015
 @author: Jerom Maas
 """
 import numpy as np
-from ...tools.aero import ft
+from ...tools.aero import ft, kts, fpm
 
 
 def start(dbconf):
@@ -235,8 +235,8 @@ def MVP(traf, dbconf, id1, id2):
     # is solved in 1 timestep, leading to a vertical separation that is too 
     # high (high vs assumed in traf). If vertical dynamics are included to 
     # aircraft  model in traffic.py, the below three lines should be deleted.
-    mindv3 = -400./60.*ft # ~ 2.016 [m/s]
-    maxdv3 = 400./60.*ft
+    mindv3 = -400*fpm# ~ 2.016 [m/s]
+    maxdv3 = 400*fpm
     dv3 = np.maximum(mindv3,np.minimum(maxdv3,dv3))
 
     # combine the dv components 

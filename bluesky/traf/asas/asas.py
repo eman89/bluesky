@@ -1,6 +1,6 @@
 import numpy as np
 from ... import settings
-from ...tools.aero import ft, nm
+from ...tools.aero import ft, nm, fpm, kts
 from ...tools.dynamicarrays import DynamicArrays, RegisterElementParameters
 from ...tools import areafilter, geo, datalog, logHeader
 from asasLogUpdate import asasLogUpdate
@@ -197,10 +197,10 @@ class ASAS(DynamicArrays):
         self.swasas       = True                       # [-] whether to perform CD&R
         self.tasas        = 0.0                        # Next time ASAS should be called
 
-        self.vmin         = 51.4                       # [m/s] Minimum ASAS velocity (100 kts)
-        self.vmax         = 308.6                      # [m/s] Maximum ASAS velocity (600 kts)
-        self.vsmin        = -3000. / 60. * ft          # [m/s] Minimum ASAS vertical speed
-        self.vsmax        = 3000. / 60. * ft           # [m/s] Maximum ASAS vertical speed
+        self.vmin         = 100.0*kts                  # [m/s] Minimum ASAS velocity (100 kts)
+        self.vmax         = 600.0*kts                  # [m/s] Maximum ASAS velocity (600 kts)
+        self.vsmin        = -3000.0*fpm                # [m/s] Minimum ASAS vertical speed
+        self.vsmax        = 3000.0*fpm                 # [m/s] Maximum ASAS vertical speed
 
         self.swresohoriz  = False                      # [-] switch to limit resolution to the horizontal direction
         self.swresospd    = False                      # [-] switch to use only speed resolutions (works with swresohoriz = True)
