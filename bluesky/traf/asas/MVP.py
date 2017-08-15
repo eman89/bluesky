@@ -155,7 +155,7 @@ def resolve(dbconf, traf):
     # tinconf that is between 0 and the lookahead time (i.e., for the ones that are 
     # in conflict). This is what the following code does:
     altCondition = dbconf.tinconf.min(axis=1) < dbconf.dtlookahead
-    asasalttemp  = dbconf.vs*dbconf.tinconf.min(axis=1) + traf.alt
+    asasalttemp  = dbconf.vs*dbconf.tcpa.min(axis=1) + traf.alt
     dbconf.alt[altCondition] = asasalttemp[altCondition]
     
     # If resolutions are limited in the horizontal direction, then asasalt should
