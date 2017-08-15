@@ -136,11 +136,11 @@ def detect(dbconf, traf, simt):
     tcrosshi = (dbconf.dalt + dbconf.dh) / -dvs
     tcrosslo = (dbconf.dalt - dbconf.dh) / -dvs
 
-    tinver  = np.minimum(tcrosshi, tcrosslo)
+    dbconf.tinver  = np.minimum(tcrosshi, tcrosslo)
     toutver = np.maximum(tcrosshi, tcrosslo)
 
     # Combine vertical and horizontal conflict-------------------------------------
-    dbconf.tinconf = np.maximum(tinver, tinhor)
+    dbconf.tinconf = np.maximum(dbconf.tinver, tinhor)
     dbconf.toutconf = np.minimum(toutver, touthor)
 
     # Boolean matrix of conflict or no conflict for each ac

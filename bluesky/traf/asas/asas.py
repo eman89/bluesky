@@ -20,6 +20,7 @@ import DoNothing
 import Eby
 import MVP
 import Swarm
+import MVP2
 
 
 class ASAS(DynamicArrays):
@@ -30,7 +31,7 @@ class ASAS(DynamicArrays):
     CDmethods = {"STATEBASED": StateBasedCD}
 
     # Dictionary of CR methods
-    CRmethods = {"OFF": DoNothing, "MVP": MVP, "EBY": Eby, "SWARM": Swarm}
+    CRmethods = {"OFF": DoNothing, "MVP": MVP, "EBY": Eby, "SWARM": Swarm, "MVP2": MVP2}
 
     @classmethod
     def addCDMethod(asas, name, module):
