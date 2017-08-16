@@ -18,6 +18,10 @@ def resolve(dbconf, traf):
     # Check if ASAS is ON first!    
     if not dbconf.swasas:
         return
+    
+    # Then check if there are any conflicts to solve in this detection cycle!        
+    if len(dbconf.conflist_now) == 0:
+        return
 
     # Initialize an array to store the resolution velocity vector for all A/C
     dv = np.zeros((traf.ntraf,3)) 

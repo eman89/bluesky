@@ -142,6 +142,9 @@ def detect(dbconf, traf, simt):
     # Combine vertical and horizontal conflict-------------------------------------
     dbconf.tinconf = np.maximum(dbconf.tinver, tinhor)
     dbconf.toutconf = np.minimum(toutver, touthor)
+    
+#    dbconf.t2solV = np.where(np.abs(dvs)>0.0, np.abs(dbconf.dalt/dvs), dbconf.tinconf) 
+    
 
     # Boolean matrix of conflict or no conflict for each ac
     swconfl = swhorconf * (dbconf.tinconf <= dbconf.toutconf) * \

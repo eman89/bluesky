@@ -17,10 +17,17 @@ def resolve(dbconf, traf):
     # Check if ASAS is ON first!    
     if not dbconf.swasas:
         return
+    
+#    # Then check if there are any conflicts to solve in this detection cycle!        
+    if len(dbconf.conflist_now) == 0:
+        return
 
     # Initialize an array to store the resolution velocity vector for all A/C
     dv = np.zeros((traf.ntraf,3)) 
-
+    
+    # Initialize an array to store the time needed to solve vertical conflict for all A/c
+    time2solV = np.ones(traf.ntraf)*1e9
+    
     # If possible, solve conflicts once and copy results for symmetrical conflicts
     # If that is not possible, solve each conflict twice, once for each A/C
     if not traf.adsb.truncated and not traf.adsb.transnoise:
@@ -42,7 +49,11 @@ def resolve(dbconf, traf):
                 if conflict in dbconf.conflist_resospawncheck:
                     dv_mvp = np.array([0.0,0.0,0.0]) # no resolution 
                 else:
-                    dv_mvp = MVP(traf, dbconf, id1, id2)
+                    dv_mvp, tver = MVP(traf, dbconf, id1, id2)
+                    if tver < time2solV[id1]:
+                        time2solV[id1] = tver
+                    if tver < time2solV[id2]:
+                        time2solV[id2] = tver
                 
                 # Use priority rules if activated
                 if dbconf.swprio:
@@ -149,14 +160,18 @@ def resolve(dbconf, traf):
     dbconf.spd = newgscapped
     dbconf.vs  = vscapped
     
+
+    dbconf.alt = dbconf.vs*time2solV + traf.alt
+    
+    
     # To update asasalt, tinconf is used. tinconf is a really big value if there is 
     # no conflict. If there is a conflict, tinconf will be between 0 and the lookahead
     # time. Therefore, asasalt should only be updated for those aircraft that have a 
     # tinconf that is between 0 and the lookahead time (i.e., for the ones that are 
     # in conflict). This is what the following code does:
-    altCondition = dbconf.tinconf.min(axis=1) < dbconf.dtlookahead
-    asasalttemp  = dbconf.vs*dbconf.tinconf.min(axis=1) + traf.alt
-    dbconf.alt[altCondition] = asasalttemp[altCondition]
+#    altCondition = dbconf.tinconf.min(axis=1) < dbconf.dtlookahead
+#    asasalttemp  = dbconf.vs*dbconf.t2solV.min(axis=1) + traf.alt
+#    dbconf.alt[altCondition] = asasalttemp[altCondition]
     
     # If resolutions are limited in the horizontal direction, then asasalt should
     # be equal to auto pilot alt (aalt). This is to prevent a new asasalt being computed 
@@ -201,15 +216,18 @@ def MVP(traf, dbconf, id1, id2):
     # Find horizontal and vertical distances at the tcpa
     dcpa  = drel + vrel*tcpa
     dabsH = np.sqrt(dcpa[0]*dcpa[0]+dcpa[1]*dcpa[1])
-    dabsV = abs(dcpa[2])
+#    dabsV = abs(dcpa[2])
     	
-    # Compute horizontal and vertical intrusions
+    # Compute horizontal intrusion
 #    iH = dbconf.Rm / np.abs(np.cos(np.arcsin(dbconf.Rm / dist) - np.arcsin(dabsH / dist))) - dabsH
     iH = dbconf.Rm - dabsH
 #    iV = dbconf.dhm - dabsV
     
-    # Compute the maximum vertical intrusion
-    iV = dbconf.dhm if abs(vrel[2]) > 0.0 else dbconf.dhm-drel[2]
+    # Compute the  vertical intrusion
+    iV     = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-drel[2]
+    t2solV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else dbconf.tinconf[id1,id2]
+#    t2solV = dbconf.t2solV[id1,id2]
+    
         
     # If id1 and id2 are in intrusion, assume full intrusion to force max movement
     # The following is commented out for Project 3. Resolutions should can the same in all conflict cases. 
@@ -233,7 +251,7 @@ def MVP(traf, dbconf, id1, id2):
     dv1 = (iH*dcpa[0])/(abs(tcpa)*dabsH)  # abs(tcpa) since tinconf can be positive, while tcpa can be be negative (i.e.,conflcit is behind the two aircraft). A negative tcpa would direct dv in the wrong direction.
     dv2 = (iH*dcpa[1])/(abs(tcpa)*dabsH)
 #    dv3 = (iV*dcpa[2])/(abs(tcpa)*dabsV)
-    dv3 = iV/dbconf.tinconf[id1,id2]    
+    dv3 = iV/t2solV 
     
     # It is necessary to cap dv3 to prevent that a vertical conflict 
     # is solved in 1 timestep, leading to a vertical separation that is too 
@@ -260,7 +278,7 @@ def MVP(traf, dbconf, id1, id2):
     import pdb
     pdb.set_trace()
           
-    return dv_plus    
+    return dv_plus, t2solV
     
 #============================= Priority Rules =================================    
     
