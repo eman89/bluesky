@@ -26,7 +26,7 @@ def resolve(dbconf, traf):
     dv = np.zeros((traf.ntraf,3)) 
     
     # Initialize an array to store the time needed to solve vertical conflict for all A/c
-    time2solV = np.ones(traf.ntraf)*1e9
+    time2solV = np.zeros(traf.ntraf)
     
     # If possible, solve conflicts once and copy results for symmetrical conflicts
     # If that is not possible, solve each conflict twice, once for each A/C
@@ -49,11 +49,9 @@ def resolve(dbconf, traf):
                 if conflict in dbconf.conflist_resospawncheck:
                     dv_mvp = np.array([0.0,0.0,0.0]) # no resolution 
                 else:
-                    dv_mvp, tver = MVP(traf, dbconf, id1, id2)
-                    if tver < time2solV[id1]:
-                        time2solV[id1] = tver
-                    if tver < time2solV[id2]:
-                        time2solV[id2] = tver
+                    dv_mvp, tversol = MVP(traf, dbconf, id1, id2)
+                    time2solV[id1] = tversol
+                    time2solV[id2] = tversol
                 
                 # Use priority rules if activated
                 if dbconf.swprio:
@@ -160,18 +158,14 @@ def resolve(dbconf, traf):
     dbconf.spd = newgscapped
     dbconf.vs  = vscapped
     
-
-    dbconf.alt = dbconf.vs*time2solV + traf.alt
-    
-    
     # To update asasalt, tinconf is used. tinconf is a really big value if there is 
     # no conflict. If there is a conflict, tinconf will be between 0 and the lookahead
     # time. Therefore, asasalt should only be updated for those aircraft that have a 
     # tinconf that is between 0 and the lookahead time (i.e., for the ones that are 
     # in conflict). This is what the following code does:
-#    altCondition = dbconf.tinconf.min(axis=1) < dbconf.dtlookahead
-#    asasalttemp  = dbconf.vs*dbconf.t2solV.min(axis=1) + traf.alt
-#    dbconf.alt[altCondition] = asasalttemp[altCondition]
+    altCondition = dbconf.tinconf.min(axis=1) < dbconf.dtlookahead
+    asasalttemp = dbconf.vs*time2solV + traf.alt
+    dbconf.alt[altCondition] = asasalttemp[altCondition]
     
     # If resolutions are limited in the horizontal direction, then asasalt should
     # be equal to auto pilot alt (aalt). This is to prevent a new asasalt being computed 
@@ -251,7 +245,8 @@ def MVP(traf, dbconf, id1, id2):
     dv1 = (iH*dcpa[0])/(abs(tcpa)*dabsH)  # abs(tcpa) since tinconf can be positive, while tcpa can be be negative (i.e.,conflcit is behind the two aircraft). A negative tcpa would direct dv in the wrong direction.
     dv2 = (iH*dcpa[1])/(abs(tcpa)*dabsH)
 #    dv3 = (iV*dcpa[2])/(abs(tcpa)*dabsV)
-    dv3 = iV/t2solV 
+#    dv3 = np.where(abs(vrel[2])>0,  (iV/t2solV)*(-vrel[2]/abs(vrel[2])), (iV/t2solV))
+    dv3 = (iV/t2solV)
     
     # It is necessary to cap dv3 to prevent that a vertical conflict 
     # is solved in 1 timestep, leading to a vertical separation that is too 
