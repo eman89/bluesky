@@ -419,7 +419,7 @@ class Traffic(DynamicArrays):
         #---------- Kinematics --------------------------------
         self.UpdateAirSpeed(simdt, simt)
         self.UpdateGroundSpeed(simdt)
-        self.UpdatePosition(simdt)
+        self.UpdatePosition(simdt, simt)
 
         #---------- Performance Update ------------------------
         self.perf.perf(simt)
@@ -482,7 +482,7 @@ class Traffic(DynamicArrays):
             self.gs  = np.sqrt(self.gsnorth**2 + self.gseast**2)
             self.trk = np.degrees(np.arctan2(self.gseast, self.gsnorth)) % 360.
 
-    def UpdatePosition(self, simdt):
+    def UpdatePosition(self, simdt, simt):
         # Update position 
         self.alt = np.where(self.swaltsel, self.alt + self.vs * simdt, self.pilot.alt)
         self.lat = self.lat + np.degrees(simdt * self.gsnorth / Rearth)
@@ -493,12 +493,13 @@ class Traffic(DynamicArrays):
         self.gamma = np.degrees(np.arctan2(self.vs,self.tas))
         
         # print out the flight path angle
-        print "Gamma:     %s" %(self.gamma)
-        print "TAS  :     %s" %(self.tas/kts)
-        print "VS:        %s" %(self.vs/fpm)
-        print "ALT:       %s" %(self.alt/ft)
-        print "Pilot Alt: %s" %(self.pilot.alt/ft)
-        print
+        if simt > 60.0*8.75:
+#            print "Gamma:     %s" %(self.gamma)
+#            print "TAS  :     %s" %(self.tas/kts)
+            print "VS:        %s" %(self.vs/fpm)
+            print "ALT:       %s" %(self.alt/ft)
+            print "Pilot Alt: %s" %(self.pilot.alt/ft)
+            print
     
     def UpdateEfficiency(self, simdt):
         # Update flight efficiency metrics

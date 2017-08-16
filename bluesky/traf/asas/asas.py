@@ -200,8 +200,8 @@ class ASAS(DynamicArrays):
 
         self.vmin         = 100.0*kts                  # [m/s] Minimum ASAS velocity (100 kts)
         self.vmax         = 600.0*kts                  # [m/s] Maximum ASAS velocity (600 kts)
-        self.vsmin        = -3000.0*fpm                # [m/s] Minimum ASAS vertical speed
-        self.vsmax        = 3000.0*fpm                 # [m/s] Maximum ASAS vertical speed
+        self.vsmin        = -4000.0*fpm                # [m/s] Minimum ASAS vertical speed
+        self.vsmax        = 4000.0*fpm                 # [m/s] Maximum ASAS vertical speed
 
         self.swresohoriz  = False                      # [-] switch to limit resolution to the horizontal direction
         self.swresospd    = False                      # [-] switch to use only speed resolutions (works with swresohoriz = True)
