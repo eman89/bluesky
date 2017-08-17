@@ -5,7 +5,7 @@ Created on Tue Mar 03 16:50:19 2015
 @author: Jerom Maas
 """
 import numpy as np
-from ...tools.aero import ft, kts, fpm
+from ...tools.aero import ft
 
 
 def start(dbconf):
@@ -17,17 +17,10 @@ def resolve(dbconf, traf):
     # Check if ASAS is ON first!    
     if not dbconf.swasas:
         return
-    
-#    # Then check if there are any conflicts to solve in this detection cycle!        
-    if len(dbconf.conflist_now) == 0:
-        return
 
     # Initialize an array to store the resolution velocity vector for all A/C
     dv = np.zeros((traf.ntraf,3)) 
-    
-    # Initialize an array to store the time needed to solve vertical conflict for all A/c
-    time2solV = np.zeros(traf.ntraf)
-    
+
     # If possible, solve conflicts once and copy results for symmetrical conflicts
     # If that is not possible, solve each conflict twice, once for each A/C
     if not traf.adsb.truncated and not traf.adsb.transnoise:
@@ -49,9 +42,7 @@ def resolve(dbconf, traf):
                 if conflict in dbconf.conflist_resospawncheck:
                     dv_mvp = np.array([0.0,0.0,0.0]) # no resolution 
                 else:
-                    dv_mvp, tversol = MVP(traf, dbconf, id1, id2)
-                    time2solV[id1] = tversol
-                    time2solV[id2] = tversol
+                    dv_mvp = MVP(traf, dbconf, id1, id2)
                 
                 # Use priority rules if activated
                 if dbconf.swprio:
@@ -164,7 +155,7 @@ def resolve(dbconf, traf):
     # tinconf that is between 0 and the lookahead time (i.e., for the ones that are 
     # in conflict). This is what the following code does:
     altCondition = dbconf.tinconf.min(axis=1) < dbconf.dtlookahead
-    asasalttemp = dbconf.vs*time2solV + traf.alt
+    asasalttemp  = dbconf.vs*dbconf.tinconf.min(axis=1) + traf.alt
     dbconf.alt[altCondition] = asasalttemp[altCondition]
     
     # If resolutions are limited in the horizontal direction, then asasalt should
@@ -210,51 +201,42 @@ def MVP(traf, dbconf, id1, id2):
     # Find horizontal and vertical distances at the tcpa
     dcpa  = drel + vrel*tcpa
     dabsH = np.sqrt(dcpa[0]*dcpa[0]+dcpa[1]*dcpa[1])
-#    dabsV = abs(dcpa[2])
+    dabsV = abs(dcpa[2])
     	
-    # Compute horizontal intrusion
+    # Compute horizontal and vertical intrusions
 #    iH = dbconf.Rm / np.abs(np.cos(np.arcsin(dbconf.Rm / dist) - np.arcsin(dabsH / dist))) - dabsH
     iH = dbconf.Rm - dabsH
-#    iV = dbconf.dhm - dabsV
-    
-    # Compute the  vertical intrusion
-    iV     = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-drel[2]
-    t2solV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else dbconf.tinconf[id1,id2]
-#    t2solV = dbconf.t2solV[id1,id2]
-    
+    iV = dbconf.dhm - dabsV
         
     # If id1 and id2 are in intrusion, assume full intrusion to force max movement
-    # The following is commented out for Project 3. Resolutions should can the same in all conflict cases. 
-#    if drel[0] < dbconf.Rm or drel[1] < dbconf.Rm:
-#        iH = dbconf.Rm
-#    if drel[2] < dbconf.dhm:
-#        iV = dbconf.dhm
+    if drel[0] < dbconf.Rm or drel[1] < dbconf.Rm:
+        iH = dbconf.Rm
+    if drel[2] < dbconf.dhm:
+        iV = dbconf.dhm
     
-    # Exception handlers for head-on conflicts. Algthough this is an excpetion there is no choice because of the divide by zero problem.
+    # Exception handlers for head-on conflicts
     # This is done to prevent division by zero in the next step
     if dabsH <= 10.:
         dabsH = 10.
         dcpa[0] = 10.
         dcpa[1] = 10.
-#    if dabsV <= 10.:
-#        dabsV = 10. 
-#        if dbconf.swresovert: # only trigger vertical resolution if it is the desired resolution direction
-#            dcpa[2] = 10.
+    if dabsV <= 10.:
+        dabsV = 10. 
+        if dbconf.swresovert: # only trigger vertical resolution if it is the desired resolution direction
+            dcpa[2] = 10.
 
     # Compute the resolution velocity vector in all three directions
     dv1 = (iH*dcpa[0])/(abs(tcpa)*dabsH)  # abs(tcpa) since tinconf can be positive, while tcpa can be be negative (i.e.,conflcit is behind the two aircraft). A negative tcpa would direct dv in the wrong direction.
     dv2 = (iH*dcpa[1])/(abs(tcpa)*dabsH)
-#    dv3 = (iV*dcpa[2])/(abs(tcpa)*dabsV)
-#    dv3 = np.where(abs(vrel[2])>0,  (iV/t2solV)*(-vrel[2]/abs(vrel[2])), (iV/t2solV))
-    dv3 = (iV/t2solV)
+    dv3 = (iV*dcpa[2])/(abs(tcpa)*dabsV)    
     
     # It is necessary to cap dv3 to prevent that a vertical conflict 
     # is solved in 1 timestep, leading to a vertical separation that is too 
     # high (high vs assumed in traf). If vertical dynamics are included to 
     # aircraft  model in traffic.py, the below three lines should be deleted.
-#    mindv3 = -400*fpm# ~ 2.016 [m/s]
-#    maxdv3 = 400*fpm
-#    dv3 = np.maximum(mindv3,np.minimum(maxdv3,dv3))
+    mindv3 = -400./60.*ft # ~ 2.016 [m/s]
+    maxdv3 = 400./60.*ft
+    dv3 = np.maximum(mindv3,np.minimum(maxdv3,dv3))
 
     # combine the dv components 
     dv = np.array([dv1,dv2,dv3])
@@ -269,11 +251,8 @@ def MVP(traf, dbconf, id1, id2):
     # Intruder inside ownship IPZ
     else: 
         dv_plus=dv
-    
-    import pdb
-    pdb.set_trace()
           
-    return dv_plus, t2solV
+    return dv_plus    
     
 #============================= Priority Rules =================================    
     
