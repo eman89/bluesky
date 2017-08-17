@@ -160,7 +160,8 @@ class Autopilot(DynamicArrays):
             self.vnavvs  = np.where(self.swvnavvs, self.traf.actwp.vs, self.vnavvs)
             #was: self.vnavvs  = np.where(self.swvnavvs, self.steepness * self.traf.gs, self.vnavvs)
 
-            self.vs = np.where(self.swvnavvs, self.vnavvs, self.traf.avsdef * self.traf.limvs_flag)
+            self.vs = np.where(self.swvnavvs, self.vnavvs, self.traf.avsdef * self.traf.limvs_flag)  # CHANGE THE self.traf.avsdef BASED ON ACTUAL SPEED AND STEEPNESS
+
 
             self.alt = np.where(self.swvnavvs, self.traf.actwp.alt, self.traf.apalt)
 

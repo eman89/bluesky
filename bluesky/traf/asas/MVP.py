@@ -18,15 +18,15 @@ def resolve(dbconf, traf):
     if not dbconf.swasas:
         return
     
-#    # Then check if there are any conflicts to solve in this detection cycle!        
-    if len(dbconf.conflist_now) == 0:
-        return
+##    # Then check if there are any conflicts to solve in this detection cycle!        
+#    if len(dbconf.conflist_now) == 0:
+#        return
 
     # Initialize an array to store the resolution velocity vector for all A/C
     dv = np.zeros((traf.ntraf,3)) 
     
     # Initialize an array to store the time needed to solve vertical conflict for all A/c
-    time2solV = np.zeros(traf.ntraf)
+    time2solV = np.ones(traf.ntraf)*1e9
     
     # If possible, solve conflicts once and copy results for symmetrical conflicts
     # If that is not possible, solve each conflict twice, once for each A/C
@@ -163,7 +163,7 @@ def resolve(dbconf, traf):
     # time. Therefore, asasalt should only be updated for those aircraft that have a 
     # tinconf that is between 0 and the lookahead time (i.e., for the ones that are 
     # in conflict). This is what the following code does:
-    altCondition = dbconf.tinconf.min(axis=1) < dbconf.dtlookahead
+    altCondition = time2solV< dbconf.dtlookahead
     asasalttemp = dbconf.vs*time2solV + traf.alt
     dbconf.alt[altCondition] = asasalttemp[altCondition]
     
@@ -245,8 +245,8 @@ def MVP(traf, dbconf, id1, id2):
     dv1 = (iH*dcpa[0])/(abs(tcpa)*dabsH)  # abs(tcpa) since tinconf can be positive, while tcpa can be be negative (i.e.,conflcit is behind the two aircraft). A negative tcpa would direct dv in the wrong direction.
     dv2 = (iH*dcpa[1])/(abs(tcpa)*dabsH)
 #    dv3 = (iV*dcpa[2])/(abs(tcpa)*dabsV)
-#    dv3 = np.where(abs(vrel[2])>0,  (iV/t2solV)*(-vrel[2]/abs(vrel[2])), (iV/t2solV))
-    dv3 = (iV/t2solV)
+    dv3 = np.where(abs(vrel[2])>0.0,  (iV/t2solV)*(-vrel[2]/abs(vrel[2])), (iV/t2solV))
+#    dv3 = (iV/t2solV)
     
     # It is necessary to cap dv3 to prevent that a vertical conflict 
     # is solved in 1 timestep, leading to a vertical separation that is too 
