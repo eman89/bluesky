@@ -5,7 +5,7 @@ Created on Tue Mar 03 16:50:19 2015
 @author: Jerom Maas
 """
 import numpy as np
-#from ...tools.aero import ft, kts, fpm
+from ...tools.aero import ft, kts, fpm
 
 
 def start(dbconf):
@@ -14,7 +14,7 @@ def start(dbconf):
 def resolve(dbconf, traf):
     """ Resolve all current conflicts """
     
-    # Preliminary Calculations-------------------------------------------------
+    # Premble------------------------------------------------------------------
     
     # Check if ASAS is ON first!    
     if not dbconf.swasas:
@@ -22,6 +22,9 @@ def resolve(dbconf, traf):
     
     # Initialize array to store the resolution velocity vector for all A/C
     dv = np.zeros((traf.ntraf,3)) 
+    
+    # Initialize an array to store time needed to resolve vertically 
+    timesolveV = np.ones(traf.ntraf)*1e9
     
     
     # Call MVP function to resolve conflicts-----------------------------------
@@ -47,7 +50,12 @@ def resolve(dbconf, traf):
                 if conflict in dbconf.conflist_resospawncheck:
                     dv_mvp = np.array([0.0,0.0,0.0]) # no resolution 
                 else:
-                    dv_mvp = MVP(traf, dbconf, id1, id2)
+                    dv_mvp, tsolV = MVP(traf, dbconf, id1, id2)
+                    # Update the time to solve vertical conflict if it is smaller than current value
+                    if tsolV < timesolveV[id1]:
+                        timesolveV[id1] = tsolV
+                    if tsolV < timesolveV[id2]:
+                        timesolveV[id2] = tsolV                         
                 
                 # Use priority rules if activated
                 if dbconf.swprio:
@@ -90,7 +98,10 @@ def resolve(dbconf, traf):
                 if confpair in dbconf.conflist_resospawncheck:
                     dv_mvp = np.array([0.0,0.0,0.0])
                 else:
-                    dv_mvp = MVP(traf, dbconf, id1, id2)
+                    dv_mvp, tsolV = MVP(traf, dbconf, id1, id2)
+                    # Update the time to solve vertical conflict if it is smaller than current value
+                    if tsolV < timesolveV[id1]:
+                        timesolveV[id1] = tsolV
                 
                 # Use priority rules if activated
                 if dbconf.swprio:
@@ -122,29 +133,29 @@ def resolve(dbconf, traf):
     newv = dv+v
     
     
-    # Limit resolution direction if required------------------------------------
+    # Limit resolution direction if required-----------------------------------
     
     # Compute new speed vector in polar coordinates based on desired resolution 
     if dbconf.swresohoriz: # horizontal resolutions
         if dbconf.swresospd and not dbconf.swresohdg: # SPD only
             newtrack = traf.trk
-            newgs    = np.sqrt(newv[0,:]**2 + newv[1,:]**2)            
+            newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
             newvs    = traf.vs           
         elif dbconf.swresohdg and not dbconf.swresospd: # HDG only
-            newtrack = (np.arctan2(newv[0,:],newv[1,:])*180/np.pi) %360
+            newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
             newgs    = traf.gs
             newvs    = traf.vs  
         else: # SPD + HDG
-            newtrack = (np.arctan2(newv[0,:],newv[1,:])*180/np.pi) %360
-            newgs    = np.sqrt(newv[0,:]**2 + newv[1,:]**2)
+            newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
+            newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
             newvs    = traf.vs 
     elif dbconf.swresovert: # vertical resolutions
         newtrack = traf.trk
         newgs    = traf.gs
         newvs    = newv[2,:]       
     else: # horizontal + vertical
-        newtrack = (np.arctan2(newv[0,:],newv[1,:])*180/np.pi) %360
-        newgs    = np.sqrt(newv[0,:]**2 + newv[1,:]**2)
+        newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
+        newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
         newvs    = newv[2,:]
         
     # Cap the velocities
@@ -159,13 +170,11 @@ def resolve(dbconf, traf):
     dbconf.spd = newgscapped
     dbconf.vs  = vscapped
     
-    # To update asasalt, tsolveV is used. tsolveV is a really big value if there is 
-    # no conflict. If there is a conflict, tinconf will be between 0 and the lookahead
-    # time. Therefore, asasalt should only be updated for those aircraft that have a 
-    # tinconf that is between 0 and the lookahead time (i.e., for the ones that are 
-    # in conflict). This is what the following code does:
-    altCondition = dbconf.tinconf.min(axis=1) < dbconf.dtlookahead
-    asasalttemp = dbconf.vs*dbconf.tsolveV.min(axis=1) + traf.alt
+    # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
+    # when there is no conflict. Therefore asas alt is only updated when its 
+    # value is less than the look-ahead time, because for those aircraft are in conflict
+    altCondition             = timesolveV < dbconf.dtlookahead
+    asasalttemp              = dbconf.vs*timesolveV + traf.alt
     dbconf.alt[altCondition] = asasalttemp[altCondition]
     
     # If resolutions are limited in the horizontal direction, then asasalt should
@@ -248,7 +257,7 @@ def MVP(traf, dbconf, id1, id2):
     iV = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-drel[2]
     
     # Get the time to solve the conflict vertically - tsolveV
-    tsolV = dbconf.tsolveV[id1,id2]
+    tsolV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else dbconf.tinconf[id1,id2]
     
     # Compute the resolution velocity vector in the vertical direction
     # The direction of the vertical resolution is such that the aircraft with
@@ -269,10 +278,7 @@ def MVP(traf, dbconf, id1, id2):
     # combine the dv components 
     dv = np.array([dv1,dv2,dv3])
     
-    import pdb
-    pdb.set_trace()
-    
-    return dv
+    return dv, tsolV
     
 #============================= Priority Rules =================================    
     

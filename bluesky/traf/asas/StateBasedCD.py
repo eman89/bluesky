@@ -147,9 +147,6 @@ def detect(dbconf, traf, simt):
     swconfl = swhorconf * (dbconf.tinconf <= dbconf.toutconf) * \
         (dbconf.toutconf > 0.) * (dbconf.tinconf < dbconf.dtlookahead) \
         * (1. - I)
-        
-    # Compute time to solve conflicts vertically [s]
-    dbconf.tsolveV = np.where(np.abs(dvs)>1e-6, np.abs(dbconf.dalt/dvs), dbconf.tinconf)
 
     # ----------------------------------------------------------------------
     # Update conflict lists
