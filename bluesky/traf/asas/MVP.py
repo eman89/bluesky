@@ -60,9 +60,12 @@ def resolve(dbconf, traf):
                 # Use priority rules if activated
                 if dbconf.swprio:
                     dv[id1],dv[id2] = prioRules(traf, dbconf.priocode, dv_mvp, dv[id1], dv[id2], id1, id2)
-                else:
-                    dv[id1] = dv[id1] - dv_mvp
-                    dv[id2] = dv[id2] + dv_mvp 
+                else: # no priority -> coopoerative resolutions
+                    # since cooperative, the vertical resolution component can be halved, and then dv_mvp can be added
+                    dv_mvp[2] = dv_mvp[2]/2.0
+                    dv[id1]   = dv[id1] - dv_mvp
+                    dv[id2]   = dv[id2] + dv_mvp 
+                    # Because resolution is cooperative, then the vertical resolution can be half
                 
                 # Check the noreso aircraft. Nobody avoids noreso aircraft. 
                 # But noreso aircraft will avoid other aircraft
@@ -106,8 +109,10 @@ def resolve(dbconf, traf):
                 # Use priority rules if activated
                 if dbconf.swprio:
                    dv[id1], foobar = prioRules(traf, dbconf.priocode, dv_mvp, dv[id1], dv[id2], id1, id2) 
-                else:
-                   dv[id1]  = dv[id1] - dv_mvp
+                else: # no priority -> cooperative resolutions
+                   # since cooperative, the vertical resolution component can be halved, and then dv_mvp can be added
+                   dv_mvp[2] = dv_mvp[2]/2.0
+                   dv[id1]   = dv[id1] - dv_mvp
                    
                 # Check the noreso aircraft. Nobody avoids noreso aircraft. 
                 # But noreso aircraft will avoid other aircraft
@@ -287,11 +292,15 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
     
     # Primary Free Flight prio rules (no priority)
     if priocode == "FF1": 
+        # since cooperative, the vertical resolution component can be halved, and then dv_mvp can be added
+        dv_mvp[2] = dv_mvp[2]/2.0
         dv1 = dv1 - dv_mvp
         dv2 = dv2 + dv_mvp 
     
     # Secondary Free Flight (Cruising aircraft has priority, combined resolutions)    
     if priocode == "FF2": 
+        # since cooperative, the vertical resolution component can be halved, and then dv_mvp can be added
+        dv_mvp[2] = dv_mvp[2]/2.0
         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 2 solves conflict
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
             dv2 = dv2 + dv_mvp
@@ -306,47 +315,42 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
     elif priocode == "FF3": 
         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 1 solves conflict horizontally
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
-            dv1 = dv1 - dv_mvp
-            dv1[2] = 0.0 # -> set vertical speed to 0
+            dv_mvp[2] = 0.0
+            dv1       = dv1 - dv_mvp
         # If aircraft 2 is cruising, and aircraft 1 is climbing -> aircraft 2 solves conflict horizontally
         elif abs(traf.vs[id2])<0.1 and abs(traf.vs[id1]) > 0.1:
-            dv2 = dv2 + dv_mvp
-            dv2[2] = 0.0
+            dv_mvp[2] = 0.0
+            dv2       = dv2 + dv_mvp
         else: # both are climbing/descending/cruising -> both aircraft solves the conflict, combined
-            dv1 = dv1 - dv_mvp
-            dv2 = dv2 + dv_mvp
+            dv_mvp[2] = dv_mvp[2]/2.0
+            dv1       = dv1 - dv_mvp
+            dv2       = dv2 + dv_mvp
             
     # Primary Layers (Cruising aircraft has priority and clmibing/descending solves. All conflicts solved horizontally)        
     elif priocode == "LAY1": 
+        dv_mvp[2] = 0.0
         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 2 solves conflict horizontally
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
             dv2 = dv2 + dv_mvp
-            dv2[2] = 0.0
         # If aircraft 2 is cruising, and aircraft 1 is climbing -> aircraft 1 solves conflict horizontally
         elif abs(traf.vs[id2])<0.1 and abs(traf.vs[id1]) > 0.1:
             dv1 = dv1 - dv_mvp
-            dv1[2] = 0.0
         else: # both are climbing/descending/cruising -> both aircraft solves the conflict horizontally
             dv1 = dv1 - dv_mvp
             dv2 = dv2 + dv_mvp
-            dv1[2] = 0.0
-            dv2[2] = 0.0
     
     # Secondary Layers (Climbing/descending aircraft has priority and cruising solves. All conflicts solved horizontally)
     elif priocode ==  "LAY2": 
-         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 1 solves conflict horizontally
+        dv_mvp[2] = 0.0
+        # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 1 solves conflict horizontally
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
             dv1 = dv1 - dv_mvp
-            dv1[2] = 0.0
         # If aircraft 2 is cruising, and aircraft 1 is climbing -> aircraft 2 solves conflict horizontally
         elif abs(traf.vs[id2])<0.1 and abs(traf.vs[id1]) > 0.1:
             dv2 = dv2 + dv_mvp
-            dv2[2] = 0.0
         else: # both are climbing/descending/cruising -> both aircraft solves the conflic horizontally
             dv1 = dv1 - dv_mvp
             dv2 = dv2 + dv_mvp
-            dv1[2] = 0.0
-            dv2[2] = 0.0
     
     return dv1, dv2
     
