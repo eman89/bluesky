@@ -495,14 +495,13 @@ class Traffic(DynamicArrays):
         # print out the flight path angle
 ##        if simt > 60.0*4.70:
 #        if simt > 60.0*8.75:
-        if len(self.asas.conflist_active)>0:
-            print "Gamma:     %s" %(self.gamma)
-            print "TAS:       %s" %(self.tas/kts)
-            print "TRK:       %s" %(self.trk)
-            print "VS:        %s" %(self.vs/fpm)
-            print "ALT:       %s" %(self.alt/ft)
-            print "Pilot Alt: %s" %(self.pilot.alt/ft)
-            print
+        print "Gamma:     %s" %(self.gamma)
+        print "TAS:       %s" %(self.tas/kts)
+        print "TRK:       %s" %(self.trk)
+        print "VS:        %s" %(self.vs/fpm)
+        print "ALT:       %s" %(self.alt/ft)
+        print "Pilot Alt: %s" %(self.pilot.alt/ft)
+        print
     
     def UpdateEfficiency(self, simdt):
         # Update flight efficiency metrics
