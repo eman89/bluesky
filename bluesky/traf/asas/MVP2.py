@@ -5,6 +5,7 @@ Created on Tue Mar 03 16:50:19 2015
 @author: Jerom Maas
 
 Same as MVP, BUT with improved vertical resolution based on the 
+approach from Joost's PhD thesis (IN PROGRESS)
 """
 import numpy as np
 from ...tools.aero import ft, kts, fpm
