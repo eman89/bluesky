@@ -3,6 +3,8 @@
 Created on Tue Mar 03 16:50:19 2015
 
 @author: Jerom Maas
+
+Same as MVP, BUT with improved vertical resolution based on the 
 """
 import numpy as np
 from ...tools.aero import ft, kts, fpm
@@ -163,12 +165,26 @@ def resolve(dbconf, traf):
         newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
         newvs    = newv[2,:]
         
+    # If resolution is limited to vertical (i.e., horizontal resolution = 0), 
+    # and PROJECT3 prio code is used, then C/D-C/D conflict with 1 a/c below 4000ft
+    # will not be resolved because PROJECT3 prio setting sets the vertical resolution to 0. 
+    # So for ONLY such conflicts, even if resolution is lmited to vertical, 
+    # horizontal resolution is used to solve conflict
+    if dbconf.swresovert:
+        newtrack = np.where(np.logical_and(timesolveV<dbconf.dtlookahead, dv[2,:]==0.0), \
+                            np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0, \
+                            traf.trk)
+        newgs    = np.where(np.logical_and(timesolveV<dbconf.dtlookahead, dv[2,:]==0.0), \
+                            np.sqrt(np.square(newv[0,:])+np.square(newv[1,:])), \
+                            traf.gs)
+        newvs    = traf.vs
+        
+
+    # Determine ASAS module commands for all aircraft--------------------------
+    
     # Cap the velocities
     newgscapped = np.maximum(dbconf.vmin,np.minimum(dbconf.vmax,newgs))
     vscapped    = np.maximum(dbconf.vsmin,np.minimum(dbconf.vsmax,newvs))
-    
-    
-    # Determine ASAS module commands for all aircraft--------------------------
     
     # Set ASAS module updates
     dbconf.trk = newtrack
@@ -178,9 +194,10 @@ def resolve(dbconf, traf):
     # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
     # when there is no conflict. Therefore asas alt is only updated when its 
     # value is less than the look-ahead time, because for those aircraft are in conflict
-    altCondition             = timesolveV < dbconf.dtlookahead
-    asasalttemp              = dbconf.vs*timesolveV + traf.alt
-    dbconf.alt[altCondition] = asasalttemp[altCondition]
+    dbconf.alt                 = traf.apalt 
+    altCondition               = np.logical_and(timesolveV<dbconf.dtlookahead, np.abs(dv[2,:])>0.0)
+    asasalttemp                = dbconf.vs*timesolveV + traf.alt
+    dbconf.alt[altCondition]   = asasalttemp[altCondition] 
     
     # If resolutions are limited in the horizontal direction, then asasalt should
     # be equal to auto pilot alt (aalt). This is to prevent a new asasalt being computed 
@@ -259,10 +276,17 @@ def MVP(traf, dbconf, id1, id2):
     
     # Compute the  vertical intrusion
     # Amount of vertical intrusion dependent on vertical relative velocity
-    iV = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-drel[2]
+    iV = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-abs(drel[2])
     
     # Get the time to solve the conflict vertically - tsolveV
     tsolV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else dbconf.tinconf[id1,id2]
+    
+    # If the time to solve the conflict vertically is longer than the look-ahead time,
+    # because the the relative vertical speed is very small, then solve the intrusion
+    # within tinconf
+    if tsolV>dbconf.dtlookahead:
+        tsolV = dbconf.tinconf[id1,id2]
+        iV    = dbconf.dhm
     
     # Compute the resolution velocity vector in the vertical direction
     # The direction of the vertical resolution is such that the aircraft with
@@ -354,6 +378,23 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
         else: # both are climbing/descending/cruising -> both aircraft solves the conflic horizontally
             dv1 = dv1 - dv_mvp
             dv2 = dv2 + dv_mvp
+    
+    # Project 3: C/D vs C/D conflict with 1 aircraft below 4000ft (=1219m) solved horizontally by both aircraft
+    elif priocode ==  "PROJECT3": 
+        # Aircraft 1 is climbing/decending and is below 4000ft, and aircraft 2 is climbing/decending -> both solve horizontally
+        if abs(traf.vs[id1]) > 0.1 and traf.alt[id1] < 9144.0 and abs(traf.vs[id2]) > 0.1:
+            dv_mvp[2] = 0.0
+            dv1       = dv1 - dv_mvp
+            dv2       = dv2 + dv_mvp
+        # Aircraft 2 is climbing/decending and is below 4000ft, and aircraft 1 is climbing/decending -> both solve horizontally
+        elif abs(traf.vs[id2]) > 0.1 and traf.alt[id2] < 9144.0 and abs(traf.vs[id1]) > 0.1:
+            dv_mvp[2] = 0.0
+            dv1       = dv1 - dv_mvp
+            dv2       = dv2 + dv_mvp
+        else: # both solve with combined resolutions in the normal way, just like FF2
+            dv_mvp[2] = dv_mvp[2]/2.0
+            dv1 = dv1 - dv_mvp
+            dv2 = dv2 + dv_mvp 
     
     return dv1, dv2
     

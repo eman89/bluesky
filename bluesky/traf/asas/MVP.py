@@ -14,22 +14,23 @@ def start(dbconf):
 def resolve(dbconf, traf):
     """ Resolve all current conflicts """
     
+    # Premble------------------------------------------------------------------
+    
     # Check if ASAS is ON first!    
     if not dbconf.swasas:
         return
     
-##    # Then check if there are any conflicts to solve in this detection cycle!        
-#    if len(dbconf.conflist_now) == 0:
-#        return
-
-    # Initialize an array to store the resolution velocity vector for all A/C
+    # Initialize array to store the resolution velocity vector for all A/C
     dv = np.zeros((traf.ntraf,3)) 
     
-    # Initialize an array to store the time needed to solve vertical conflict for all A/c
-    time2solV = np.ones(traf.ntraf)*1e9
+    # Initialize an array to store time needed to resolve vertically 
+    timesolveV = np.ones(traf.ntraf)*1e9
     
-    # If possible, solve conflicts once and copy results for symmetrical conflicts
-    # If that is not possible, solve each conflict twice, once for each A/C
+    
+    # Call MVP function to resolve conflicts-----------------------------------
+    
+    # When ADS-B is off, calculate resolutions for both aircraft in a conflict 
+    # pair in 1 go as resolution will be symetric in this case
     if not traf.adsb.truncated and not traf.adsb.transnoise:
         for conflict in dbconf.conflist_now:
             
@@ -49,16 +50,22 @@ def resolve(dbconf, traf):
                 if conflict in dbconf.conflist_resospawncheck:
                     dv_mvp = np.array([0.0,0.0,0.0]) # no resolution 
                 else:
-                    dv_mvp, tversol = MVP(traf, dbconf, id1, id2)
-                    time2solV[id1] = tversol
-                    time2solV[id2] = tversol
+                    dv_mvp, tsolV = MVP(traf, dbconf, id1, id2)
+                    # Update the time to solve vertical conflict if it is smaller than current value
+                    if tsolV < timesolveV[id1]:
+                        timesolveV[id1] = tsolV
+                    if tsolV < timesolveV[id2]:
+                        timesolveV[id2] = tsolV                         
                 
                 # Use priority rules if activated
                 if dbconf.swprio:
                     dv[id1],dv[id2] = prioRules(traf, dbconf.priocode, dv_mvp, dv[id1], dv[id2], id1, id2)
-                else:
-                    dv[id1] = dv[id1] - dv_mvp
-                    dv[id2] = dv[id2] + dv_mvp 
+                else: # no priority -> coopoerative resolutions
+                    # since cooperative, the vertical resolution component can be halved, and then dv_mvp can be added
+                    dv_mvp[2] = dv_mvp[2]/2.0
+                    dv[id1]   = dv[id1] - dv_mvp
+                    dv[id2]   = dv[id2] + dv_mvp 
+                    # Because resolution is cooperative, then the vertical resolution can be half
                 
                 # Check the noreso aircraft. Nobody avoids noreso aircraft. 
                 # But noreso aircraft will avoid other aircraft
@@ -75,7 +82,7 @@ def resolve(dbconf, traf):
                     if ac2 in dbconf.resoofflst: # -> Then id2 does not do any resolutions
                         dv[id2] = 0.0    
                     
-                                                               
+    # If ADS-B is on, calculate resolution for each conflicting aircraft individually                                                           
     else:
         for i in range(dbconf.nconf):
             confpair = dbconf.confpairs[i]
@@ -94,13 +101,18 @@ def resolve(dbconf, traf):
                 if confpair in dbconf.conflist_resospawncheck:
                     dv_mvp = np.array([0.0,0.0,0.0])
                 else:
-                    dv_mvp = MVP(traf, dbconf, id1, id2)
+                    dv_mvp, tsolV = MVP(traf, dbconf, id1, id2)
+                    # Update the time to solve vertical conflict if it is smaller than current value
+                    if tsolV < timesolveV[id1]:
+                        timesolveV[id1] = tsolV
                 
                 # Use priority rules if activated
                 if dbconf.swprio:
                    dv[id1], foobar = prioRules(traf, dbconf.priocode, dv_mvp, dv[id1], dv[id2], id1, id2) 
-                else:
-                   dv[id1]  = dv[id1] - dv_mvp
+                else: # no priority -> cooperative resolutions
+                   # since cooperative, the vertical resolution component can be halved, and then dv_mvp can be added
+                   dv_mvp[2] = dv_mvp[2]/2.0
+                   dv[id1]   = dv[id1] - dv_mvp
                    
                 # Check the noreso aircraft. Nobody avoids noreso aircraft. 
                 # But noreso aircraft will avoid other aircraft
@@ -112,60 +124,78 @@ def resolve(dbconf, traf):
                 if dbconf.swresooff:
                     if ac1 in dbconf.resoofflst: # -> Then id1 does not do any resolutions
                         dv[id1] = 0.0                
-                
+    
+    
+    # Determine new speed and limit resolution direction for all aicraft-------     
 
-    # Now we have the resolution velocity vector for all A/C, cartesian coordinates
+    # Resolution vector for all aircraft, cartesian coordinates
     dv = np.transpose(dv)
 
-    # The old speed vector, cartesian coordinates
+    # The old speed vector for all aircraft, cartesian coordinates
     v = np.array([traf.gseast, traf.gsnorth, traf.vs])
 
-    # The new speed vector, cartesian coordinates
+    # The new speed vector, cartesian coordinates (dv = 0 for conflict free a/c)
     newv = dv+v
     
+    
+    # Limit resolution direction if required-----------------------------------
+    
     # Compute new speed vector in polar coordinates based on desired resolution 
-    # direction: horizontal or vertical or horizontal+vertical
     if dbconf.swresohoriz: # horizontal resolutions
         if dbconf.swresospd and not dbconf.swresohdg: # SPD only
             newtrack = traf.trk
-            newgs    = np.sqrt(newv[0,:]**2 + newv[1,:]**2)            
+            newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
             newvs    = traf.vs           
         elif dbconf.swresohdg and not dbconf.swresospd: # HDG only
-            newtrack = (np.arctan2(newv[0,:],newv[1,:])*180/np.pi) %360
+            newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
             newgs    = traf.gs
             newvs    = traf.vs  
         else: # SPD + HDG
-            newtrack = (np.arctan2(newv[0,:],newv[1,:])*180/np.pi) %360
-            newgs    = np.sqrt(newv[0,:]**2 + newv[1,:]**2)
+            newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
+            newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
             newvs    = traf.vs 
     elif dbconf.swresovert: # vertical resolutions
         newtrack = traf.trk
         newgs    = traf.gs
         newvs    = newv[2,:]       
     else: # horizontal + vertical
-        newtrack = (np.arctan2(newv[0,:],newv[1,:])*180/np.pi) %360
-        newgs    = np.sqrt(newv[0,:]**2 + newv[1,:]**2)
+        newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
+        newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
         newvs    = newv[2,:]
         
-    # Cap the velocity
+    # If resolution is limited to vertical (i.e., horizontal resolution = 0), 
+    # and PROJECT3 prio code is used, then C/D-C/D conflict with 1 a/c below 4000ft
+    # will not be resolved because PROJECT3 prio setting sets the vertical resolution to 0. 
+    # So for ONLY such conflicts, even if resolution is lmited to vertical, 
+    # horizontal resolution is used to solve conflict
+    if dbconf.swresovert:
+        newtrack = np.where(np.logical_and(timesolveV<dbconf.dtlookahead, dv[2,:]==0.0), \
+                            np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0, \
+                            traf.trk)
+        newgs    = np.where(np.logical_and(timesolveV<dbconf.dtlookahead, dv[2,:]==0.0), \
+                            np.sqrt(np.square(newv[0,:])+np.square(newv[1,:])), \
+                            traf.gs)
+        newvs    = traf.vs
+        
+
+    # Determine ASAS module commands for all aircraft--------------------------
+    
+    # Cap the velocities
     newgscapped = np.maximum(dbconf.vmin,np.minimum(dbconf.vmax,newgs))
+    vscapped    = np.maximum(dbconf.vsmin,np.minimum(dbconf.vsmax,newvs))
     
-    # Cap the vertical speed
-    vscapped = np.maximum(dbconf.vsmin,np.minimum(dbconf.vsmax,newvs))
-    
-    # Now assign resolutions to variables in the ASAS class
+    # Set ASAS module updates
     dbconf.trk = newtrack
     dbconf.spd = newgscapped
     dbconf.vs  = vscapped
     
-    # To update asasalt, tinconf is used. tinconf is a really big value if there is 
-    # no conflict. If there is a conflict, tinconf will be between 0 and the lookahead
-    # time. Therefore, asasalt should only be updated for those aircraft that have a 
-    # tinconf that is between 0 and the lookahead time (i.e., for the ones that are 
-    # in conflict). This is what the following code does:
-    altCondition = time2solV< dbconf.dtlookahead
-    asasalttemp = dbconf.vs*time2solV + traf.alt
-    dbconf.alt[altCondition] = asasalttemp[altCondition]
+    # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
+    # when there is no conflict. Therefore asas alt is only updated when its 
+    # value is less than the look-ahead time, because for those aircraft are in conflict
+    dbconf.alt                 = traf.apalt 
+    altCondition               = np.logical_and(timesolveV<dbconf.dtlookahead, np.abs(dv[2,:])>0.0)
+    asasalttemp                = dbconf.vs*timesolveV + traf.alt
+    dbconf.alt[altCondition]   = asasalttemp[altCondition] 
     
     # If resolutions are limited in the horizontal direction, then asasalt should
     # be equal to auto pilot alt (aalt). This is to prevent a new asasalt being computed 
@@ -181,11 +211,14 @@ def resolve(dbconf, traf):
     # LAYERS -> CONDITION 2 IS REQUIRED BELOW!
     
            
-#=================================== Modified Voltage Potential ===============
+#======================= Modified Voltage Potential ===========================
            
 
 def MVP(traf, dbconf, id1, id2):
     """Modified Voltage Potential (MVP) resolution method"""
+    
+    
+    # Preliminary calculations-------------------------------------------------
     
     # Get distance and qdr between id1 and id2
     dist = dbconf.dist[id1,id2]
@@ -196,57 +229,67 @@ def MVP(traf, dbconf, id1, id2):
    
     # Relative position vector between id1 and id2
     drel = np.array([np.sin(qdr)*dist, \
-                np.cos(qdr)*dist, \
-                traf.alt[id2]-traf.alt[id1]])
+                     np.cos(qdr)*dist, \
+                     traf.alt[id2]-traf.alt[id1]])
        
     # Write velocities as vectors and find relative velocity vector              
     v1 = np.array([traf.gseast[id1], traf.gsnorth[id1], traf.vs[id1]])
     v2 = np.array([traf.gseast[id2], traf.gsnorth[id2], traf.vs[id2]])
     vrel = np.array(v2-v1) 
     
-    # Find tcpa (or should it be tinconf, since tinconf decided whether its a conflict?)
-    tcpa = dbconf.tcpa[id1,id2] # dbconf.tinconf[id1,id2]
     
-    # Find horizontal and vertical distances at the tcpa
+    # Horizontal resolution----------------------------------------------------
+    
+    # Get the time to solve conflict horizontally -> tcpa
+    tcpa = dbconf.tcpa[id1,id2] 
+    
+    # Find horizontal distance at the tcpa (min horizontal distance)
     dcpa  = drel + vrel*tcpa
     dabsH = np.sqrt(dcpa[0]*dcpa[0]+dcpa[1]*dcpa[1])
-#    dabsV = abs(dcpa[2])
     	
     # Compute horizontal intrusion
-#    iH = dbconf.Rm / np.abs(np.cos(np.arcsin(dbconf.Rm / dist) - np.arcsin(dabsH / dist))) - dabsH
     iH = dbconf.Rm - dabsH
-#    iV = dbconf.dhm - dabsV
     
-    # Compute the  vertical intrusion
-    iV     = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-drel[2]
-    t2solV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else dbconf.tinconf[id1,id2]
-#    t2solV = dbconf.t2solV[id1,id2]
-    
-        
-    # If id1 and id2 are in intrusion, assume full intrusion to force max movement
-    # The following is commented out for Project 3. Resolutions should can the same in all conflict cases. 
-#    if drel[0] < dbconf.Rm or drel[1] < dbconf.Rm:
-#        iH = dbconf.Rm
-#    if drel[2] < dbconf.dhm:
-#        iV = dbconf.dhm
-    
-    # Exception handlers for head-on conflicts. Algthough this is an excpetion there is no choice because of the divide by zero problem.
+    # Exception handlers for head-on conflicts
     # This is done to prevent division by zero in the next step
     if dabsH <= 10.:
         dabsH = 10.
         dcpa[0] = 10.
         dcpa[1] = 10.
-#    if dabsV <= 10.:
-#        dabsV = 10. 
-#        if dbconf.swresovert: # only trigger vertical resolution if it is the desired resolution direction
-#            dcpa[2] = 10.
-
-    # Compute the resolution velocity vector in all three directions
-    dv1 = (iH*dcpa[0])/(abs(tcpa)*dabsH)  # abs(tcpa) since tinconf can be positive, while tcpa can be be negative (i.e.,conflcit is behind the two aircraft). A negative tcpa would direct dv in the wrong direction.
+        
+    # Compute the resolution velocity vector in horizontal direction
+    # abs(tcpa) because it bcomes negative during intrusion
+    dv1 = (iH*dcpa[0])/(abs(tcpa)*dabsH)  
     dv2 = (iH*dcpa[1])/(abs(tcpa)*dabsH)
-#    dv3 = (iV*dcpa[2])/(abs(tcpa)*dabsV)
-    dv3 = np.where(abs(vrel[2])>0.0,  (iV/t2solV)*(-vrel[2]/abs(vrel[2])), (iV/t2solV))
-#    dv3 = (iV/t2solV)
+    
+    # If intruder is outside the ownship PZ, then apply extra factor
+    # to make sure that resolution does not graze IPZ
+    if dbconf.Rm<dist and dabsH<dist:
+        erratum=np.cos(np.arcsin(dbconf.Rm/dist)-np.arcsin(dabsH/dist))
+        dv1 = dv1/erratum
+        dv2 = dv2/erratum
+        
+    
+    # Vertical resolution------------------------------------------------------
+    
+    # Compute the  vertical intrusion
+    # Amount of vertical intrusion dependent on vertical relative velocity
+    iV = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-abs(drel[2])
+    
+    # Get the time to solve the conflict vertically - tsolveV
+    tsolV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else dbconf.tinconf[id1,id2]
+    
+    # If the time to solve the conflict vertically is longer than the look-ahead time,
+    # because the the relative vertical speed is very small, then solve the intrusion
+    # within tinconf
+    if tsolV>dbconf.dtlookahead:
+        tsolV = dbconf.tinconf[id1,id2]
+        iV    = dbconf.dhm
+    
+    # Compute the resolution velocity vector in the vertical direction
+    # The direction of the vertical resolution is such that the aircraft with
+    # higher climb/decent rate reduces their climb/decent rate    
+    dv3 = np.where(abs(vrel[2])>0.0,  (iV/tsolV)*(-vrel[2]/abs(vrel[2])), (iV/tsolV))
     
     # It is necessary to cap dv3 to prevent that a vertical conflict 
     # is solved in 1 timestep, leading to a vertical separation that is too 
@@ -256,24 +299,16 @@ def MVP(traf, dbconf, id1, id2):
 #    maxdv3 = 400*fpm
 #    dv3 = np.maximum(mindv3,np.minimum(maxdv3,dv3))
 
+    
+    # Combine resolutions------------------------------------------------------
+
     # combine the dv components 
     dv = np.array([dv1,dv2,dv3])
     
-     # Intruder outside ownship IPZ
-    if dbconf.Rm<dist and dabsH<dist:
-        erratum=np.cos(np.arcsin(dbconf.Rm/dist)-np.arcsin(dabsH/dist))
-        dv_plus1 = dv[0]/erratum
-        dv_plus2 = dv[1]/erratum
-	   # combine dv_plus components. Note: erratum only applies to horizontal dv components
-        dv_plus = np.array([dv_plus1,dv_plus2,dv[2]])		
-    # Intruder inside ownship IPZ
-    else: 
-        dv_plus=dv
-    
     import pdb
     pdb.set_trace()
-          
-    return dv_plus, t2solV
+    
+    return dv, tsolV
     
 #============================= Priority Rules =================================    
     
@@ -282,11 +317,15 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
     
     # Primary Free Flight prio rules (no priority)
     if priocode == "FF1": 
+        # since cooperative, the vertical resolution component can be halved, and then dv_mvp can be added
+        dv_mvp[2] = dv_mvp[2]/2.0
         dv1 = dv1 - dv_mvp
         dv2 = dv2 + dv_mvp 
     
     # Secondary Free Flight (Cruising aircraft has priority, combined resolutions)    
     if priocode == "FF2": 
+        # since cooperative, the vertical resolution component can be halved, and then dv_mvp can be added
+        dv_mvp[2] = dv_mvp[2]/2.0
         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 2 solves conflict
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
             dv2 = dv2 + dv_mvp
@@ -301,47 +340,59 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
     elif priocode == "FF3": 
         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 1 solves conflict horizontally
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
-            dv1 = dv1 - dv_mvp
-            dv1[2] = 0.0 # -> set vertical speed to 0
+            dv_mvp[2] = 0.0
+            dv1       = dv1 - dv_mvp
         # If aircraft 2 is cruising, and aircraft 1 is climbing -> aircraft 2 solves conflict horizontally
         elif abs(traf.vs[id2])<0.1 and abs(traf.vs[id1]) > 0.1:
-            dv2 = dv2 + dv_mvp
-            dv2[2] = 0.0
+            dv_mvp[2] = 0.0
+            dv2       = dv2 + dv_mvp
         else: # both are climbing/descending/cruising -> both aircraft solves the conflict, combined
-            dv1 = dv1 - dv_mvp
-            dv2 = dv2 + dv_mvp
+            dv_mvp[2] = dv_mvp[2]/2.0
+            dv1       = dv1 - dv_mvp
+            dv2       = dv2 + dv_mvp
             
     # Primary Layers (Cruising aircraft has priority and clmibing/descending solves. All conflicts solved horizontally)        
     elif priocode == "LAY1": 
+        dv_mvp[2] = 0.0
         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 2 solves conflict horizontally
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
             dv2 = dv2 + dv_mvp
-            dv2[2] = 0.0
         # If aircraft 2 is cruising, and aircraft 1 is climbing -> aircraft 1 solves conflict horizontally
         elif abs(traf.vs[id2])<0.1 and abs(traf.vs[id1]) > 0.1:
             dv1 = dv1 - dv_mvp
-            dv1[2] = 0.0
         else: # both are climbing/descending/cruising -> both aircraft solves the conflict horizontally
             dv1 = dv1 - dv_mvp
             dv2 = dv2 + dv_mvp
-            dv1[2] = 0.0
-            dv2[2] = 0.0
     
     # Secondary Layers (Climbing/descending aircraft has priority and cruising solves. All conflicts solved horizontally)
     elif priocode ==  "LAY2": 
-         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 1 solves conflict horizontally
+        dv_mvp[2] = 0.0
+        # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 1 solves conflict horizontally
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
             dv1 = dv1 - dv_mvp
-            dv1[2] = 0.0
         # If aircraft 2 is cruising, and aircraft 1 is climbing -> aircraft 2 solves conflict horizontally
         elif abs(traf.vs[id2])<0.1 and abs(traf.vs[id1]) > 0.1:
             dv2 = dv2 + dv_mvp
-            dv2[2] = 0.0
         else: # both are climbing/descending/cruising -> both aircraft solves the conflic horizontally
             dv1 = dv1 - dv_mvp
             dv2 = dv2 + dv_mvp
-            dv1[2] = 0.0
-            dv2[2] = 0.0
+    
+    # Project 3: C/D vs C/D conflict with 1 aircraft below 4000ft (=1219m) solved horizontally by both aircraft
+    elif priocode ==  "PROJECT3": 
+        # Aircraft 1 is climbing/decending and is below 4000ft, and aircraft 2 is climbing/decending -> both solve horizontally
+        if abs(traf.vs[id1]) > 0.1 and traf.alt[id1] < 9144.0 and abs(traf.vs[id2]) > 0.1:
+            dv_mvp[2] = 0.0
+            dv1       = dv1 - dv_mvp
+            dv2       = dv2 + dv_mvp
+        # Aircraft 2 is climbing/decending and is below 4000ft, and aircraft 1 is climbing/decending -> both solve horizontally
+        elif abs(traf.vs[id2]) > 0.1 and traf.alt[id2] < 9144.0 and abs(traf.vs[id1]) > 0.1:
+            dv_mvp[2] = 0.0
+            dv1       = dv1 - dv_mvp
+            dv2       = dv2 + dv_mvp
+        else: # both solve with combined resolutions in the normal way, just like FF2
+            dv_mvp[2] = dv_mvp[2]/2.0
+            dv1 = dv1 - dv_mvp
+            dv2 = dv2 + dv_mvp 
     
     return dv1, dv2
     
