@@ -2,7 +2,7 @@
 # Synthetic scenarios
 # Good for checking multi-aircraft conflict resolution
 
-00:00:00.00>SYN SUPER 4
+00:00:00.00>SYN SUPER 3
 # 00:00:00.00>SYN SUPER 8
 # 00:00:00.00>SYN WALL
 
