@@ -175,7 +175,6 @@ def resolve(dbconf, traf):
         newgs    = np.where(np.logical_and(timesolveV<dbconf.dtlookahead, dv[2,:]==0.0), \
                             np.sqrt(np.square(newv[0,:])+np.square(newv[1,:])), \
                             traf.gs)
-        newvs    = traf.vs
         
 
     # Determine ASAS module commands for all aircraft--------------------------
