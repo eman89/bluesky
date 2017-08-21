@@ -168,7 +168,7 @@ def resolve(dbconf, traf):
     # will not be resolved because PROJECT3 prio setting sets the vertical resolution to 0. 
     # So for ONLY such conflicts, even if resolution is lmited to vertical, 
     # horizontal resolution is used to solve conflict
-    if dbconf.swresovert:
+    if dbconf.swresovert and dbconf.priocode == 'PROJECT3':
         newtrack = np.where(np.logical_and(timesolveV<dbconf.dtlookahead, dv[2,:]==0.0), \
                             np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0, \
                             traf.trk)
@@ -193,7 +193,8 @@ def resolve(dbconf, traf):
     # value is less than the look-ahead time, because for those aircraft are in conflict
     altCondition               = np.logical_and(timesolveV<dbconf.dtlookahead, np.abs(dv[2,:])>0.0)
     asasalttemp                = dbconf.vs*timesolveV + traf.alt
-    dbconf.alt[altCondition]   = asasalttemp[altCondition] 
+    dbconf.alt = np.where(altCondition, asasalttemp, traf.apalt)
+#    dbconf.alt[altCondition]   = asasalttemp[altCondition] 
     
     # If resolutions are limited in the horizontal direction, then asasalt should
     # be equal to auto pilot alt (aalt). This is to prevent a new asasalt being computed 
