@@ -273,34 +273,62 @@ def MVP(traf, dbconf, id1, id2):
         dv2 = dv2/erratum
         
     
-    # Vertical resolution------------------------------------------------------
+    # Vertical resolution Using Joost Thesis-----------------------------------
+    # See figure A.6 of Joost Ellerbroek PhD Thesis
     
-    # Compute the  vertical intrusion
-    # Amount of vertical intrusion dependent on vertical relative velocity
-    iV = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-abs(drel[2])
+    # Get the time to solve the conflict vertically - tinconf
+    tsolV = dbconf.tinconf[id1,id2]
+
     
-    # Get the time to solve the conflict vertically - tsolveV
-    tsolV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else dbconf.tinconf[id1,id2]
+    # Step 1: calculate all 4 xts (position vectors between ownship and )
     
-    # If the time to solve the conflict vertically is longer than the look-ahead time,
-    # because the the relative vertical speed is very small, then solve the intrusion
-    # within tinconf
-    if tsolV>dbconf.dtlookahead:
-        tsolV = dbconf.tinconf[id1,id2]
-        iV    = dbconf.dhm
+    # Step 2: Normalize all xts
     
-    # Compute the resolution velocity vector in the vertical direction
-    # The direction of the vertical resolution is such that the aircraft with
-    # higher climb/decent rate reduces their climb/decent rate    
-    dv3 = np.where(abs(vrel[2])>0.0,  (iV/tsolV)*(-vrel[2]/abs(vrel[2])), (iV/tsolV))
+    # Step 3: Determine the 2 xts with the widest angle between them
     
-    # It is necessary to cap dv3 to prevent that a vertical conflict 
-    # is solved in 1 timestep, leading to a vertical separation that is too 
-    # high (high vs assumed in traf). If vertical dynamics are included to 
-    # aircraft  model in traffic.py, the below three lines should be deleted.
-#    mindv3 = -400*fpm# ~ 2.016 [m/s]
-#    maxdv3 = 400*fpm
-#    dv3 = np.maximum(mindv3,np.minimum(maxdv3,dv3))
+    # Step 4: Determine the distance vector in the direction of the intruder 
+    #         from the ownship nose
+    
+    # Step 5: Determine the xt which has the smallest angle with the distance
+    #         vector in the direction of the intruder from the aircraft nose
+    
+    # Step 6: Project the distance vector in the direction of the direction of 
+    #         nose to the selected xt. The vertical component of this is the 
+    #         vector is the 
+    
+    # Step 6: 
+    
+    
+    
+    
+    
+    
+#    # Compute the  vertical intrusion
+#    # Amount of vertical intrusion dependent on vertical relative velocity
+#    iV = dbconf.dhm if abs(vrel[2])>0.0 else dbconf.dhm-abs(drel[2])
+#    
+#    # Get the time to solve the conflict vertically - tsolveV
+#    tsolV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else dbconf.tinconf[id1,id2]
+#    
+#    # If the time to solve the conflict vertically is longer than the look-ahead time,
+#    # because the the relative vertical speed is very small, then solve the intrusion
+#    # within tinconf
+#    if tsolV>dbconf.dtlookahead:
+#        tsolV = dbconf.tinconf[id1,id2]
+#        iV    = dbconf.dhm
+#    
+#    # Compute the resolution velocity vector in the vertical direction
+#    # The direction of the vertical resolution is such that the aircraft with
+#    # higher climb/decent rate reduces their climb/decent rate    
+#    dv3 = np.where(abs(vrel[2])>0.0,  (iV/tsolV)*(-vrel[2]/abs(vrel[2])), (iV/tsolV))
+#    
+#    # It is necessary to cap dv3 to prevent that a vertical conflict 
+#    # is solved in 1 timestep, leading to a vertical separation that is too 
+#    # high (high vs assumed in traf). If vertical dynamics are included to 
+#    # aircraft  model in traffic.py, the below three lines should be deleted.
+##    mindv3 = -400*fpm# ~ 2.016 [m/s]
+##    maxdv3 = 400*fpm
+##    dv3 = np.maximum(mindv3,np.minimum(maxdv3,dv3))
 
     
     # Combine resolutions------------------------------------------------------
