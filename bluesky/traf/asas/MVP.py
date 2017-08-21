@@ -191,7 +191,6 @@ def resolve(dbconf, traf):
     # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
     # when there is no conflict. Therefore asas alt is only updated when its 
     # value is less than the look-ahead time, because for those aircraft are in conflict
-    dbconf.alt                 = traf.apalt 
     altCondition               = np.logical_and(timesolveV<dbconf.dtlookahead, np.abs(dv[2,:])>0.0)
     asasalttemp                = dbconf.vs*timesolveV + traf.alt
     dbconf.alt[altCondition]   = asasalttemp[altCondition] 
