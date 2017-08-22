@@ -143,20 +143,20 @@ def resolve(asas, traf):
     # Compute new speed vector in polar coordinates based on desired resolution 
     if asas.swresohoriz: # horizontal resolutions
         if asas.swresospd and not asas.swresohdg: # SPD only
-            newtrack = traf.trk
+            newtrack = traf.trk[:]
             newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
-            newvs    = traf.vs           
+            newvs    = traf.vs[:]         
         elif asas.swresohdg and not asas.swresospd: # HDG only
             newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
-            newgs    = traf.gs
-            newvs    = traf.vs  
+            newgs    = traf.gs[:]
+            newvs    = traf.vs[:]
         else: # SPD + HDG
             newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
             newgs    = np.sqrt(np.square(newv[0,:])+np.square(newv[1,:]))
-            newvs    = traf.vs 
+            newvs    = traf.vs[:]
     elif asas.swresovert: # vertical resolutions
-        newtrack = traf.trk
-        newgs    = traf.gs
+        newtrack = traf.trk[:]
+        newgs    = traf.gs[:]
         newvs    = newv[2,:]       
     else: # horizontal + vertical
         newtrack = np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0
@@ -191,9 +191,9 @@ def resolve(asas, traf):
     # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
     # when there is no conflict. Therefore asas alt is only updated when its 
     # value is less than the look-ahead time, because for those aircraft are in conflict
-    altCondition               = np.logical_and(timesolveV<asas.dtlookahead, np.abs(dv[2,:])>0.0)
-    asasalttemp                = asas.vs*timesolveV + traf.alt
-    asas.alt[altCondition]   = asasalttemp[altCondition] 
+    altCondition           = np.logical_and(timesolveV<asas.dtlookahead, np.abs(dv[2,:])>0.0)
+    asasalttemp            = asas.vs*timesolveV + traf.alt
+    asas.alt[altCondition] = asasalttemp[altCondition] 
     
     # If resolutions are limited in the horizontal direction, then asasalt should
     # be equal to auto pilot alt (aalt). This is to prevent a new asasalt being computed 
