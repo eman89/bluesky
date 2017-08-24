@@ -375,12 +375,12 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
     # Project 3: C/D vs C/D conflict with 1 aircraft below 4000ft (=1219m) solved horizontally by both aircraft
     elif priocode ==  "PROJECT3": 
         # Aircraft 1 is climbing/decending and is below 4000ft, and aircraft 2 is climbing/decending -> both solve horizontally
-        if abs(traf.vs[id1]) > 0.1 and traf.alt[id1] < 9144.0 and abs(traf.vs[id2]) > 0.1:
+        if abs(traf.vs[id1]) > 0.1 and traf.alt[id1] < 1219.0 and abs(traf.vs[id2]) > 0.1:
             dv_mvp[2] = 0.0
             dv1       = dv1 - dv_mvp
             dv2       = dv2 + dv_mvp
         # Aircraft 2 is climbing/decending and is below 4000ft, and aircraft 1 is climbing/decending -> both solve horizontally
-        elif abs(traf.vs[id2]) > 0.1 and traf.alt[id2] < 9144.0 and abs(traf.vs[id1]) > 0.1:
+        elif abs(traf.vs[id2]) > 0.1 and traf.alt[id2] < 1219.0 and abs(traf.vs[id1]) > 0.1:
             dv_mvp[2] = 0.0
             dv1       = dv1 - dv_mvp
             dv2       = dv2 + dv_mvp

@@ -570,6 +570,12 @@ class ASAS(DynamicArrays):
             acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
             acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
             inarea    = np.where(np.logical_or(np.logical_or(cpainsidei,cpainsideo), np.logical_or(acinsideo,acinsidei)))
+            
+        # OPTION6: One aircraft inside selected shape
+        elif self.areafiltercode == "OPTION6":
+            acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
+            acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
+            inarea    = np.where(np.logical_or(acinsideo,acinsidei))
 
         # Filter out the conflcits that do not match the selected "option"
         ownidx = ownidx[inarea]
