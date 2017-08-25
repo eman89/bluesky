@@ -1,3 +1,8 @@
+scenario/ic.scn
+data/cache
+data/coefficients/BADA/*
+!/data/coefficients/BADA/README.md
+
 .DS_Store
 settings.cfg
 # Byte-compiled / optimized / DLL files
