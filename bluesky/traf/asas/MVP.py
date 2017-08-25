@@ -195,18 +195,26 @@ def resolve(asas, traf):
     asasalttemp            = asas.vs*timesolveV + traf.alt
     asas.alt[altCondition] = asasalttemp[altCondition] 
     
+    # If resolution is limited to the vertical direction, and PROJECT3 prio code is used,
+    # then the vertical resolution is set to zero. Such conflicts will be resolved horizontally.
+    # Therefore, since ASAS is still active for such aircraft, they should fly with their auto pilot altitudes
+    if asas.swresovert and asas.priocode == 'PROJECT3':
+        altCondition2           = np.logical_and(timesolveV<asas.dtlookahead, np.abs(dv[2,:])==0.0)
+        asasalttemp             = traf.ap.alt
+        asas.alt[altCondition2] = asasalttemp[altCondition2] 
+    
     # If resolutions are limited in the horizontal direction, then asasalt should
     # be equal to auto pilot alt (aalt). This is to prevent a new asasalt being computed 
     # using the auto pilot vertical speed (traf.avs) using the code in line 106 (asasalttemp) when only
     # horizontal resolutions are allowed.
-    asas.alt = asas.alt*(1-asas.swresohoriz) + traf.apalt*asas.swresohoriz
+    asas.alt = asas.alt*(1-asas.swresohoriz) + traf.ap.alt*asas.swresohoriz
     
     # NOTE:
     # WHEN PRIORITY IS ON, THE ABOVE LINES DON'T WORK WELL WHEN CLIMBING/DESCENDING
     # HAVE PRIORITY BECAUSE WE ARE UPDATING asas.ALT for all aircraft in conflict
     # THIS CAN BE FIXED BY CHECKING if dv FOR any aircraft is 0. FOR THOSE AIRCRAFT,
     # FOLLOW THE AUTOPILOT GUIDANCE. THIS IS ALSO THE OVERSHOOTING BUSINESS NEEDED FOR 
-    # LAYERS -> CONDITION 2 IS REQUIRED BELOW!
+    # LAYERS -> CONDITION 3 IS REQUIRED BELOW!
     
            
 #======================= Modified Voltage Potential ===========================
@@ -373,22 +381,27 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
             dv1 = dv1 - dv_mvp
             dv2 = dv2 + dv_mvp
     
-    # Project 3: C/D vs C/D conflict with 1 aircraft below 4000ft (=1219m) solved horizontally by both aircraft
-    elif priocode ==  "PROJECT3": 
-        # Aircraft 1 is climbing/decending and is below 4000ft, and aircraft 2 is climbing/decending -> both solve horizontally
-        if abs(traf.vs[id1]) > 0.1 and traf.alt[id1] < 1219.0 and abs(traf.vs[id2]) > 0.1:
-            dv_mvp[2] = 0.0
-            dv1       = dv1 - dv_mvp
-            dv2       = dv2 + dv_mvp
-        # Aircraft 2 is climbing/decending and is below 4000ft, and aircraft 1 is climbing/decending -> both solve horizontally
-        elif abs(traf.vs[id2]) > 0.1 and traf.alt[id2] < 1219.0 and abs(traf.vs[id1]) > 0.1:
-            dv_mvp[2] = 0.0
-            dv1       = dv1 - dv_mvp
-            dv2       = dv2 + dv_mvp
-        else: # both solve with combined resolutions in the normal way, just like FF2
-            dv_mvp[2] = dv_mvp[2]/2.0
-            dv1 = dv1 - dv_mvp
-            dv2 = dv2 + dv_mvp 
-    
+    # Project 3: No resolution if 1 a/c is below 1000 ft (=305m) to avoid take off conflicts AND 
+    #            conflicts with C/D aircraft, where the C/D aircraft is below 4000ft (=1219m), are solved 
+    #            horizontally by both aircraft, to ensure that aircraft don't get stuck at lower altitudes
+    #            below analysis altitudes
+    elif priocode ==  "PROJECT3":
+        # Only resolve if atleast one of the aircraft is above 1000ft 
+        if traf.alt[id1] >= 305.0 or traf.alt[id2] >= 305.0:            
+            # Aircraft 1 is climbing/decending and is below 4000ft-> both solve horizontally
+            if abs(traf.vs[id1]) > 0.1 and traf.alt[id1] < 1219.0: 
+                dv_mvp[2] = 0.0
+                dv1       = dv1 - dv_mvp
+                dv2       = dv2 + dv_mvp
+            # Aircraft 2 is climbing/decending and is below 4000ft -> both solve horizontally
+            elif abs(traf.vs[id2]) > 0.1 and traf.alt[id2] < 1219.0: 
+                dv_mvp[2] = 0.0
+                dv1       = dv1 - dv_mvp
+                dv2       = dv2 + dv_mvp
+            else: # both solve with combined resolutions in the normal way, just like FF2
+                dv_mvp[2] = dv_mvp[2]/2.0
+                dv1 = dv1 - dv_mvp
+                dv2 = dv2 + dv_mvp 
+            
     return dv1, dv2
     
