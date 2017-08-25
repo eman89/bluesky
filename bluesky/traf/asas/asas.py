@@ -227,6 +227,8 @@ class ASAS(DynamicArrays):
         
         self.swspawncheck     = False                  # [-] switch to activate the RESOSPAWNCHECK command. This command prevents aircraft spawned in very short term conflicts and in intrusions from perfroming conflict resolutions.
         self.spawncheckfactor = 1.0                    # [-] factor that is multiplied with the look-ahead-time to determine what constitutes a 'very short term conflcit' 
+        
+        self.swconfdef = False                         # [-] switch to activate the CONFDEF command. This command activates the alterante conflict definition (intrusion is not a conflict)
 
         self.nconf        = 0                          # Number of detected conflicts
         self.latowncpa    = np.array([])
@@ -243,7 +245,6 @@ class ASAS(DynamicArrays):
         
         self.nconf_total             = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI. 
         self.nLOS_total              = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
-        self.nconf_now               = 0   # Number of conflicts that are detected in the current asas cycle. Used for display on GUI.
         
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
@@ -677,6 +678,15 @@ class ASAS(DynamicArrays):
             # have completed their flights (and have been deleted) 
             else:
                 self.conflist_active.remove(conflict)
+    
+    def setConflictDefinition(self, flag=None):
+        ''' Activates the alternate conflict definition (intrusion is not a conflict)
+            This means that when tinconf < 0, and the conflict turns into a intrusion,
+            it is no longer regarded to be a conflict, but it is regarded to be an intrusion '''
+        if flag is None:
+            return True, "CONFDEF is currently " + ("ON" if self.swconfdef else "OFF")
+        self.swconfdef = flag
+        return True, "CONFDEF is " + ("ON" if self.swconfdef else "OFF")
 
     def create(self):
         super(ASAS, self).create()

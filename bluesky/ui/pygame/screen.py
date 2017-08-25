@@ -838,11 +838,11 @@ class Screen:
             self.fontsys.printat(self.win, 10+240, 2, \
                                  "#LOS      = " + str(len(traf.asas.LOSlist_now)))
             self.fontsys.printat(self.win, 10+240, 18, \
-                                 "Total LOS = " + str(len(traf.asas.LOSlist_all)))
+                                 "Total LOS = " + str(traf.asas.nLOS_total))
             self.fontsys.printat(self.win, 10+240, 34, \
-                                 "#Con      = " + str(traf.asas.nconf_now))
+                                 "#Con      = " + str(len(traf.asas.conflist_now)))
             self.fontsys.printat(self.win, 10+240, 50, \
-                                 "Total Con = " + str(len(traf.asas.conflist_all)))                                 
+                                 "Total Con = " + str(traf.asas.nconf_total))
 
             # Frame ready, flip to screen
             pg.display.flip()

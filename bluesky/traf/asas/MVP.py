@@ -287,7 +287,8 @@ def MVP(traf, asas, id1, id2):
     # Compute the resolution velocity vector in the vertical direction
     # The direction of the vertical resolution is such that the aircraft with
     # higher climb/decent rate reduces their climb/decent rate    
-    dv3 = np.where(abs(vrel[2])>0.0,  (iV/tsolV)*(-vrel[2]/abs(vrel[2])), (iV/tsolV))
+    dv3 = (iV/tsolV)*(-vrel[2]/abs(vrel[2])) if abs(vrel[2])>0.0 else (iV/tsolV)
+    
     
     # It is necessary to cap dv3 to prevent that a vertical conflict 
     # is solved in 1 timestep, leading to a vertical separation that is too 

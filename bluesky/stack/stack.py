@@ -225,6 +225,12 @@ def init(sim, traf, scr):
             traf.asas.SetConfAreaFilter,
             "Filter out conflicts outside desired area"
         ],
+        "CONFDEF": [
+            "CONFDEF ON/OFF",
+            "[onoff]",
+            traf.asas.setConflictDefinition,
+            "Alternate conflict definition switch (intrusion is not conflict)"
+        ],
         "CRE": [
             "CRE acid,type,lat,lon,hdg,alt,spd",
             "txt,txt,latlon,hdg,alt,spd",

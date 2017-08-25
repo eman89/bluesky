@@ -49,9 +49,6 @@ def detect(asas, traf, simt):
     asas.instlogloncpaid2 = []
     asas.instlogaltcpaid2 = []
     
-    # Reset variable for keeping track of number of current conflicts for display on GUI.
-    asas.nconf_now = 0.0
-    
 
     # Horizontal conflict ---------------------------------------------------------
 
@@ -208,23 +205,37 @@ def detect(asas, traf, simt):
         # and also do RESOSPAWNCHECK
         if combi not in asas.conflist_active and combi2 not in asas.conflist_active:
             asas.nconf_total = asas.nconf_total + 1    
-            # Check if conflict tcpa and tinconf is greater than 0. only log 
-            # if condition met
-            if asas.tcpa[i,j] >= 0 and  asas.tcpa[j,i] >= 0 and \
-                asas.tinconf[i,j] >= 0 and  asas.tinconf[j,i] >= 0: 
-                    asas.conflist_active.append(combi)
-                    # Now get the stuff you need for the CFLLOG variables!
-                    asas.clogi.append(i)
-                    asas.clogj.append(j)
-                    asas.clogid1.append(combi[0])
-                    asas.clogid2.append(combi[1])
-                    asas.cloglatcpaid1.append(lati)
-                    asas.clogloncpaid1.append(loni)
-                    asas.clogaltcpaid1.append(alti)
-                    asas.cloglatcpaid2.append(latj)
-                    asas.clogloncpaid2.append(lonj)
-                    asas.clogaltcpaid2.append(altj)
-           
+            # if using alternate conflict definition, then check if conflict 
+            # tcpa and tinconf is greater than 0. only log (and resolve) if condition met
+            if asas.swconfdef:
+                if asas.tcpa[i,j] >= 0 and  asas.tcpa[j,i] >= 0 and \
+                    asas.tinconf[i,j] >= 0 and  asas.tinconf[j,i] >= 0: 
+                        asas.conflist_active.append(combi)
+                        # Now get the stuff you need for the CFLLOG variables!
+                        asas.clogi.append(i)
+                        asas.clogj.append(j)
+                        asas.clogid1.append(combi[0])
+                        asas.clogid2.append(combi[1])
+                        asas.cloglatcpaid1.append(lati)
+                        asas.clogloncpaid1.append(loni)
+                        asas.clogaltcpaid1.append(alti)
+                        asas.cloglatcpaid2.append(latj)
+                        asas.clogloncpaid2.append(lonj)
+                        asas.clogaltcpaid2.append(altj)
+            else:
+                asas.conflist_active.append(combi)
+                # Now get the stuff you need for the CFLLOG variables!
+                asas.clogi.append(i)
+                asas.clogj.append(j)
+                asas.clogid1.append(combi[0])
+                asas.clogid2.append(combi[1])
+                asas.cloglatcpaid1.append(lati)
+                asas.clogloncpaid1.append(loni)
+                asas.clogaltcpaid1.append(alti)
+                asas.cloglatcpaid2.append(latj)
+                asas.clogloncpaid2.append(lonj)
+                asas.clogaltcpaid2.append(altj)
+               
             # If RESOSPAWNCHECK is active, then check if this conflict cotains
             # an aircraft that is just spawned, and if that conflict is a very short term conflict.
             # If so, then add it to the 'conflist_resospawncheck' list
@@ -236,23 +247,37 @@ def detect(asas, traf, simt):
         # Update conflist_now (newly detected conflicts during this detection cycle)
         # and some variables related INSTLOG (others updated in asasLogUpdate())
         if combi not in asas.conflist_now and combi2 not in asas.conflist_now:
-            # Check if conflict tcpa and tinconf is greater than 0. only log 
-            # and resolve if condition met
-            asas.nconf_now = asas.nconf_now + 1.0 # not a LOS, update it now
-            if asas.tcpa[i,j] >= 0 and  asas.tcpa[j,i] >= 0 and \
-                asas.tinconf[i,j] >= 0 and  asas.tinconf[j,i] >= 0:
-                    asas.conflist_now.append(combi)
-                    # Now get the stuff you need for the INSTLOG variables!
-                    asas.instlogi.append(i)
-                    asas.instlogj.append(j)
-                    asas.instlogid1.append(combi[0])
-                    asas.instlogid2.append(combi[1])
-                    asas.instloglatcpaid1.append(lati)
-                    asas.instlogloncpaid1.append(loni)
-                    asas.instlogaltcpaid1.append(alti)
-                    asas.instloglatcpaid2.append(latj)
-                    asas.instlogloncpaid2.append(lonj)
-                    asas.instlogaltcpaid2.append(altj)
+            # if using alternate conflict definition, then check if conflict 
+            # tcpa and tinconf is greater than 0. only log (and resolve) if condition met
+            if asas.swconfdef:
+                if asas.tcpa[i,j] >= 0 and  asas.tcpa[j,i] >= 0 and \
+                    asas.tinconf[i,j] >= 0 and  asas.tinconf[j,i] >= 0:
+                        asas.conflist_now.append(combi)
+                        # Now get the stuff you need for the INSTLOG variables!
+                        asas.instlogi.append(i)
+                        asas.instlogj.append(j)
+                        asas.instlogid1.append(combi[0])
+                        asas.instlogid2.append(combi[1])
+                        asas.instloglatcpaid1.append(lati)
+                        asas.instlogloncpaid1.append(loni)
+                        asas.instlogaltcpaid1.append(alti)
+                        asas.instloglatcpaid2.append(latj)
+                        asas.instlogloncpaid2.append(lonj)
+                        asas.instlogaltcpaid2.append(altj)
+            else:
+                asas.conflist_now.append(combi)
+                # Now get the stuff you need for the INSTLOG variables!
+                asas.instlogi.append(i)
+                asas.instlogj.append(j)
+                asas.instlogid1.append(combi[0])
+                asas.instlogid2.append(combi[1])
+                asas.instloglatcpaid1.append(lati)
+                asas.instlogloncpaid1.append(loni)
+                asas.instlogaltcpaid1.append(alti)
+                asas.instloglatcpaid2.append(latj)
+                asas.instlogloncpaid2.append(lonj)
+                asas.instlogaltcpaid2.append(altj)
+                
                                                 
         # Check if a LOS occured
         dx     = (traf.lat[i] - traf.lat[j]) * 111319.
@@ -264,7 +289,6 @@ def detect(asas, traf, simt):
         isLOS  = (hLOS & vLOS)
         
         if isLOS:
-            asas.nconf_now  = asas.nconf_now-0.5 # to prevent unnecessary double counting for GUI counter
             # Update LOS lists: LOSlist_active (all LOS that are active) and nLOS_total (GUI)
             if combi not in asas.LOSlist_active and combi2 not in asas.LOSlist_active:                
                 asas.nLOS_total = asas.nLOS_total + 1  
@@ -285,4 +309,3 @@ def detect(asas, traf, simt):
             #       but some are logged here are  as they are based on lists (easier here in loop)
         
         gc.enable()
-#    asas.nconf_now = int(asas.nconf_now)
