@@ -8,7 +8,7 @@
 00:00:00.00>SYMBOL
 
 # Simulation Speed Settings:
-00:00:00.00>DT 0.07
+00:00:00.00>DT 0.05
 00:00:00.00>FF
 
 # Steepness:
