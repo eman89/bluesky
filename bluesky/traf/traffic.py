@@ -444,7 +444,7 @@ class Traffic(DynamicArrays):
     def UpdateAirSpeed(self, simdt, simt):
         # Acceleration
         self.delspd = self.pilot.spd - self.tas
-        swspdsel = np.abs(self.delspd) > 0.4  # <1 kts = 0.514444 m/s
+        swspdsel = np.abs(self.delspd) > 0.1  # <1 kts = 0.514444 m/s
         ax = self.perf.acceleration(simdt)
 
         # Update velocities
@@ -465,7 +465,7 @@ class Traffic(DynamicArrays):
 
         # Update vertical speed
         delalt   = self.pilot.alt - self.alt
-        self.swaltsel = np.abs(delalt) > np.maximum(10 * ft, np.abs(2 * simdt * np.abs(self.vs)))
+        self.swaltsel = np.abs(delalt) > np.maximum(1.0 * ft, np.abs(2 * simdt * np.abs(self.vs)))
         self.vs  = self.swaltsel * np.sign(delalt) * self.pilot.vs
 
     def UpdateGroundSpeed(self, simdt):
@@ -579,6 +579,7 @@ class Traffic(DynamicArrays):
             M             = self.M[idx]
             VS            = round(self.vs[idx]/ft*60.)              
             route         = self.ap.route[idx]
+            gamma         = self.gamma[idx]
             
             # Position report
             
@@ -586,7 +587,8 @@ class Traffic(DynamicArrays):
                   + "Pos: "+latlon+ "\n"                                  \
                   + "Hdg: %03d   Trk: %03d\n"        %(hdg, trk)              \
                   + "Alt: %d ft  V/S: %d fpm\n"  %(alt,VS)                \
-                  + "CAS/TAS/GS: %d/%d/%d kts   M: %.3f\n"%(cas,tas,gs,M)
+                  + "CAS/TAS/GS: %d/%d/%d kts   M: %.3f\n"%(cas,tas,gs,M) \
+                  + "Gamma: %.3f\n"%(gamma)
 
             # FMS AP modes
             if self.swlnav[idx] and route.nwp > 0 and route.iactwp >= 0:
