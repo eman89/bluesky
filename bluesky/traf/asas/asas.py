@@ -50,7 +50,7 @@ class ASAS(DynamicArrays):
             self.iconf    = []            # index in 'conflicting' aircraft database
 
             self.trk      = np.array([])  # heading provided by the ASAS [deg]
-            self.spd      = np.array([])  # speed provided by the ASAS (eas) [m/s]
+            self.spd      = np.array([])  # speed provided by the ASAS (tas) [m/s]
             self.alt      = np.array([])  # speed alt by the ASAS [m]
             self.vs       = np.array([])  # speed vspeed by the ASAS [m/s]
             
