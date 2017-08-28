@@ -11,8 +11,7 @@ class ActiveWaypoint(DynamicArrays):
         with RegisterElementParameters(self):
             self.lat      = np.array([])  # Active WP latitude
             self.lon      = np.array([])  # Active WP longitude
-            self.nextaltco = np.array([])  # Altitude to arrive at after distance xtoalt
-            self.xtoalt    = np.array([])  # Distance to next altitude constraint
+            self.alt      = np.array([])  # Active WP altitude to arrive at
             self.spd      = np.array([])  # Active WP speed
             self.vs       = np.array([])  # Active vertical speed to use
             self.turndist = np.array([])  # Distance when to turn to next waypoint
@@ -28,7 +27,7 @@ class ActiveWaypoint(DynamicArrays):
         self.flyby[-1]     = 1.0   # Flyby/fly-over switch
         self.next_qdr[-1]  = -999.0    # bearing next leg
 
-    def Reached(self, qdr, dist, flyby):
+    def Reached(self, qdr, dist):
         # Calculate distance before waypoint where to start the turn
         # Turn radius:      R = V2 tan phi / g
         # Distance to turn: wpturn = R * tan (1/2 delhdg) but max 4 times radius
@@ -37,14 +36,14 @@ class ActiveWaypoint(DynamicArrays):
         next_qdr = np.where(self.next_qdr < -900., qdr, self.next_qdr)
      
         # Avoid circling
-        away = np.abs(degto180(self.traf.trk%360. - next_qdr%360.))>90.
+        away = np.abs(degto180(self.traf.trk - next_qdr)+180.)>90.
         incircle = dist<turnrad*1.01
         circling = away*incircle
 
 
         # distance to turn initialisation point
-        self.turndist = flyby*np.minimum(100., np.abs(turnrad *
-            np.tan(np.radians(0.5 * np.abs(degto180(qdr%360. - next_qdr%360.))))))
+        self.turndist = np.minimum(100., np.abs(turnrad *
+            np.tan(np.radians(0.5 * np.abs(degto180(qdr - next_qdr))))))
 
         # Check whether shift based dist [nm] is required, set closer than WP turn distanc
         return np.where(self.traf.swlnav * ((dist < self.turndist)+circling))[0]

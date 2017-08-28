@@ -588,7 +588,6 @@ class Route():
             self.iactwp = wpidx
             traf.actwp.lat[idx] = self.wplat[wpidx]
             traf.actwp.lon[idx] = self.wplon[wpidx]
-            traf.actwp.flyby[idx] = self.wpflyby[wpidx]
 
             self.calcfp()
             traf.ap.ComputeVNAV(idx, self.wptoalt[wpidx], self.wpxtoalt[wpidx])
@@ -598,13 +597,13 @@ class Route():
 #                if self.wptoalt[wpidx] > 0:
 #
 #                    if traf.alt[idx] < self.wptoalt[idx]-10.*ft:
-#                        traf.actwp.nextaltco[idx] = self.wptoalt[wpidx]
+#                        traf.actwp.alt[idx] = self.wptoalt[wpidx]
 #                        traf.ap.dist2vs[idx] = 9999.
 #                    else:
 #                    
 #                        steepness = 3000.*ft/(10.*nm)
-#                        traf.actwp.nextaltco[idx] = self.wptoalt[wpidx] + self.wpxtoalt[wpidx]*steepness
-#                        delalt = traf.alt[idx] - traf.actwp.nextaltco[idx]
+#                        traf.actwp.alt[idx] = self.wptoalt[wpidx] + self.wpxtoalt[wpidx]*steepness
+#                        delalt = traf.alt[idx] - traf.actwp.alt[idx]
 #                        traf.ap.dist2vs[idx] = steepness*delalt
 
                 # Set target speed for autopilot. Autopilot controls TAS and
@@ -619,19 +618,15 @@ class Route():
                 if desspd > 0:
                     if desspd < 2.0:
                         traf.aptas[idx] = mach2tas(desspd, desalt)
-                        traf.actwp.spd[idx] = mach2tas(desspd, desalt)
                     else:
                         traf.aptas[idx] = cas2tas(desspd, desalt)
-                        traf.actwp.spd[idx] = cas2tas(desspd, desalt)
-
                         
             qdr, dist = geo.qdrdist(traf.lat[idx], traf.lon[idx],
                                 traf.actwp.lat[idx], traf.actwp.lon[idx])
             turnrad = traf.tas[idx]*traf.tas[idx]/tan(radians(25.)) / g0 / nm  # default bank angle 25 deg
 
-            traf.actwp.turndist[idx] = (traf.actwp.flyby[idx] > 0.5)  * \
-                                        turnrad*abs(tan(0.5*radians(max(5., abs(degto180(qdr -
-                                        self.wpdirfrom[self.iactwp]))))))
+            traf.actwp.turndist[idx] = turnrad*abs(tan(0.5*radians(max(5., abs(degto180(qdr -
+                        self.wpdirfrom[self.iactwp]))))))
 
             traf.swlnav[idx] = True
             return True
@@ -666,12 +661,10 @@ class Route():
                     txt = txt+str(int(round(self.wpalt[i] / ft))) + "/"
 
                 # Speed
-                if self.wpspd[i] < 0.:
+                if self.wpspd[i] < 0:
                     txt = txt+"---"
-                elif self.wpspd[i]>2.0:
-                    txt = txt+str(int(round(self.wpspd[i] / kts)))
                 else:
-                    txt = txt + "M"+str(self.wpspd[i])
+                    txt = txt+str(int(round(self.wpspd[i] / kts)))
 
                 # Type
                 if self.wptype[i] == self.orig:

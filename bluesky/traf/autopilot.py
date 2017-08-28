@@ -79,15 +79,14 @@ class Autopilot(DynamicArrays):
             qdr, dist = geo.qdrdist(self.traf.lat, self.traf.lon, self.traf.actwp.lat, self.traf.actwp.lon)  # [deg][nm])
 
             # Shift waypoints for aircraft i where necessary
-            for i in self.traf.actwp.Reached(qdr, dist, self.traf.actwp.flyby):
+            for i in self.traf.actwp.Reached(qdr, dist):
                 # Save current wp speed and altitude
                 oldspd = self.traf.actwp.spd[i]
-                oldalt = self.traf.actwp.nextaltco[i]
+                oldalt = self.traf.actwp.alt[i]
 
                 # Get next wp (lnavon = False if no more waypoints)
-                lat, lon, alt, spd, self.traf.actwp.xtoalt[i], toalt, \
-                        lnavon, flyby, self.traf.actwp.next_qdr[i] =  \
-                                self.route[i].getnextwp()  # note: xtoalt,toalt in [m]
+                lat, lon, alt, spd, xtoalt, toalt, lnavon, flyby, self.traf.actwp.next_qdr[i] =  \
+                       self.route[i].getnextwp()  # note: xtoalt,toalt in [m]
 
                 # End of route/no more waypoints: switch off LNAV
                 self.traf.swlnav[i] = self.traf.swlnav[i] and lnavon
@@ -101,7 +100,7 @@ class Autopilot(DynamicArrays):
 
                 # User has entered an altitude for this waypoint
                 if alt >= 0.:
-                    self.traf.actwp.nextaltco[i] = alt
+                    self.traf.actwp.alt[i] = alt
 
                 if spd > 0. and self.traf.swlnav[i] and self.traf.swvnav[i]:
                     # Valid speed and LNAV and VNAV ap modes are on
@@ -127,7 +126,7 @@ class Autopilot(DynamicArrays):
                 self.traf.aptas[i] = vcas2tas(desspd,desalt)
 
                 # VNAV = FMS ALT/SPD mode
-                self.ComputeVNAV(i, toalt, self.traf.actwp.xtoalt[i])
+                self.ComputeVNAV(i, toalt, xtoalt)
 
             #=============== End of Waypoint switching loop ===================
 
@@ -140,21 +139,18 @@ class Autopilot(DynamicArrays):
             dist2wp   = 60. * nm * np.sqrt(dx * dx + dy * dy)
 
             # VNAV logic: descend as late as possible, climb as soon as possible
-            startdescent = self.traf.swvnav * ((dist2wp < self.dist2vs)+(self.traf.actwp.nextaltco > self.traf.alt))
+            startdescent = self.traf.swvnav * ((dist2wp <= self.dist2vs)+(self.traf.actwp.alt > self.traf.alt))
             
             # If not lnav:Climb/descend if doing so before lnav/vnav was switched off
             #    (because there are no more waypoints). This is needed
             #    to continue descending when you get into a conflict
             #    while descending to the destination (the last waypoint)
-            #    Use 0.1 nm (185.2 m) circle in case turndist might be zero
             self.swvnavvs = np.where(self.traf.swlnav, startdescent, dist <= np.maximum(185.2,self.traf.actwp.turndist))
 
             #Recalculate V/S based on current altitude and distance 
             # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
-            # t2go2alt = np.maximum(0.,(dist2wp + self.traf.actwp.xtoalt - self.traf.actwp.turndist*nm)) \
-            #                             / np.maximum(0.5,traf.gs)
-            # self.traf.actwp.vs = np.maximum(self.steepness*self.traf.gs, \
-                                  # np.abs((self.traf.actwp.nextaltco-self.traf.alt))/np.maximum(1.0,t2go2alt))
+#            t2go = dist2wp/np.maximum(0.5,self.traf.gs)
+#            self.traf.actwp.vs = (self.traf.actwp.alt-self.traf.alt)/np.maximum(1.0,t2go) 
             
             # static VertSpeed based on steepnees. Fine when you want to descent with a constant rate 
             # protect against zero/invalid ground speed value
@@ -164,15 +160,13 @@ class Autopilot(DynamicArrays):
             self.vnavvs  = np.where(self.swvnavvs, self.traf.actwp.vs, self.vnavvs)
             #was: self.vnavvs  = np.where(self.swvnavvs, self.steepness * self.traf.gs, self.vnavvs)
 
-            avs = np.where(abs(self.traf.avs) > 0.1, self.traf.avs, self.traf.avsdef)
-            self.vs = np.where(self.swvnavvs, self.vnavvs, avs)# * self.traf.limvs_flag)
-            # was: self.vs = np.where(self.swvnavvs, self.vnavvs, self.traf.avsdef)# * self.traf.limvs_flag)
+            self.vs = np.where(self.swvnavvs, self.vnavvs, self.traf.avsdef * self.traf.limvs_flag)  # CHANGE THE self.traf.avsdef BASED ON ACTUAL SPEED AND STEEPNESS
 
 
-            self.alt = np.where(self.swvnavvs, self.traf.actwp.nextaltco, self.traf.apalt)
+            self.alt = np.where(self.swvnavvs, self.traf.actwp.alt, self.traf.apalt)
 
             # When descending or climbing in VNAV also update altitude command of select/hold mode            
-            self.traf.apalt = np.where(self.swvnavvs,self.traf.actwp.nextaltco,self.traf.apalt)
+            self.traf.apalt = np.where(self.swvnavvs,self.traf.actwp.alt,self.traf.apalt)
             
             # LNAV commanded track angle
             self.trk = np.where(self.traf.swlnav, qdr, self.trk)
@@ -196,7 +190,7 @@ class Autopilot(DynamicArrays):
             return
 
         # So: somewhere there is an altitude constraint ahead
-        # Compute proper values for self.traf.actwp.nextaltco, self.dist2vs, self.alt, self.traf.actwp.vs
+        # Compute proper values for self.traf.actwp.alt, self.dist2vs, self.alt, self.traf.actwp.vs
         # Descent VNAV mode (T/D logic)
         #
         # xtoalt =  distance to go to next altitude constraint at a waypoinit in the route 
@@ -234,11 +228,11 @@ class Autopilot(DynamicArrays):
             
 
             #Calculate max allowed altitude at next wp (above toalt)
-            self.traf.actwp.nextaltco[idx] = min(self.traf.alt[idx],toalt + xtoalt * self.steepness)
+            self.traf.actwp.alt[idx] = min(self.traf.alt[idx],toalt + xtoalt * self.steepness)
             
 
             # Dist to waypoint where descent should start
-            self.dist2vs[idx] = (self.traf.alt[idx] - self.traf.actwp.nextaltco[idx]) / self.steepness
+            self.dist2vs[idx] = (self.traf.alt[idx] - self.traf.actwp.alt[idx]) / self.steepness
 
 #            # Flat earth distance to next wp
 #            dy = (self.traf.actwp.lat[idx] - self.traf.lat[idx])
@@ -248,11 +242,11 @@ class Autopilot(DynamicArrays):
 #
 #            # If descent is urgent, descent with maximum steepness
 #            if legdist < self.dist2vs[idx]:
-#                self.alt[idx] = self.traf.actwp.nextaltco[idx]  # dial in altitude of next waypoint as calculated
+#                self.alt[idx] = self.traf.actwp.alt[idx]  # dial in altitude of next waypoint as calculated
 #                
 #                # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
-##                t2go         = max(0.1, legdist+xtoalt) / max(0.01, self.traf.gs[idx])
-##                self.traf.actwp.vs[idx]  = (self.traf.actwp.nextaltco[idx] - self.traf.alt[idx]) / t2go
+##                t2go         = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
+##                self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
 #                
 #                
 #
@@ -267,8 +261,8 @@ class Autopilot(DynamicArrays):
         elif self.traf.alt[idx] < toalt - 10. * ft:
 
 
-            self.traf.actwp.nextaltco[idx] = toalt
-            self.alt[idx]    = self.traf.actwp.nextaltco[idx]  # dial in altitude of next waypoint as calculated
+            self.traf.actwp.alt[idx] = toalt
+            self.alt[idx]    = self.traf.actwp.alt[idx]  # dial in altitude of next waypoint as calculated
             self.dist2vs[idx]  = 9999.
 
 #            # Flat earth distance to next wp
@@ -277,8 +271,8 @@ class Autopilot(DynamicArrays):
 #            legdist = 60. * nm * np.sqrt(dx * dx + dy * dy)
 #            
 #            # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
-#            t2go = max(0.1, legdist+xtoalt) / max(0.01, self.traf.gs[idx])
-#            self.traf.actwp.vs[idx]  = (self.traf.actwp.nextaltco[idx] - self.traf.alt[idx]) / t2go
+#            t2go = max(0.1, legdist) / max(0.01, self.traf.gs[idx])
+#            self.traf.actwp.vs[idx]  = (self.traf.actwp.alt[idx] - self.traf.alt[idx]) / t2go
             
             # Static VertSpeed to climb with constant rate
             # protect against zero/invalid ground speed value
@@ -424,7 +418,7 @@ class Autopilot(DynamicArrays):
             if (iwp == 0) or (self.orig[idx] != "" and route.nwp == 2):
                 self.traf.actwp.lat[idx] = route.wplat[iwp]
                 self.traf.actwp.lon[idx] = route.wplon[iwp]
-                self.traf.actwp.nextaltco[idx] = route.wpalt[iwp]
+                self.traf.actwp.alt[idx] = route.wpalt[iwp]
                 self.traf.actwp.spd[idx] = route.wpspd[iwp]
 
                 self.traf.swlnav[idx] = True
