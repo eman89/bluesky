@@ -6,6 +6,7 @@ from ..tools.position import txt2pos
 from ..tools.aero import ft, nm, vcas2tas, vtas2cas, vmach2tas, casormach, kts
 from route import Route
 from ..tools.dynamicarrays import DynamicArrays, RegisterElementParameters
+from ..tools.misc import degto180
 
 
 class Autopilot(DynamicArrays):
@@ -189,6 +190,11 @@ class Autopilot(DynamicArrays):
                 # if lnav off, then continue flying a trk parallel to route
                 elif self.afterlnavcode == 'PARALLEL': 
                     self.trk = np.where(self.traf.swlnav, qdr, self.traf.actwp.dirfrom)
+                # if lnav off, then intercept imaginary extension of route
+                elif self.afterlnavcode == 'INTERCEPT': 
+                    delhdg = (qdr%360.-180.0)%360.
+                    sign = np.where(delhdg>90., 1.0, -1.0)
+                    self.trk = np.where(self.traf.swlnav, qdr, self.traf.actwp.dirfrom+sign*10.) # turn in with an angle of 10 deg to intercept route
             # normal case when AFTERLNAV is not active. Then if lnav off, fly with previous command
             # useful when there are no waypoints, like ASAS-01.scn - ASAS-04.scn
             else:            
@@ -533,12 +539,13 @@ class Autopilot(DynamicArrays):
     
     def SetAfterLnav(self, flag=None, code="PARALLEL"):
         '''Set the afterlnav switch and the type of horizontal flight path '''
-        options = ["CURRENT", "PARALLEL"]
+        options = ["CURRENT", "PARALLEL", "INTERCEPT"]
         if flag is None:
             return True, "AFTERLNAVTRK [ON/OFF] [CODE]"  + \
                          "\nAvailable codes: " + \
-                         "\n     CURRENT:   Continue flying with current a/c trk" + \
-                         "\n     PARALLEL:  Continue flying parallel to route" + \
+                         "\n   CURRENT:   Continue flying with current a/c trk" + \
+                         "\n   PARALLEL:  Continue flying parallel to route" + \
+                         "\n   INTERCEPT: Gradually intercept the imaginary extension of route" + \
                          "AFTERLNAVTRK is " + ("ON" if self.swafterlnav else "OFF") + \
                          "\nAFTERLNAVTRK Code is: " + str(self.afterlnavcode)
         if code not in options:

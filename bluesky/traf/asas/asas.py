@@ -668,6 +668,8 @@ class ASAS(DynamicArrays):
                  if iwpid2 != -1: # To avoid problems if there are no waypoints
                      self.traf.ap.route[id2].direct(self.traf, id2, self.traf.ap.route[id2].wpname[iwpid2])
                  self.conflist_active.remove(conflict)
+                 if conflict in self.conflist_resospawncheck:
+                        self.conflist_resospawncheck.remove(conflict)
     
             # If aircraft id2 cannot be found in traffic because it has finished its
             # flight (and has been deleted) start trajectory recovery for aircraft id1
@@ -677,11 +679,15 @@ class ASAS(DynamicArrays):
                 if iwpid1 != -1: # To avoid problems if there are no waypoints
                     self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
                 self.conflist_active.remove(conflict)
+                if conflict in self.conflist_resospawncheck:
+                        self.conflist_resospawncheck.remove(conflict)
             
             # if both ids are unknown, then delete this conflict, because both aircraft
             # have completed their flights (and have been deleted) 
             else:
                 self.conflist_active.remove(conflict)
+                if conflict in self.conflist_resospawncheck:
+                        self.conflist_resospawncheck.remove(conflict)
     
     def setConflictDefinition(self, flag=None):
         ''' Activates the alternate conflict definition (intrusion is not a conflict)
