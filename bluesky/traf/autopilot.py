@@ -254,7 +254,7 @@ class Autopilot(DynamicArrays):
             
 
             #Calculate max allowed altitude at next wp (above toalt)
-            self.traf.actwp.nextaltco[idx] = min(self.traf.alt[idx],toalt) # + xtoalt * self.steepness)
+            self.traf.actwp.nextaltco[idx] = min(self.traf.alt[idx],toalt + xtoalt * self.steepness)
             
 
             # Dist to waypoint where descent should start
