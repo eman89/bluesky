@@ -695,13 +695,13 @@ class Route():
             lnavon = True
         else:
             lnavon = False
-            
+        
         nextqdr= self.getnextqdr()                                                          
 
         return self.wplat[self.iactwp],self.wplon[self.iactwp],   \
                self.wpalt[self.iactwp],self.wpspd[self.iactwp],   \
                self.wpxtoalt[self.iactwp],self.wptoalt[self.iactwp],\
-               lnavon,self.wpflyby[self.iactwp], nextqdr
+               lnavon,self.wpflyby[self.iactwp], nextqdr, self.wpdirfrom[self.iactwp]
 
     def delrte(self):
         """Delete complete route"""

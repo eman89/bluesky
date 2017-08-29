@@ -3,7 +3,7 @@ from math import sin, cos, radians
 
 from ..tools import geo, datalog
 from ..tools.position import txt2pos
-from ..tools.aero import ft, nm, vcas2tas, vtas2cas, vmach2tas, casormach
+from ..tools.aero import ft, nm, vcas2tas, vtas2cas, vmach2tas, casormach, kts
 from route import Route
 from ..tools.dynamicarrays import DynamicArrays, RegisterElementParameters
 
@@ -18,6 +18,10 @@ class Autopilot(DynamicArrays):
 
         # Standard self.steepness for descent
         self.steepness = 3000. * ft / (10. * nm)
+        
+        # AfterLNAV settings
+        self.swafterlnav   = False
+        self.afterlnavcode = None
 
         # From here, define object arrays
         with RegisterElementParameters(self):
@@ -83,12 +87,13 @@ class Autopilot(DynamicArrays):
                 # Save current wp speed and altitude
                 oldspd = self.traf.actwp.spd[i]
                 oldalt = self.traf.actwp.nextaltco[i]
-
+                
                 # Get next wp (lnavon = False if no more waypoints)
                 lat, lon, alt, spd, self.traf.actwp.xtoalt[i], toalt, \
-                        lnavon, flyby, self.traf.actwp.next_qdr[i] =  \
-                                self.route[i].getnextwp()  # note: xtoalt,toalt in [m]
-
+                        lnavon, flyby, self.traf.actwp.next_qdr[i], \
+                                    self.traf.actwp.dirfrom[i] =  \
+                                            self.route[i].getnextwp()  # note: xtoalt,toalt in [m]
+                
                 # End of route/no more waypoints: switch off LNAV
                 self.traf.swlnav[i] = self.traf.swlnav[i] and lnavon
 
@@ -118,8 +123,7 @@ class Autopilot(DynamicArrays):
                 # so convert the scenario CAS to TAS! This is what the following line does.
                 # The following code has been tested for flight plans with 1 climb leg,
                 # 1 cruise leg and 1 descend leg. This type of flight plan needs origin, 
-                # ToC waypoint (with speed and alt) and destination. Performance is improved
-                # if a ToD waypoint (with speed) is optionally included. 
+                # ToC waypoint (with speed and alt) and destination.
                 # IT MAY ALSO WORK FOR OTHER FLIGHTPLAN TYPES, BUT NEEDS TESTING!
                 # Same logic used in route.direct()
                 desspd = spd if spd >= 0.0 else oldspd
@@ -128,6 +132,7 @@ class Autopilot(DynamicArrays):
 
                 # VNAV = FMS ALT/SPD mode
                 self.ComputeVNAV(i, toalt, self.traf.actwp.xtoalt[i])
+                
 
             #=============== End of Waypoint switching loop ===================
 
@@ -146,8 +151,10 @@ class Autopilot(DynamicArrays):
             #    (because there are no more waypoints). This is needed
             #    to continue descending when you get into a conflict
             #    while descending to the destination (the last waypoint)
-            #    Use 0.1 nm (185.2 m) circle in case turndist might be zero
-            self.swvnavvs = np.where(self.traf.swlnav, startdescent, dist <= np.maximum(185.2,self.traf.actwp.turndist))
+            #    Use 40 NM as cut off in case turndist might be zero
+            #    40 NM is the distance needed to descend from highest cruise 
+            #    altitude of project 3 to arrive at destination perfectly for CROFF
+            self.swvnavvs = np.where(self.traf.swlnav, startdescent, dist <= np.maximum(40.0,self.traf.actwp.turndist))
 
             #Recalculate V/S based on current altitude and distance 
             # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
@@ -174,8 +181,21 @@ class Autopilot(DynamicArrays):
             # When descending or climbing in VNAV also update altitude command of select/hold mode            
             self.traf.apalt = np.where(self.swvnavvs,self.traf.actwp.nextaltco,self.traf.apalt)
             
-            # LNAV commanded track angle
-            self.trk = np.where(self.traf.swlnav, qdr, self.trk)
+            # LNAV commanded track angle. Depends on whether AFTERLNAV switch is active.
+            if self.swafterlnav:
+                # if lnav off, then continue flying with current aircraft trk
+                if self.afterlnavcode == 'CURRENT': 
+                    self.trk = np.where(self.traf.swlnav, qdr, self.traf.trk)
+                # if lnav off, then continue flying a trk parallel to route
+                elif self.afterlnavcode == 'PARALLEL': 
+                    self.trk = np.where(self.traf.swlnav, qdr, self.traf.actwp.dirfrom)
+            # normal case when AFTERLNAV is not active. Then if lnav off, fly with previous command
+            # useful when there are no waypoints, like ASAS-01.scn - ASAS-04.scn
+            else:            
+                self.trk = np.where(self.traf.swlnav, qdr, self.trk)
+            
+           
+            
         
         # NOTE!!!: Airplane speed is controlled using TAS. The following code
         # therefore computes the TAS the autopilot wants the airplane to fly
@@ -234,7 +254,7 @@ class Autopilot(DynamicArrays):
             
 
             #Calculate max allowed altitude at next wp (above toalt)
-            self.traf.actwp.nextaltco[idx] = min(self.traf.alt[idx],toalt + xtoalt * self.steepness)
+            self.traf.actwp.nextaltco[idx] = min(self.traf.alt[idx],toalt) # + xtoalt * self.steepness)
             
 
             # Dist to waypoint where descent should start
@@ -510,9 +530,38 @@ class Autopilot(DynamicArrays):
                 return False, ("VNAV " + self.traf.id[idx] + ": no waypoints or destination specified")
         else:
             self.traf.swvnav[idx] = False
+    
+    def SetAfterLnav(self, flag=None, code="PARALLEL"):
+        '''Set the afterlnav switch and the type of horizontal flight path '''
+        options = ["CURRENT", "PARALLEL"]
+        if flag is None:
+            return True, "AFTERLNAVTRK [ON/OFF] [CODE]"  + \
+                         "\nAvailable codes: " + \
+                         "\n     CURRENT:   Continue flying with current a/c trk" + \
+                         "\n     PARALLEL:  Continue flying parallel to route" + \
+                         "AFTERLNAVTRK is " + ("ON" if self.swafterlnav else "OFF") + \
+                         "\nAFTERLNAVTRK Code is: " + str(self.afterlnavcode)
+        if code not in options:
+            return False, "AFTERLNAVTRK Code Not Understood. Available Options: " + str(options)
+        else:
+            self.afterlnavcode = code
+        self.swafterlnav = flag
+        return True, "AFTERLNAVTRK is currently " + ("ON" if self.swafterlnav else "OFF") + \
+                     "\nCode is currently: " + str(self.afterlnavcode)
 
     def reset(self):
         super(Autopilot,self).reset()
         self.route = []
+        
+        # Scheduling of FMS and ASAS
+        self.t0 = -999.  # last time fms was called
+        self.dt = 1.01   # interval for fms
+
+        # Standard self.steepness for descent
+        self.steepness = 3000. * ft / (10. * nm)
+        
+        # AfterLNAV settings
+        self.swafterlnav   = False
+        self.afterlnavcode = None
         
         

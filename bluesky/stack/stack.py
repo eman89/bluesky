@@ -153,6 +153,12 @@ def init(sim, traf, scr):
             lambda idx, *args: traf.ap.route[idx].afteraddwptStack(traf, idx, *args),
             "After waypoint, add a waypoint to route of aircraft (FMS)"
         ],
+        "AFTERLNAVTRK": [
+            "AFTERLNAVTRK [ON/OFF CODE]",
+            "[onoff, txt]",
+            traf.ap.SetAfterLnav,
+            "Determine how aircraft should fly horizontally after LNAV is off"
+        ],
         "AIRWAY": [
             "AIRWAY wp/airway",
             "txt",

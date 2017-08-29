@@ -18,6 +18,7 @@ class ActiveWaypoint(DynamicArrays):
             self.turndist = np.array([])  # Distance when to turn to next waypoint
             self.flyby    = np.array([])  # Distance when to turn to next waypoint
             self.next_qdr = np.array([])  # bearing next leg
+            self.dirfrom  = np.array([])  # bearing of previous leg
 
     def create(self):
         super(ActiveWaypoint, self).create()
@@ -27,6 +28,7 @@ class ActiveWaypoint(DynamicArrays):
         self.turndist[-1]  = 1.0   # Distance to active waypoint where to turn
         self.flyby[-1]     = 1.0   # Flyby/fly-over switch
         self.next_qdr[-1]  = -999.0    # bearing next leg
+        self.dirfrom[-1]   = -999.0 # bearing of previous leg
 
     def Reached(self, qdr, dist, flyby):
         # Calculate distance before waypoint where to start the turn

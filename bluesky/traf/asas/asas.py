@@ -424,11 +424,13 @@ class ASAS(DynamicArrays):
                          "\n               even if only vertical resolutions are allowed" + \
                          "\nPriority is currently " + ("ON" if self.swprio else "OFF") + \
                          "\nPriority code is currently: " + str(self.priocode)
-        self.swprio = flag
         if priocode not in options:
             return False, "Priority code Not Understood. Available Options: " + str(options)
         else:
             self.priocode = priocode
+        self.swprio = flag
+        return True, "Priority is " + ("ON" if self.swprio else "OFF") + \
+                     "\nPriority code is : " + str(self.priocode)
 
     def SetNoreso(self, noresoac=''):
         '''ADD or Remove aircraft that nobody will avoid.
