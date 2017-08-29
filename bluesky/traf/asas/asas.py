@@ -229,7 +229,9 @@ class ASAS(DynamicArrays):
         self.spawncheckfactor = 1.0                    # [-] factor that is multiplied with the look-ahead-time to determine what constitutes a 'very short term conflcit' 
         
         self.swconfdef = False                         # [-] switch to activate the CONFDEF command. This command activates the alterante conflict definition (intrusion is not a conflict)
-
+        
+        self.swafterconfalt = False                    # [-] if True, altitude not recovered after conflict resolution for cruising aircraft with waypoints
+        
         self.nconf        = 0                          # Number of detected conflicts
         self.latowncpa    = np.array([])
         self.lonowncpa    = np.array([])
@@ -647,9 +649,31 @@ class ASAS(DynamicArrays):
                     iwpid1 = self.traf.ap.route[id1].findact(self.traf,id1)
                     if iwpid1 != -1: # To avoid problems if there are no waypoints
                         self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
+                        # afterconfalt for id1
+                        if not self.swresohoriz: # there is no altitude resolution for horiz, so do nothing for horiz
+                            if self.swafterconfalt: # check if activated
+                                if 1219. <= self.traf.alt[id1] <= 3567.: # a/c has to be in the cruising alt range -> 1219m (=4000ft) and 3567m (=11700ft)
+                                    if iwpid1 > 1 and self.traf.ap.swvnavvs[id1] == False: # a/c has be in the cruise phase of a flight
+                                        # Then set the selected autopilot altitude to be the current alt
+                                        self.traf.apalt[id1] = self.traf.alt[id1]
+                                        self.traf.ap.alt[id1] = self.traf.alt[id1]
+                                        # recompte flight plan and compute VNAV so that dist2vs
+                                        self.traf.ap.route[id1].calcfp()
+                                        self.traf.ap.ComputeVNAV(id1, self.traf.ap.route[id1].wptoalt[iwpid1], self.traf.ap.route[id1].wpxtoalt[iwpid1])
                     iwpid2 = self.traf.ap.route[id2].findact(self.traf,id2)
                     if iwpid2 != -1: # To avoid problems if there are no waypoints
                         self.traf.ap.route[id2].direct(self.traf, id2, self.traf.ap.route[id2].wpname[iwpid2])
+                        # afterconfalt for id2
+                        if not self.swresohoriz: # there is no altitude resolution for horiz, so do nothing for horiz
+                            if self.swafterconfalt: # check if activated
+                                if 1219. <= self.traf.alt[id2] <= 3567.: # a/c has to be in the cruising alt range -> 1219m (=4000ft) and 3567m (=11700ft)
+                                    if iwpid2 > 1 and self.traf.ap.swvnavvs[id2] == False: # a/c has be in the cruise phase of a flight
+                                        # Then set the selected autopilot altitude to be the current alt
+                                        self.traf.apalt[id2] = self.traf.alt[id2]
+                                        self.traf.ap.alt[id2] = self.traf.alt[id2]
+                                        # recompte flight plan and compute VNAV so that dist2vs
+                                        self.traf.ap.route[id2].calcfp()
+                                        self.traf.ap.ComputeVNAV(id2, self.traf.ap.route[id2].wptoalt[iwpid2], self.traf.ap.route[id2].wpxtoalt[iwpid2])
                     
                     # If conflict is solved, remove it from conflist_active list
                     # This is so that if a conflict between this pair of aircraft 
@@ -667,6 +691,18 @@ class ASAS(DynamicArrays):
                  iwpid2 = self.traf.ap.route[id2].findact(self.traf,id2)
                  if iwpid2 != -1: # To avoid problems if there are no waypoints
                      self.traf.ap.route[id2].direct(self.traf, id2, self.traf.ap.route[id2].wpname[iwpid2])
+                     # afterconfalt for id2
+                     if not self.swresohoriz: # there is no altitude resolution for horiz, so do nothing for horiz
+                        if self.swafterconfalt: # check if activated
+                            if 1219. <= self.traf.alt[id2] <= 3567.: # a/c has to be in the cruising alt range -> 1219m (=4000ft) and 3567m (=11700ft)
+                                if iwpid2 > 1  and self.traf.ap.swvnavvs[id2] == False: # a/c has be in the cruise phase of a flight
+                                    # Then set the selected autopilot altitude to be the current alt
+                                    self.traf.apalt[id2] = self.traf.alt[id2]
+                                    self.traf.ap.alt[id2] = self.traf.alt[id2]
+                                    # recompte flight plan and compute VNAV so that dist2vs
+                                    self.traf.ap.route[id2].calcfp()
+                                    self.traf.ap.ComputeVNAV(id2, self.traf.ap.route[id2].wptoalt[iwpid2], self.traf.ap.route[id2].wpxtoalt[iwpid2])
+                 # also remove from active list and resospawn check       
                  self.conflist_active.remove(conflict)
                  if conflict in self.conflist_resospawncheck:
                         self.conflist_resospawncheck.remove(conflict)
@@ -678,6 +714,18 @@ class ASAS(DynamicArrays):
                 iwpid1 = self.traf.ap.route[id1].findact(self.traf,id1)
                 if iwpid1 != -1: # To avoid problems if there are no waypoints
                     self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
+                    # afterconfalt for id1
+                    if not self.swresohoriz: # there is no altitude resolution for horiz, so do nothing for horiz
+                        if self.swafterconfalt: # check if activated
+                            if 1219. <= self.traf.alt[id1] <= 3567.: # a/c has to be in the cruising alt range -> 1219m (=4000ft) and 3567m (=11700ft)
+                                if iwpid1 > 1 and self.traf.ap.swvnavvs[id1] == False: # a/c has be in the cruise phase of a flight
+                                    # Then set the selected autopilot altitude to be the current alt
+                                    self.traf.apalt[id1] = self.traf.alt[id1]
+                                    self.traf.ap.alt[id1] = self.traf.alt[id1]
+                                    # recompte flight plan and compute VNAV so that dist2vs
+                                    self.traf.ap.route[id1].calcfp()
+                                    self.traf.ap.ComputeVNAV(id1, self.traf.ap.route[id1].wptoalt[iwpid1], self.traf.ap.route[id1].wpxtoalt[iwpid1])
+                # also remove from active list and resospawn check                     
                 self.conflist_active.remove(conflict)
                 if conflict in self.conflist_resospawncheck:
                         self.conflist_resospawncheck.remove(conflict)
@@ -697,6 +745,13 @@ class ASAS(DynamicArrays):
             return True, "CONFDEF is currently " + ("ON" if self.swconfdef else "OFF")
         self.swconfdef = flag
         return True, "CONFDEF is " + ("ON" if self.swconfdef else "OFF")
+        
+    def setAfterConfAlt(self, flag=None):
+        ''' If switched on, altitude not recovered for cruising aircraft with waypoints  '''
+        if flag is None:
+            return True, "AFTERCONFALT is currently " + ("ON" if self.swafterconfalt else "OFF")
+        self.swafterconfalt = flag
+        return True, "AFTERCONFALT is " + ("ON" if self.swafterconfalt else "OFF")
 
     def create(self):
         super(ASAS, self).create()

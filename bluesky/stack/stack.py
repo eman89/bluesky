@@ -153,6 +153,12 @@ def init(sim, traf, scr):
             lambda idx, *args: traf.ap.route[idx].afteraddwptStack(traf, idx, *args),
             "After waypoint, add a waypoint to route of aircraft (FMS)"
         ],
+        "AFTERCONFALT": [
+            "AFTERCONFALT ON/OFF",
+            "[onoff]",
+            traf.asas.setAfterConfAlt,
+            "If ON, altitude not recovered after conflict resolution for cruising a/c with waypoints"
+        ],
         "AFTERLNAVTRK": [
             "AFTERLNAVTRK [ON/OFF CODE]",
             "[onoff, txt]",

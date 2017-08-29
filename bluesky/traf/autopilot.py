@@ -199,9 +199,6 @@ class Autopilot(DynamicArrays):
             # useful when there are no waypoints, like ASAS-01.scn - ASAS-04.scn
             else:            
                 self.trk = np.where(self.traf.swlnav, qdr, self.trk)
-            
-           
-            
         
         # NOTE!!!: Airplane speed is controlled using TAS. The following code
         # therefore computes the TAS the autopilot wants the airplane to fly
