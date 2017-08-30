@@ -421,9 +421,10 @@ class ASAS(DynamicArrays):
                          "\n     FF3:      Free Flight Tertiary (Climbing/descending has priority)" + \
                          "\n     LAY1:     Layers Primary (Cruising has priority + horizontal resolutions)" + \
                          "\n     LAY2:     Layers Secondary (Climbing/descending has priority + horizontal resolutions)" + \
-                         "\n     PROJECT3: No resolution if 1 ac is below 1000ft AND for conflicts with C/D aircraft," + \
+                         "\n     C/D:      No resolution if 1 ac is below 1000ft AND for conflicts with C/D aircraft," + \
                          "\n               where the C/D aircraft is below 4000ft, both aircraft solve horizontally," + \
                          "\n               even if only vertical resolutions are allowed" + \
+                         "\n     PROJECT3: No resolution if 1 ac is below 1000ft to avoid take-off conflict chain reactions" + \
                          "\nPriority is currently " + ("ON" if self.swprio else "OFF") + \
                          "\nPriority code is currently: " + str(self.priocode)
         if priocode not in options:
