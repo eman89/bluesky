@@ -199,9 +199,7 @@ class MainWindow(QMainWindow):
             else:
                 self.radarwidget.show_wpt = 0
         elif self.sender() == self.showlabels:
-            self.radarwidget.show_lbl -= 1
-            if self.radarwidget.show_lbl < 0:
-                self.radarwidget.show_lbl = 2
+            self.radarwidget.show_lbl = not self.radarwidget.show_lbl
         elif self.sender() == self.showmap:
             self.radarwidget.show_map = not self.radarwidget.show_map
         elif self.sender() == self.action_Save:

@@ -137,7 +137,7 @@ class RadarWidget(QGLWidget):
         self.show_coast     = True
         self.show_traf      = True
         self.show_pz        = False
-        self.show_lbl       = 2
+        self.show_lbl       = True
         self.show_wpt       = 1
         self.show_apt       = 1
 
@@ -197,6 +197,7 @@ class RadarWidget(QGLWidget):
         self.aclonbuf      = create_empty_buffer(MAX_NAIRCRAFT * 4, usage=gl.GL_STREAM_DRAW)
         self.acaltbuf      = create_empty_buffer(MAX_NAIRCRAFT * 4, usage=gl.GL_STREAM_DRAW)
         self.actasbuf      = create_empty_buffer(MAX_NAIRCRAFT * 4, usage=gl.GL_STREAM_DRAW)
+        self.acvsbuf       = create_empty_buffer(MAX_NAIRCRAFT * 4, usage=gl.GL_STREAM_DRAW)
         self.accolorbuf    = create_empty_buffer(MAX_NAIRCRAFT * 4, usage=gl.GL_STREAM_DRAW)
         self.aclblbuf      = create_empty_buffer(MAX_NAIRCRAFT * 24, usage=gl.GL_STREAM_DRAW)
         self.confcpabuf    = create_empty_buffer(MAX_NCONFLICTS * 16, usage=gl.GL_STREAM_DRAW)
@@ -240,11 +241,13 @@ class RadarWidget(QGLWidget):
         self.ssd.bind_attrib(ATTRIB_LON0, 1, self.aclonbuf, instance_divisor=1)
         self.ssd.bind_attrib(ATTRIB_ALT0, 1, self.acaltbuf, instance_divisor=1)
         self.ssd.bind_attrib(ATTRIB_TAS0, 1, self.actasbuf, instance_divisor=1)
+        self.ssd.bind_attrib(ATTRIB_TAS0, 1, self.acvsbuf, instance_divisor=1)
         self.ssd.bind_attrib(ATTRIB_TRK0, 1, self.achdgbuf, instance_divisor=1)
         self.ssd.bind_attrib(ATTRIB_LAT1, 1, self.aclatbuf)
         self.ssd.bind_attrib(ATTRIB_LON1, 1, self.aclonbuf)
         self.ssd.bind_attrib(ATTRIB_ALT1, 1, self.acaltbuf)
         self.ssd.bind_attrib(ATTRIB_TAS1, 1, self.actasbuf)
+        self.ssd.bind_attrib(ATTRIB_TAS1, 1, self.acvsbuf)
         self.ssd.bind_attrib(ATTRIB_TRK1, 1, self.achdgbuf)
 
         # ------- Protected Zone -------------------------
@@ -644,16 +647,10 @@ class RadarWidget(QGLWidget):
                     data.alt[i] = 0.0
 
                 # Make label: 3 lines of 8 characters per aircraft
-                if self.show_lbl >= 1:
-                    rawlabel += '%-8s' % data.id[:8]
-                    if self.show_lbl == 2:
-                        if data.alt[i] <= 15000. * ft:
-                            rawlabel += '%-5d' % int(data.alt[i]/ft  + 0.5)
-                        else:
-                            rawlabel += 'FL%03d' % int(data.alt[i]/ft/100.+0.5)
-                        rawlabel += '%1s  %-8d' % (chr(vs), int(data.cas[i] / kts+0.5))
-                    else:
-                        rawlabel += 16 * ' '
+                if data.alt[i] <= 15000. * ft:
+                    rawlabel += '%-8s%-5d%1s  %-8d' % (data.id[i][:8], int(data.alt[i]/ft  +0.5), chr(vs), int(data.cas[i] / kts+0.5))
+                else:
+                    rawlabel += '%-8sFL%03d%1s  %-8d' % (data.id[i][:8], int(data.alt[i]/ft/100.+0.5), chr(vs), int(data.cas[i] / kts+0.5))
                 confindices = data.iconf[i]
                 if len(confindices) > 0:
                     color[i, :] = amber + (255,)
