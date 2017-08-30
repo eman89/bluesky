@@ -248,6 +248,7 @@ class ScreenIO(QObject):
             data.confcpalat = self.sim.traf.asas.latowncpa
             data.confcpalon = self.sim.traf.asas.lonowncpa
             data.trk        = self.sim.traf.hdg
+            data.vs         = self.sim.traf.vs
 
             # Conflict statistics
             data.nconf_tot  = self.sim.traf.asas.nconf_total

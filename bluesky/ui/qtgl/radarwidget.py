@@ -137,7 +137,7 @@ class RadarWidget(QGLWidget):
         self.show_coast     = True
         self.show_traf      = True
         self.show_pz        = False
-        self.show_lbl       = True
+        self.show_lbl       = 2
         self.show_wpt       = 1
         self.show_apt       = 1
 
@@ -622,6 +622,7 @@ class RadarWidget(QGLWidget):
             update_buffer(self.achdgbuf, np.array(data.trk, dtype=np.float32))
             update_buffer(self.acaltbuf, np.array(data.alt, dtype=np.float32))
             update_buffer(self.actasbuf, np.array(data.tas, dtype=np.float32))
+            update_buffer(self.acvsbuf,  np.array(data.vs, dtype=np.float32))
 
             # CPA lines to indicate conflicts
             ncpalines = len(data.confcpalat)
@@ -633,6 +634,7 @@ class RadarWidget(QGLWidget):
             rawlabel = ''
             color    = np.empty((self.naircraft, 4), dtype=np.uint8)
             for i in range(self.naircraft):
+                vs = 30 if data.vs[i] > 0.15 else 31 if data.vs[i] < -0.15 else 32
                 if np.isnan(data.tas[i]):
                     print 'CAS NaN in %d: %s' % (i, data.id[i])
                     data.cas[i] = 0.0
@@ -642,7 +644,16 @@ class RadarWidget(QGLWidget):
                     data.alt[i] = 0.0
 
                 # Make label: 3 lines of 8 characters per aircraft
-                rawlabel += '%-8sFL%03d   %-8d' % (data.id[i][:8], int(data.alt[i] / ft / 100), int(data.cas[i] / kts))
+                if self.show_lbl >= 1:
+                    rawlabel += '%-8s' % data.id[:8]
+                    if self.show_lbl == 2:
+                        if data.alt[i] <= 15000. * ft:
+                            rawlabel += '%-5d' % int(data.alt[i]/ft  + 0.5)
+                        else:
+                            rawlabel += 'FL%03d' % int(data.alt[i]/ft/100.+0.5)
+                        rawlabel += '%1s  %-8d' % (chr(vs), int(data.cas[i] / kts+0.5))
+                    else:
+                        rawlabel += 16 * ' '
                 confindices = data.iconf[i]
                 if len(confindices) > 0:
                     color[i, :] = amber + (255,)

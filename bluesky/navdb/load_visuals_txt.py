@@ -45,7 +45,7 @@ if gui == 'qtgl':
             from PyQt4.QtGui import QApplication, QProgressDialog
         except ImportError:
             class QApplication:
-                @classmethod
+                @staticmethod
                 def instance():
                     return None
 
