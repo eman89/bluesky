@@ -31,8 +31,8 @@
 00:00:00.00>AFTERLNAVTRK ON PARALLEL
 
 # Conflict Resolution Direction (Both off->horiz+vert)
-# 00:00:00.00>RMETHH BOTH
-00:00:00.00>RMETHV ON
+00:00:00.00>RMETHH BOTH
+# 00:00:00.00>RMETHV ON
 
 # Switch On Flight Stats Log:
 00:00:00.00>FLSTLOG ON

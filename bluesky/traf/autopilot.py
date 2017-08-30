@@ -6,7 +6,6 @@ from ..tools.position import txt2pos
 from ..tools.aero import ft, nm, vcas2tas, vtas2cas, vmach2tas, casormach, kts
 from route import Route
 from ..tools.dynamicarrays import DynamicArrays, RegisterElementParameters
-from ..tools.misc import degto180
 
 
 class Autopilot(DynamicArrays):
@@ -16,6 +15,10 @@ class Autopilot(DynamicArrays):
         # Scheduling of FMS and ASAS
         self.t0 = -999.  # last time fms was called
         self.dt = 1.01   # interval for fms
+        
+        # Scheduling of live dist2vs calculation
+        self.t0vs = -999.
+        self.dtvs = 5.01
 
         # Standard self.steepness for descent
         self.steepness = 3000. * ft / (10. * nm)
@@ -85,6 +88,7 @@ class Autopilot(DynamicArrays):
 
             # Shift waypoints for aircraft i where necessary
             for i in self.traf.actwp.Reached(qdr, dist, self.traf.actwp.flyby):
+                
                 # Save current wp speed and altitude
                 oldspd = self.traf.actwp.spd[i]
                 oldalt = self.traf.actwp.nextaltco[i]
@@ -199,6 +203,12 @@ class Autopilot(DynamicArrays):
             # useful when there are no waypoints, like ASAS-01.scn - ASAS-04.scn
             else:            
                 self.trk = np.where(self.traf.swlnav, qdr, self.trk)
+            
+            # Live update of dist2vs. Needed because horizontal resolutions can
+            # can change ac speed and so not get into reached loop in time
+            if self.t0vs + self.dtvs < simt or simt < self.t0vs:
+                self.t0vs = simt
+                self.dist2vs = (self.traf.alt - self.traf.actwp.nextaltco) / self.steepness
         
         # NOTE!!!: Airplane speed is controlled using TAS. The following code
         # therefore computes the TAS the autopilot wants the airplane to fly
@@ -560,6 +570,10 @@ class Autopilot(DynamicArrays):
         # Scheduling of FMS and ASAS
         self.t0 = -999.  # last time fms was called
         self.dt = 1.01   # interval for fms
+        
+        # Scheduling of live dist2vs calculation
+        self.t0vs = -999.
+        self.dtvs = 5.01
 
         # Standard self.steepness for descent
         self.steepness = 3000. * ft / (10. * nm)
