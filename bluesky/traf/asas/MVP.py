@@ -164,11 +164,11 @@ def resolve(asas, traf):
         newvs    = newv[2,:]
         
     # If resolution is limited to vertical (i.e., horizontal resolution = 0), 
-    # and C/D prio code is used, then C/D-C/D conflict with 1 a/c below 4000ft
-    # will not be resolved because C/D prio setting sets the vertical resolution to 0. 
+    # and PROJECT3B prio code is used, then C/D-C/D conflict with 1 a/c below 4000ft
+    # will not be resolved because PROJECT3B prio setting sets the vertical resolution to 0. 
     # So for ONLY such conflicts, even if resolution is lmited to vertical, 
     # horizontal resolution is used to solve conflict
-    if asas.swresovert and asas.priocode == 'C/D':
+    if asas.swresovert and asas.priocode == 'PROJECT3B':
         newtrack = np.where(np.logical_and(timesolveV<asas.dtlookahead, dv[2,:]==0.0), \
                             np.degrees(np.arctan2(newv[0,:],newv[1,:])) %360.0, \
                             traf.trk)
@@ -195,10 +195,10 @@ def resolve(asas, traf):
     asasalttemp            = asas.vs*timesolveV + traf.alt
     asas.alt[altCondition] = asasalttemp[altCondition] 
     
-    # If resolution is limited to the vertical direction, and C/D prio code is used,
+    # If resolution is limited to the vertical direction, and PROJECT3B prio code is used,
     # then the vertical resolution is set to zero. Such conflicts will be resolved horizontally.
     # Therefore, since ASAS is still active for such aircraft, they should fly with their auto pilot altitudes
-    if asas.swresovert and asas.priocode == 'C/D':
+    if asas.swresovert and asas.priocode == 'PROJECT3B':
         altCondition2           = np.logical_and(timesolveV<asas.dtlookahead, np.abs(dv[2,:])==0.0)
         asasalttemp             = traf.ap.alt
         asas.alt[altCondition2] = asasalttemp[altCondition2] 
@@ -381,11 +381,19 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
             dv1 = dv1 - dv_mvp
             dv2 = dv2 + dv_mvp
     
-    # C/D: No resolution if 1 a/c is below 1000 ft (=305m) to avoid take off conflicts AND 
+    # Project3A: No resolution if 1 a/c is below 1000 ft (=305m) to avoid take off conflict chain reactions  
+    elif priocode ==  "PROJECT3A":
+        # Only resolve if atleast one of the aircraft is above 1000ft 
+        if traf.alt[id1] >= 305.0 or traf.alt[id2] >= 305.0:            
+            dv_mvp[2] = dv_mvp[2]/2.0
+            dv1 = dv1 - dv_mvp
+            dv2 = dv2 + dv_mvp 
+    
+    # PROJECT3B: No resolution if 1 a/c is below 1000 ft (=305m) to avoid take off conflicts AND 
     #            conflicts with C/D aircraft, where the C/D aircraft is below 4000ft (=1219m), are solved 
     #            horizontally by both aircraft, to ensure that aircraft don't get stuck at lower altitudes
     #            below analysis altitudes
-    elif priocode ==  "C/D":
+    elif priocode ==  "PROJECT3B":
         # Only resolve if atleast one of the aircraft is above 1000ft 
         if traf.alt[id1] >= 305.0 or traf.alt[id2] >= 305.0:            
             # Aircraft 1 is climbing/decending and is below 4000ft-> both solve horizontally
@@ -403,13 +411,5 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
                 dv1 = dv1 - dv_mvp
                 dv2 = dv2 + dv_mvp 
                 
-    # Project 3: No resolution if 1 a/c is below 1000 ft (=305m) to avoid take off conflict chain reactions  
-    elif priocode ==  "PROJECT3":
-        # Only resolve if atleast one of the aircraft is above 1000ft 
-        if traf.alt[id1] >= 305.0 or traf.alt[id2] >= 305.0:            
-            dv_mvp[2] = dv_mvp[2]/2.0
-            dv1 = dv1 - dv_mvp
-            dv2 = dv2 + dv_mvp 
-            
     return dv1, dv2
     
