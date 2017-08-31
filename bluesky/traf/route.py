@@ -633,7 +633,7 @@ class Route():
                                         turnrad*abs(tan(0.5*radians(max(5., abs(degto180(qdr -
                                         self.wpdirfrom[self.iactwp]))))))
 
-            traf.swlnav[idx] = True
+#            traf.swlnav[idx] = True
             return True
         else:
             return False, "Waypoint " + wpnam + " not found"
