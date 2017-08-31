@@ -16,10 +16,6 @@ class Autopilot(DynamicArrays):
         self.t0 = -999.  # last time fms was called
         self.dt = 1.01   # interval for fms
         
-        # Scheduling of live dist2vs calculation
-        self.t0vs = -999.
-        self.dtvs = 5.01
-
         # Standard self.steepness for descent
         self.steepness = 3000. * ft / (10. * nm)
         
@@ -204,11 +200,10 @@ class Autopilot(DynamicArrays):
             else:            
                 self.trk = np.where(self.traf.swlnav, qdr, self.trk)
             
-            # Live update of dist2vs. Needed because horizontal resolutions can
-            # can change ac speed and so not get into reached loop in time
-            if self.t0vs + self.dtvs < simt or simt < self.t0vs:
-                self.t0vs = simt
-                self.dist2vs = (self.traf.alt - self.traf.actwp.nextaltco) / self.steepness
+            # Live update of dist2vs. Needed because after resolution a Direct is called
+            # aircraft could be at the wrong cruising altitude when this Direct is called
+            # so it needs to be updated.
+            self.dist2vs = (self.traf.alt - self.traf.actwp.nextaltco) / self.steepness
         
         # NOTE!!!: Airplane speed is controlled using TAS. The following code
         # therefore computes the TAS the autopilot wants the airplane to fly
@@ -571,10 +566,6 @@ class Autopilot(DynamicArrays):
         self.t0 = -999.  # last time fms was called
         self.dt = 1.01   # interval for fms
         
-        # Scheduling of live dist2vs calculation
-        self.t0vs = -999.
-        self.dtvs = 5.01
-
         # Standard self.steepness for descent
         self.steepness = 3000. * ft / (10. * nm)
         
