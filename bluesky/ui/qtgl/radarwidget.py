@@ -592,7 +592,7 @@ class RadarWidget(QGLWidget):
                     txt = wp[:10].ljust(10)
                     if alt < 0:
                         txt += "-----/"
-                    elif alt > 4500 * ft:
+                    elif alt > 15000 * ft:
                         FL = int(round((alt / (100. * ft))))
                         txt += "FL%03d/" % FL
                     else:
