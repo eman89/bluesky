@@ -637,7 +637,7 @@ class RadarWidget(QGLWidget):
             rawlabel = ''
             color    = np.empty((self.naircraft, 4), dtype=np.uint8)
             for i in range(self.naircraft):
-                vs = 30 if data.vs[i] > 0.15 else 31 if data.vs[i] < -0.15 else 32
+                vs = 30 if data.vs[i] > 0.10 else 31 if data.vs[i] < -0.10 else 32
                 if np.isnan(data.tas[i]):
                     print 'CAS NaN in %d: %s' % (i, data.id[i])
                     data.cas[i] = 0.0

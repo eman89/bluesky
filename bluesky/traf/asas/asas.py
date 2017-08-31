@@ -412,7 +412,7 @@ class ASAS(DynamicArrays):
 
     def SetPrio(self, flag=None, priocode="FF1"):
         '''Set the prio switch and the type of prio '''
-        options = ["FF1", "FF2", "FF3", "LAY1", "LAY2", "PROJECT3A", "PROJECT3B"]
+        options = ["FF1", "FF2", "FF3", "LAY1", "LAY2", "PROJECT3"]
         if flag is None:
             return True, "PRIORULES [ON/OFF] [PRIOCODE]"  + \
                          "\nAvailable priority codes: " + \
@@ -421,10 +421,8 @@ class ASAS(DynamicArrays):
                          "\n     FF3:       Free Flight Tertiary (Climbing/descending has priority)" + \
                          "\n     LAY1:      Layers Primary (Cruising has priority + horizontal resolutions)" + \
                          "\n     LAY2:      Layers Secondary (Climbing/descending has priority + horizontal resolutions)" + \
-                         "\n     PROJECT3A: No resolution if 1 ac is below 1000ft to avoid take-off conflict chain reactions" + \
-                         "\n     PROJECT3B: No resolution if 1 ac is below 1000ft AND for conflicts with C/D aircraft," + \
-                         "\n                where the C/D aircraft is below 4000ft, both aircraft solve horizontally," + \
-                         "\n                even if only vertical resolutions are allowed" + \
+                         "\n     PROJECT3:  For conflicts with C/D aircraft, where at least 1 C/D aircraft is below 4000ft" + \
+                         "\n                both aircraft solve horizontally, even if only vertical resolutions are allowed" + \
                          "\nPriority is currently " + ("ON" if self.swprio else "OFF") + \
                          "\nPriority code is currently: " + str(self.priocode)
         if priocode not in options:
