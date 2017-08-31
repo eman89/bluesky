@@ -274,6 +274,7 @@ class Route():
                     # If success: update flight plan and guidance
                     self.calcfp()
                     self.direct(traf, idx, self.wpname[self.iactwp])
+                    traf.swlnav[idx] = True
 
 
                 #acid AT wpinroute ALT/SPD alt/spd
@@ -333,6 +334,7 @@ class Route():
                     # If success: update flight plan and guidance
                     self.calcfp()
                     self.direct(traf, idx, self.wpname[self.iactwp])
+                    traf.swlnav[idx] = True
 
                     del parser                    
                     
@@ -576,6 +578,7 @@ class Route():
         # Update autopilot settings
         if wpok and self.iactwp >= 0 and self.iactwp < self.nwp:
             self.direct(traf, iac, self.wpname[self.iactwp])
+            traf.swlnav[iac] = True
 
 
         return idx
