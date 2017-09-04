@@ -193,9 +193,10 @@ def resolve(asas, traf):
     # altitude also resolves the conflict. Because ASAS.alt is calculated using
     # the time to resolve, it may result in climbing or descending more than the selected
     # altitude.
-    signdvs = np.sign(asas.vs - traf.ap.vs * np.sign(traf.apalt - traf.alt))
-    signalt = np.sign(asas.alt - traf.apalt)
-    asas.alt = np.where(np.logical_or(signdvs == 0, signdvs == signalt), asas.alt, traf.apalt)
+    if not asas.swafterconfalt: 
+        signdvs = np.sign(asas.vs - traf.ap.vs * np.sign(traf.apalt - traf.alt))
+        signalt = np.sign(asas.alt - traf.apalt)
+        asas.alt = np.where(np.logical_or(signdvs == 0, signdvs == signalt), asas.alt, traf.apalt)
 
     # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
     # when there is no conflict. Therefore asas alt is only updated when its
