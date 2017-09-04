@@ -176,7 +176,7 @@ def cflHeader():
                "Pilot ALT id2 [m], " + \
                "Pilot SPD id2 (TAS) [m/s], " + \
                "Pilot VS id2 [m/s], " + \
-               "Pilot HDG id2 [deg]" + \
+               "Pilot HDG id2 [deg]"
                
 
   lines      = "#######################################################\n" + \

@@ -142,10 +142,10 @@ def asasLogUpdate(asas, traf):
         asas.clogvsid1 = traf.vs[asas.clogi]
         asas.cloghdgid1 = traf.hdg[asas.clogi]
         asas.clogasasactiveid1 = asas.active[asas.clogi]
-        asas.clogpilotaltid1 = traf.pilot.alt[clogi]
-        asas.clogpilottasid1 = traf.pilot.spd[clogi]
-        asas.clogpilotvsid1 = traf.pilot.vs[clogi]
-        asas.clogpilothdgid1 = traf.pilot.hdg[clogi]
+        asas.clogpilotaltid1 = traf.pilot.alt[asas.clogi]
+        asas.clogpilottasid1 = traf.pilot.spd[asas.clogi]
+        asas.clogpilotvsid1 = traf.pilot.vs[asas.clogi]
+        asas.clogpilothdgid1 = traf.pilot.hdg[asas.clogi]
 
         # Update the variables belonging to id2
         asas.clogspawntimeid2 = traf.spawnTime[asas.clogj]
@@ -159,10 +159,10 @@ def asasLogUpdate(asas, traf):
         asas.clogvsid2 = traf.vs[asas.clogj]
         asas.cloghdgid2 = traf.hdg[asas.clogj]
         asas.clogasasactiveid2 = asas.active[asas.clogj]
-        asas.clogpilotaltid2 = traf.pilot.alt[clogj]
-        asas.clogpilottasid2 = traf.pilot.spd[clogj]
-        asas.clogpilotvsid2 = traf.pilot.vs[clogj]
-        asas.clogpilothdgid2 = traf.pilot.hdg[clogj]
+        asas.clogpilotaltid2 = traf.pilot.alt[asas.clogj]
+        asas.clogpilottasid2 = traf.pilot.spd[asas.clogj]
+        asas.clogpilotvsid2 = traf.pilot.vs[asas.clogj]
+        asas.clogpilothdgid2 = traf.pilot.hdg[asas.clogj]
         
         # Finally, call the logger
         asas.cfllog.log()
