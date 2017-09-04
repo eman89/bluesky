@@ -107,10 +107,10 @@ def asasLogUpdate(asas, traf):
     asas.clogvsid1 = []
     asas.cloghdgid1 = []
     asas.clogasasactiveid1 = []
-    asas.clogpilotaltid1 = []
-    asas.clogpilottasid1 = []
-    asas.clogpilotvsid1 = []
-    asas.clogpilothdgid1 = []
+    asas.clogasasaltid1 = []
+    asas.clogasastasid1 = []
+    asas.clogasasvsid1 = []
+    asas.clogasashdgid1 = []
     asas.clogspawntimeid2 = []
     asas.clogtinconfid2 = []
     asas.clogtoutconfid2 = []
@@ -122,10 +122,10 @@ def asasLogUpdate(asas, traf):
     asas.clogvsid2 = []
     asas.cloghdgid2 = []
     asas.clogasasactiveid2 = []
-    asas.clogpilotaltid2 = []
-    asas.clogpilottasid2 = []
-    asas.clogpilotvsid2 = []
-    asas.clogpilothdgid2 = []
+    asas.clogasasaltid2 = []
+    asas.clogasastasid2 = []
+    asas.clogasasvsid2 = []
+    asas.clogasashdgid2 = []
         
     # Update the lists if there is something to log
     if len(asas.clogi) > 0:
@@ -142,10 +142,10 @@ def asasLogUpdate(asas, traf):
         asas.clogvsid1 = traf.vs[asas.clogi]
         asas.cloghdgid1 = traf.hdg[asas.clogi]
         asas.clogasasactiveid1 = asas.active[asas.clogi]
-        asas.clogpilotaltid1 = traf.pilot.alt[asas.clogi]
-        asas.clogpilottasid1 = traf.pilot.spd[asas.clogi]
-        asas.clogpilotvsid1 = traf.pilot.vs[asas.clogi]
-        asas.clogpilothdgid1 = traf.pilot.hdg[asas.clogi]
+        asas.clogasasaltid1 = asas.alt[asas.clogi]
+        asas.clogasastasid1 = asas.spd[asas.clogi]
+        asas.clogasasvsid1 = asas.vs[asas.clogi]
+        asas.clogasashdgid1 = asas.hdg[asas.clogi]
 
         # Update the variables belonging to id2
         asas.clogspawntimeid2 = traf.spawnTime[asas.clogj]
@@ -159,10 +159,10 @@ def asasLogUpdate(asas, traf):
         asas.clogvsid2 = traf.vs[asas.clogj]
         asas.cloghdgid2 = traf.hdg[asas.clogj]
         asas.clogasasactiveid2 = asas.active[asas.clogj]
-        asas.clogpilotaltid2 = traf.pilot.alt[asas.clogj]
-        asas.clogpilottasid2 = traf.pilot.spd[asas.clogj]
-        asas.clogpilotvsid2 = traf.pilot.vs[asas.clogj]
-        asas.clogpilothdgid2 = traf.pilot.hdg[asas.clogj]
+        asas.clogasasaltid2 = asas.alt[asas.clogj]
+        asas.clogasastasid2 = asas.spd[asas.clogj]
+        asas.clogasasvsid2 = asas.vs[asas.clogj]
+        asas.clogasashdgid2 = asas.hdg[asas.clogj]
         
         # Finally, call the logger
         asas.cfllog.log()
@@ -185,10 +185,10 @@ def asasLogUpdate(asas, traf):
     asas.instlogvsid1 = []
     asas.instloghdgid1 = []
     asas.instlogasasactiveid1 = []
-    asas.instlogpilotaltid1 = []
-    asas.instlogpilottasid1 = []
-    asas.instlogpilotvsid1 = []
-    asas.instlogpilothdgid1 = []
+    asas.instlogasasaltid1 = []
+    asas.instlogasastasid1 = []
+    asas.instlogasasvsid1 = []
+    asas.instlogasashdgid1 = []
     asas.instlogspawntimeid2 = []
     asas.instlogtinconfid2 = []
     asas.instlogtoutconfid2 = []
@@ -200,10 +200,10 @@ def asasLogUpdate(asas, traf):
     asas.instlogvsid2 = []
     asas.instloghdgid2 = []
     asas.instlogasasactiveid2 = []
-    asas.instlogpilotaltid2 = []
-    asas.instlogpilottasid2 = []
-    asas.instlogpilotvsid2 = []
-    asas.instlogpilothdgid2 = []
+    asas.instlogasasaltid2 = []
+    asas.instlogasastasid2 = []
+    asas.instlogasasvsid2 = []
+    asas.instlogasashdgid2 = []
 
     # Update the lists if there is something to log
     if len(asas.instlogi) > 0:
@@ -220,10 +220,10 @@ def asasLogUpdate(asas, traf):
         asas.instlogvsid1 = traf.vs[asas.instlogi]
         asas.instloghdgid1 = traf.hdg[asas.instlogi]
         asas.instlogasasactiveid1 = asas.active[asas.instlogi]
-        asas.instlogpilotaltid1 = traf.pilot.alt[asas.instlogi]
-        asas.instlogpilottasid1 = traf.pilot.spd[asas.instlogi]
-        asas.instlogpilotvsid1 = traf.pilot.vs[asas.instlogi]
-        asas.instlogpilothdgid1 = traf.pilot.hdg[asas.instlogi]
+        asas.instlogasasaltid1 = asas.alt[asas.instlogi]
+        asas.instlogasastasid1 = asas.spd[asas.instlogi]
+        asas.instlogasasvsid1 = asas.vs[asas.instlogi]
+        asas.instlogasashdgid1 = asas.hdg[asas.instlogi]
 
         # Update the variables belonging to id2
         asas.instlogspawntimeid2 = traf.spawnTime[asas.instlogj]
@@ -237,10 +237,10 @@ def asasLogUpdate(asas, traf):
         asas.instlogvsid2 = traf.vs[asas.instlogj]
         asas.instloghdgid2 = traf.hdg[asas.instlogj]
         asas.instlogasasactiveid2 = asas.active[asas.instlogj]
-        asas.instlogpilotaltid2 = traf.pilot.alt[asas.instlogj]
-        asas.instlogpilottasid2 = traf.pilot.spd[asas.instlogj]
-        asas.instlogpilotvsid2 = traf.pilot.vs[asas.instlogj]
-        asas.instlogpilothdgid2 = traf.pilot.hdg[asas.instlogj]    
+        asas.instlogasasaltid2 = asas.alt[asas.instlogj]
+        asas.instlogasastasid2 = asas.spd[asas.instlogj]
+        asas.instlogasasvsid2 = asas.vs[asas.instlogj]
+        asas.instlogasashdgid2 = asas.hdg[asas.instlogj]    
     
     # INSTLOG END -------------------------------------------------------------
 
@@ -267,10 +267,10 @@ def asasLogUpdate(asas, traf):
     asas.ilogvsid1 = []
     asas.iloghdgid1 = []
     asas.ilogasasactiveid1 = []
-    asas.ilogpilotaltid1 = []
-    asas.ilogpilottasid1 = []
-    asas.ilogpilotvsid1 = []
-    asas.ilogpilothdgid1 = []
+    asas.ilogasasaltid1 = []
+    asas.ilogasastasid1 = []
+    asas.ilogasasvsid1 = []
+    asas.ilogasashdgid1 = []
     asas.ilogspawntimeid2 = []
     asas.ilogtinconfid2 = []
     asas.ilogtoutconfid2 = []
@@ -282,10 +282,10 @@ def asasLogUpdate(asas, traf):
     asas.ilogvsid2 = []
     asas.iloghdgid2 = []
     asas.ilogasasactiveid2 = []
-    asas.ilogpilotaltid2 = []
-    asas.ilogpilottasid2 = []
-    asas.ilogpilotvsid2 = []
-    asas.ilogpilothdgid2 = []
+    asas.ilogasasaltid2 = []
+    asas.ilogasastasid2 = []
+    asas.ilogasasvsid2 = []
+    asas.ilogasashdgid2 = []
 
     # Update the lists if there is something to log        
     if len(asas.ilogi) > 0:   
@@ -302,10 +302,10 @@ def asasLogUpdate(asas, traf):
         asas.ilogvsid1 = np.where(id1exists, traf.vs[asas.ilogi], Fail)
         asas.iloghdgid1 = np.where(id1exists, traf.hdg[asas.ilogi], Fail)
         asas.ilogasasactiveid1 = np.where(id1exists, asas.active[asas.ilogi], Fail)
-        asas.ilogpilotaltid1 = np.where(id1exists,traf.pilot.alt[asas.ilogi], Fail)
-        asas.ilogpilottasid1 = np.where(id1exists,traf.pilot.spd[asas.ilogi], Fail)
-        asas.ilogpilotvsid1 = np.where(id1exists,traf.pilot.vs[asas.ilogi], Fail)
-        asas.ilogpilothdgid1 = np.where(id1exists,traf.pilot.hdg[asas.ilogi], Fail)
+        asas.ilogasasaltid1 = np.where(id1exists,asas.alt[asas.ilogi], Fail)
+        asas.ilogasastasid1 = np.where(id1exists,asas.spd[asas.ilogi], Fail)
+        asas.ilogasasvsid1 = np.where(id1exists,asas.vs[asas.ilogi], Fail)
+        asas.ilogasashdgid1 = np.where(id1exists,asas.hdg[asas.ilogi], Fail)
         
         # Update the variables belonging to id2
         asas.ilogspawntimeid2 = np.where(id2exists, traf.spawnTime[asas.ilogj], Fail)
@@ -319,10 +319,10 @@ def asasLogUpdate(asas, traf):
         asas.ilogvsid2 = np.where(id2exists, traf.vs[asas.ilogj], Fail)
         asas.iloghdgid2 = np.where(id2exists, traf.hdg[asas.ilogj], Fail)
         asas.ilogasasactiveid2 = np.where(id2exists, asas.active[asas.ilogj], Fail)
-        asas.ilogpilotaltid2 = np.where(id2exists,traf.pilot.alt[asas.ilogj], Fail)
-        asas.ilogpilottasid2 = np.where(id2exists,traf.pilot.spd[asas.ilogj], Fail)
-        asas.ilogpilotvsid2 = np.where(id2exists,traf.pilot.vs[asas.ilogj], Fail)
-        asas.ilogpilothdgid2 = np.where(id2exists,traf.pilot.hdg[asas.ilogj], Fail)
+        asas.ilogasasaltid2 = np.where(id2exists,asas.alt[asas.ilogj], Fail)
+        asas.ilogasastasid2 = np.where(id2exists,asas.spd[asas.ilogj], Fail)
+        asas.ilogasasvsid2 = np.where(id2exists,asas.vs[asas.ilogj], Fail)
+        asas.ilogasashdgid2 = np.where(id2exists,asas.hdg[asas.ilogj], Fail)
         
         # Finally, call the logger
         asas.intlog.log()
