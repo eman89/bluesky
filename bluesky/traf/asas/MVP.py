@@ -188,16 +188,6 @@ def resolve(asas, traf):
     asas.spd = newgscapped
     asas.vs  = vscapped
 
-    # Calculate if Autopilot selected altitude should be followed. This avoids ASAS from
-    # climbing or descending longer than it needs to if the autopilot leveloff
-    # altitude also resolves the conflict. Because ASAS.alt is calculated using
-    # the time to resolve, it may result in climbing or descending more than the selected
-    # altitude.
-    if not asas.swafterconfalt: 
-        signdvs = np.sign(asas.vs - traf.ap.vs * np.sign(traf.apalt - traf.alt))
-        signalt = np.sign(asas.alt - traf.apalt)
-        asas.alt = np.where(np.logical_or(signdvs == 0, signdvs == signalt), asas.alt, traf.apalt)
-
     # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
     # when there is no conflict. Therefore asas alt is only updated when its
     # value is less than the look-ahead time, because for those aircraft are in conflict
@@ -205,12 +195,22 @@ def resolve(asas, traf):
     asasalttemp            = asas.vs*timesolveV + traf.alt
     asas.alt[altCondition] = asasalttemp[altCondition]
 
+    # Calculate if Autopilot selected altitude should be followed. This avoids ASAS from
+    # climbing or descending longer than it needs to if the autopilot leveloff
+    # altitude also resolves the conflict. Because ASAS.alt is calculated using
+    # the time to resolve, it may result in climbing or descending more than the selected
+    # altitude. Don't do this if AFTERCONFALT command is ON. 
+    if not asas.swafterconfalt: 
+        signdvs  = np.sign(asas.vs - traf.ap.vs * np.sign(traf.apalt - traf.alt))
+        signalt  = np.sign(asas.alt - traf.apalt)
+        asas.alt = np.where(np.logical_or(signdvs == 0, signdvs == signalt), asas.alt, traf.apalt)
+
     # If resolution is limited to the vertical direction, and PROJECT3 prio code is used,
     # then the vertical resolution is set to zero. Such conflicts will be resolved horizontally.
     # Therefore, since ASAS is still active for such aircraft, they should fly with their auto pilot altitudes
     if asas.swresovert and asas.priocode == 'PROJECT3':
         altCondition2           = np.logical_and(timesolveV<asas.dtlookahead, np.abs(dv[2,:])==0.0)
-        asasalttemp             = traf.ap.alt
+        asasalttemp             = traf.apalt
         asas.alt[altCondition2] = asasalttemp[altCondition2]
 
     # If resolutions are limited in the horizontal direction, then asasalt should
