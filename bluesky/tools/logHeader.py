@@ -124,8 +124,8 @@ def flstHeader():
                "ASAS Active [bool], " + \
                "Pilot ALT [m], " + \
                "Pilot SPD (TAS) [m/s], " + \
-               "Pilot HDG [deg], " + \
-               "Pilot VS [m/s]" 
+               "Pilot VS [m/s], " + \
+               "Pilot HDG [deg]" 
 
   lines      = "#######################################################\n" + \
                "FLST LOG\n" + \
