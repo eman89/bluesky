@@ -187,14 +187,7 @@ def resolve(asas, traf):
     asas.trk = newtrack
     asas.spd = newgscapped
     asas.vs  = vscapped
-
-    # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
-    # when there is no conflict. Therefore asas alt is only updated when its
-    # value is less than the look-ahead time, because for those aircraft are in conflict
-    altCondition           = np.logical_and(timesolveV<asas.dtlookahead, np.abs(dv[2,:])>0.0)
-    asasalttemp            = asas.vs*timesolveV + traf.alt
-    asas.alt[altCondition] = asasalttemp[altCondition]
-
+    
     # Calculate if Autopilot selected altitude should be followed. This avoids ASAS from
     # climbing or descending longer than it needs to if the autopilot leveloff
     # altitude also resolves the conflict. Because ASAS.alt is calculated using
@@ -204,6 +197,13 @@ def resolve(asas, traf):
         signdvs  = np.sign(asas.vs - traf.ap.vs * np.sign(traf.apalt - traf.alt))
         signalt  = np.sign(asas.alt - traf.apalt)
         asas.alt = np.where(np.logical_or(signdvs == 0, signdvs == signalt), asas.alt, traf.apalt)
+
+    # To compute asas alt, timesolveV is used. timesolveV is a really big value (1e9)
+    # when there is no conflict. Therefore asas alt is only updated when its
+    # value is less than the look-ahead time, because for those aircraft are in conflict
+    altCondition           = np.logical_and(timesolveV<asas.dtlookahead, np.abs(dv[2,:])>0.0)
+    asasalttemp            = asas.vs*timesolveV + traf.alt
+    asas.alt[altCondition] = asasalttemp[altCondition]
 
     # If resolution is limited to the vertical direction, and PROJECT3 prio code is used,
     # then the vertical resolution is set to zero. Such conflicts will be resolved horizontally.
@@ -290,7 +290,7 @@ def MVP(traf, asas, id1, id2):
 
     # Compute the  vertical intrusion
     # Amount of vertical intrusion dependent on vertical relative velocity
-    iV = asas.dhm if abs(vrel[2])>0.0 else asas.dhm-abs(drel[2])
+    iV = asas.dhm if abs(vrel[2])>0.0 else abs(asas.dhm-abs(drel[2]))
 
     # Get the time to solve the conflict vertically - tsolveV
     tsolV = abs(drel[2]/vrel[2]) if abs(vrel[2])>0.0 else asas.tinconf[id1,id2]
@@ -305,8 +305,8 @@ def MVP(traf, asas, id1, id2):
     # Compute the resolution velocity vector in the vertical direction
     # The direction of the vertical resolution is such that the aircraft with
     # higher climb/decent rate reduces their climb/decent rate
-    dv3 = (iV/tsolV)*(-vrel[2]/abs(vrel[2])) if abs(vrel[2])>0.0 else (iV/tsolV)
-    # dv3 = (iV/tsolV)
+#    dv3 = (iV/tsolV)*(-vrel[2]/abs(vrel[2])) if abs(vrel[2])>0.0 else (iV/tsolV)
+    dv3 = (iV/tsolV)
 
 
     # It is necessary to cap dv3 to prevent that a vertical conflict
