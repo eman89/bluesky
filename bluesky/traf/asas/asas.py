@@ -90,6 +90,7 @@ class ASAS(DynamicArrays):
         # Register the following parameters for CFL logging
         with datalog.registerLogParameters('CFLLOG', self):
             self.clogid1 = []
+            self.clogspawntimeid1 = []
             self.clogtinconfid1 = []
             self.clogtoutconfid1 = []
             self.clogtcpaid1 = []
@@ -103,7 +104,12 @@ class ASAS(DynamicArrays):
             self.clogloncpaid1 = []
             self.clogaltcpaid1 = []
             self.clogasasactiveid1 = []
+            self.clogpilotaltid1 = []
+            self.clogpilottasid1 = []
+            self.clogpilotvsid1 = []
+            self.clogpilothdgid1 = []
             self.clogid2 = []
+            self.clogspawntimeid2 = []
             self.clogtinconfid2 = []
             self.clogtoutconfid2 = []
             self.clogtcpaid2 = []
@@ -117,10 +123,15 @@ class ASAS(DynamicArrays):
             self.clogloncpaid2 = []
             self.clogaltcpaid2 = []
             self.clogasasactiveid2 = []
+            self.clogpilotaltid2 = []
+            self.clogpilottasid2 = []
+            self.clogpilotvsid2 = []
+            self.clogpilothdgid2 = []
 
         # Register the following parameters for INT logging
         with datalog.registerLogParameters('INTLOG', self):
             self.ilogid1 = []
+            self.ilogspawntimeid1 = []
             self.ilogtinconfid1 = []
             self.ilogtoutconfid1 = []
             self.ilogtcpaid1 = []
@@ -131,7 +142,12 @@ class ASAS(DynamicArrays):
             self.ilogvsid1 = []
             self.iloghdgid1 = []
             self.ilogasasactiveid1 = []
+            self.ilogpilotaltid1 = []
+            self.ilogpilottasid1 = []
+            self.ilogpilotvsid1 = []
+            self.ilogpilothdgid1 = []
             self.ilogid2 = []
+            self.ilogspawntimeid2 = []
             self.ilogtinconfid2 = []
             self.ilogtoutconfid2 = []
             self.ilogtcpaid2 = []
@@ -142,13 +158,19 @@ class ASAS(DynamicArrays):
             self.ilogvsid2 = []
             self.iloghdgid2 = []
             self.ilogasasactiveid2 = []
+            self.ilogpilotaltid2 = []
+            self.ilogpilottasid2 = []
+            self.ilogpilotvsid2 = []
+            self.ilogpilothdgid2 = []
             self.ilogintsev    = []
             self.iloginthsev   = []
             self.ilogintvsev   = []
 
+
         # Register the following parameters for CFL logging
         with datalog.registerLogParameters('INSTLOG', self):
             self.instlogid1 = []
+            self.instlogspawntimeid1 = []
             self.instlogtinconfid1 = []
             self.instlogtoutconfid1 = []
             self.instlogtcpaid1 = []
@@ -162,7 +184,12 @@ class ASAS(DynamicArrays):
             self.instlogloncpaid1 = []
             self.instlogaltcpaid1 = []
             self.instlogasasactiveid1 = []
+            self.instlogpilotaltid1 = []
+            self.instlogpilottasid1 = []
+            self.instlogpilotvsid1 = []
+            self.instlogpilothdgid1 = []
             self.instlogid2 = []
+            self.instlogspawntimeid2 = []
             self.instlogtinconfid2 = []
             self.instlogtoutconfid2 = []
             self.instlogtcpaid2 = []
@@ -176,6 +203,10 @@ class ASAS(DynamicArrays):
             self.instlogloncpaid2 = []
             self.instlogaltcpaid2 = []
             self.instlogasasactiveid2 = []
+            self.instlogpilotaltid2 = []
+            self.instlogpilottasid2 = []
+            self.instlogpilotvsid2 = []
+            self.instlogpilothdgid2 = []
 
         # All ASAS variables are initialized in the reset function
         self.reset()

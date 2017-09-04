@@ -140,6 +140,7 @@ def flstHeader():
 def cflHeader():
   parameters = "Simulation Time [s], " + \
                "Call sign id1 [-], " + \
+               "Spawn time id1 [s], " + \
                "tinconf id1  [s], " + \
                "toutconf id1 [s], " + \
                "tcpa id1 [s], " + \
@@ -153,7 +154,12 @@ def cflHeader():
                "Longitude cpa id1 [deg], " + \
                "Altitude cpa id1 [m], " + \
                "ASAS active id1 [bool], " + \
+               "Pilot ALT id1 [m], " + \
+               "Pilot SPD id1 (TAS) [m/s], " + \
+               "Pilot VS id1 [m/s], "  + \
+               "Pilot HDG id1 [deg], " + \
                "Call sign id2 [-], " + \
+               "Spawn time id2 [s], " + \
                "tinconf id2 [s], " + \
                "toutconf id2 [s], " + \
                "tcpa id2 [s], " + \
@@ -166,7 +172,12 @@ def cflHeader():
                "Latitude cpa id2 [deg], " + \
                "Longitude cpa id2 [deg], " + \
                "Altitude cpa id2 [m], " + \
-               "ASAS active id2 [bool]"
+               "ASAS active id2 [bool], " + \
+               "Pilot ALT id2 [m], " + \
+               "Pilot SPD id2 (TAS) [m/s], " + \
+               "Pilot VS id2 [m/s], " + \
+               "Pilot HDG id2 [deg]" + \
+               
 
   lines      = "#######################################################\n" + \
                "CFL LOG\n" + \
@@ -182,6 +193,7 @@ def cflHeader():
 def instHeader():
   parameters = "Simulation Time [s], " + \
                "Call sign id1 [-], " + \
+               "Spawn time id1 [s], " + \
                "tinconf id1  [s], " + \
                "toutconf id1 [s], " + \
                "tcpa id1 [s], " + \
@@ -195,7 +207,12 @@ def instHeader():
                "Longitude cpa id1 [deg], " + \
                "Altitude cpa id1 [m], " + \
                "ASAS active id1 [bool], " + \
+               "Pilot ALT id1 [m], " + \
+               "Pilot SPD id1 (TAS) [m/s], " + \
+               "Pilot VS id1 [m/s], "  + \
+               "Pilot HDG id1 [deg], " + \
                "Call sign id2 [-], " + \
+               "Spawn time id2 [s], " + \
                "tinconf id2 [s], " + \
                "toutconf id2 [s], " + \
                "tcpa id2 [s], " + \
@@ -208,7 +225,12 @@ def instHeader():
                "Latitude cpa id2 [deg], " + \
                "Longitude cpa id2 [deg], " + \
                "Altitude cpa id2 [m], " + \
-               "ASAS active id2 [bool]"
+               "ASAS active id2 [bool], " + \
+               "Pilot ALT id2 [m], " + \
+               "Pilot SPD id2 (TAS) [m/s], " + \
+               "Pilot VS id2 [m/s], " + \
+               "Pilot HDG id2 [deg]"
+               
 
   lines      = "#######################################################\n" + \
                "INST LOG\n" + \
@@ -224,6 +246,7 @@ def instHeader():
 def intHeader():
   parameters = "Simulation Time [s], " + \
                "Call sign id1 [-], " + \
+               "Spawn time id1 [s], " + \
                "tinconf id1  [s], " + \
                "toutconf id1 [s], " + \
                "tcpa id1 [s], " + \
@@ -234,7 +257,12 @@ def intHeader():
                "Vertical speed id1  [m/s], " + \
                "Heading id1 [deg], " + \
                "ASAS active id1 [bool], " + \
+               "Pilot ALT id1 [m], " + \
+               "Pilot SPD id1 (TAS) [m/s], " + \
+               "Pilot VS id1 [m/s], "  + \
+               "Pilot HDG id1 [deg], " + \
                "Call sign id2 [-], " + \
+               "Spawn time id2 [s], " + \
                "tinconf id2 [s], " + \
                "toutconf id2 [s], " + \
                "tcpa id2 [s], " + \
@@ -245,6 +273,10 @@ def intHeader():
                "Vertical speed id2 [m/s], " + \
                "Heading id2 [deg], " + \
                "ASAS active id2 [bool], " + \
+               "Pilot ALT id2 [m], " + \
+               "Pilot SPD id2 (TAS) [m/s], " + \
+               "Pilot VS id2 [m/s], " + \
+               "Pilot HDG id2 [deg]" + \
                "Max Intrusion Severity [-], " + \
                "Horiz Intrusion at Max IS [-], " + \
                "Vert Intrusion at Max IS [-]"
