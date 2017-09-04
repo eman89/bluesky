@@ -145,7 +145,7 @@ def asasLogUpdate(asas, traf):
         asas.clogasasaltid1 = asas.alt[asas.clogi]
         asas.clogasastasid1 = asas.spd[asas.clogi]
         asas.clogasasvsid1 = asas.vs[asas.clogi]
-        asas.clogasashdgid1 = asas.hdg[asas.clogi]
+        asas.clogasashdgid1 = asas.trk[asas.clogi]
 
         # Update the variables belonging to id2
         asas.clogspawntimeid2 = traf.spawnTime[asas.clogj]
@@ -162,7 +162,7 @@ def asasLogUpdate(asas, traf):
         asas.clogasasaltid2 = asas.alt[asas.clogj]
         asas.clogasastasid2 = asas.spd[asas.clogj]
         asas.clogasasvsid2 = asas.vs[asas.clogj]
-        asas.clogasashdgid2 = asas.hdg[asas.clogj]
+        asas.clogasashdgid2 = asas.trk[asas.clogj]
         
         # Finally, call the logger
         asas.cfllog.log()
@@ -223,7 +223,7 @@ def asasLogUpdate(asas, traf):
         asas.instlogasasaltid1 = asas.alt[asas.instlogi]
         asas.instlogasastasid1 = asas.spd[asas.instlogi]
         asas.instlogasasvsid1 = asas.vs[asas.instlogi]
-        asas.instlogasashdgid1 = asas.hdg[asas.instlogi]
+        asas.instlogasashdgid1 = asas.trk[asas.instlogi]
 
         # Update the variables belonging to id2
         asas.instlogspawntimeid2 = traf.spawnTime[asas.instlogj]
@@ -240,7 +240,7 @@ def asasLogUpdate(asas, traf):
         asas.instlogasasaltid2 = asas.alt[asas.instlogj]
         asas.instlogasastasid2 = asas.spd[asas.instlogj]
         asas.instlogasasvsid2 = asas.vs[asas.instlogj]
-        asas.instlogasashdgid2 = asas.hdg[asas.instlogj]    
+        asas.instlogasashdgid2 = asas.trk[asas.instlogj]    
     
     # INSTLOG END -------------------------------------------------------------
 
@@ -305,7 +305,7 @@ def asasLogUpdate(asas, traf):
         asas.ilogasasaltid1 = np.where(id1exists,asas.alt[asas.ilogi], Fail)
         asas.ilogasastasid1 = np.where(id1exists,asas.spd[asas.ilogi], Fail)
         asas.ilogasasvsid1 = np.where(id1exists,asas.vs[asas.ilogi], Fail)
-        asas.ilogasashdgid1 = np.where(id1exists,asas.hdg[asas.ilogi], Fail)
+        asas.ilogasashdgid1 = np.where(id1exists,asas.trk[asas.ilogi], Fail)
         
         # Update the variables belonging to id2
         asas.ilogspawntimeid2 = np.where(id2exists, traf.spawnTime[asas.ilogj], Fail)
@@ -322,7 +322,7 @@ def asasLogUpdate(asas, traf):
         asas.ilogasasaltid2 = np.where(id2exists,asas.alt[asas.ilogj], Fail)
         asas.ilogasastasid2 = np.where(id2exists,asas.spd[asas.ilogj], Fail)
         asas.ilogasasvsid2 = np.where(id2exists,asas.vs[asas.ilogj], Fail)
-        asas.ilogasashdgid2 = np.where(id2exists,asas.hdg[asas.ilogj], Fail)
+        asas.ilogasashdgid2 = np.where(id2exists,asas.trk[asas.ilogj], Fail)
         
         # Finally, call the logger
         asas.intlog.log()

@@ -458,7 +458,7 @@ class Traffic(DynamicArrays):
         # Turning
         turnrate = np.degrees(g0 * np.tan(self.bank) / np.maximum(self.tas, self.eps))
         delhdg   = (self.pilot.hdg - self.hdg + 180.) % 360 - 180.  # [deg]
-        self.hdgsel = np.abs(delhdg) > np.abs(1. * simdt * turnrate)
+        self.hdgsel = np.abs(delhdg) > np.abs(0.5 * simdt * turnrate)
 
         # Update heading
         self.hdg = (self.hdg + simdt * turnrate * self.hdgsel * np.sign(delhdg)) % 360.
