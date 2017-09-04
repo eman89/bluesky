@@ -306,8 +306,14 @@ def MVP(traf, asas, id1, id2):
     # The direction of the vertical resolution is such that the aircraft with
     # higher climb/decent rate reduces their climb/decent rate
 #    dv3 = (iV/tsolV)*(-vrel[2]/abs(vrel[2])) if abs(vrel[2])>0.0 else (iV/tsolV)
-    dv3 = (iV/tsolV)
-
+#    dv3 = (iV/tsolV)
+    if abs(vrel[2])>0.0:
+        dv3 = (iV/tsolV)*(-vrel[2]/abs(vrel[2]))
+    else: # Then check who is above. The ac above should climb, and the ac below should descend
+        if drel[2]<0.0:
+            dv3 = -(iV/tsolV)
+        else:
+            dv3 = iV/tsolV       
 
     # It is necessary to cap dv3 to prevent that a vertical conflict
     # is solved in 1 timestep, leading to a vertical separation that is too
