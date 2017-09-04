@@ -42,9 +42,10 @@ class ASAS(DynamicArrays):
         asas.CRmethods[name] = module
 
     def __init__(self, traf):
-    
+
         self.traf = traf
-        
+        self.simt = 0.0
+
         with RegisterElementParameters(self):
             # ASAS info per aircraft:
             self.iconf    = []            # index in 'conflicting' aircraft database
@@ -53,39 +54,39 @@ class ASAS(DynamicArrays):
             self.spd      = np.array([])  # speed provided by the ASAS (tas) [m/s]
             self.alt      = np.array([])  # speed alt by the ASAS [m]
             self.vs       = np.array([])  # speed vspeed by the ASAS [m/s]
-            
+
             # Register the following parameters for SNAP logging
             with datalog.registerLogParameters('SNAPLOG', self):
                 self.active   = np.array([], dtype=bool)  # whether the autopilot follows ASAS or not
-            
+
         # Create event based ASAS loggers
         self.cfllog = datalog.defineLogger("CFLLOG", logHeader.cflHeader())
         self.intlog = datalog.defineLogger("INTLOG", logHeader.intHeader())
-        
+
         # Create periodic ASAS loggers
         datalog.definePeriodicLogger('INSTLOG', logHeader.instHeader(), settings.instdt)
-        
+
         # Register the following parameters for SKY logging
         with datalog.registerLogParameters('SKYLOG', self):
             self.ncfl = 0
             self.ncflCruising = 0
             self.ncflCruisingVS = 0
             self.ncflVS = 0
-        
+
 #        # Register the following parameters for SModel logging
 #        with datalog.registerLogParameters('SMODELLOG', self):
 #            self.smodncfl = 0
 #            self.smodncflCruising = 0
 #            self.smodncflCruisingVS = 0
 #            self.smodncflVS = 0
-#        
+#
 #        # Register the following parameters for CModel logging
 #        with datalog.registerLogParameters('CMODELLOG', self):
 #            self.cmodncfl = 0
 #            self.cmodncflCruising = 0
 #            self.cmodncflCruisingVS = 0
 #            self.cmodncflVS = 0
-        
+
         # Register the following parameters for CFL logging
         with datalog.registerLogParameters('CFLLOG', self):
             self.clogid1 = []
@@ -116,7 +117,7 @@ class ASAS(DynamicArrays):
             self.clogloncpaid2 = []
             self.clogaltcpaid2 = []
             self.clogasasactiveid2 = []
-        
+
         # Register the following parameters for INT logging
         with datalog.registerLogParameters('INTLOG', self):
             self.ilogid1 = []
@@ -175,7 +176,7 @@ class ASAS(DynamicArrays):
             self.instlogloncpaid2 = []
             self.instlogaltcpaid2 = []
             self.instlogasasactiveid2 = []
-        
+
         # All ASAS variables are initialized in the reset function
         self.reset()
 
@@ -220,18 +221,18 @@ class ASAS(DynamicArrays):
 
         self.resoFacH     = 1.0                        # [-] set horizontal resolution factor (1.0 = 100%)
         self.resoFacV     = 1.0                        # [-] set horizontal resolution factor (1.0 = 100%)
-        
+
         self.swconfareafilt  = False                   # [-] swtich to activate the CONFAREAFILT command. This conflict filter is area based.
-        self.areafiltercode  = None                    # [-] Code for the conflict area filter that should be used (OPTION1, OPTION2, OPTION3, OPTION4, OPTION5) 
-        self.areafiltershape = None                    # [-] Name of shape where area conflict filter is active 
-        
+        self.areafiltercode  = None                    # [-] Code for the conflict area filter that should be used (OPTION1, OPTION2, OPTION3, OPTION4, OPTION5)
+        self.areafiltershape = None                    # [-] Name of shape where area conflict filter is active
+
         self.swspawncheck     = False                  # [-] switch to activate the RESOSPAWNCHECK command. This command prevents aircraft spawned in very short term conflicts and in intrusions from perfroming conflict resolutions.
-        self.spawncheckfactor = 1.0                    # [-] factor that is multiplied with the look-ahead-time to determine what constitutes a 'very short term conflcit' 
-        
+        self.spawncheckfactor = 1.0                    # [-] factor that is multiplied with the look-ahead-time to determine what constitutes a 'very short term conflcit'
+
         self.swconfdef = False                         # [-] switch to activate the CONFDEF command. This command activates the alterante conflict definition (intrusion is not a conflict)
-        
+
         self.swafterconfalt = False                    # [-] if True, altitude not recovered after conflict resolution for cruising aircraft with waypoints
-        
+
         self.nconf        = 0                          # Number of detected conflicts
         self.latowncpa    = np.array([])
         self.lonowncpa    = np.array([])
@@ -240,24 +241,24 @@ class ASAS(DynamicArrays):
         self.confpairs               = []  # Start with emtpy database: no conflicts
         self.conflist_active         = []  # List of all Conflicts that are still active (not past CPA). Conflict deleted from this list once past CPA
         self.LOSlist_active          = []  # List of all Losses Of Separation that are still active (LOS still on-going). LOS deleted from this list when it is over.
-        self.conflist_now            = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts. 
+        self.conflist_now            = []  # List of Conflicts detected in the current ASAS cycle. Used to resolve conflicts.
         self.LOSlist_now             = []  # List of Losses Of Separations in the current ASAS cycle.
-        self.LOSlist_logged          = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once. 
-        self.conflist_resospawncheck = []  # List of conflicts that have met the Reso Spawn Check command conditions. These conflicts will not be solved even if CR is on. 
-        
-        self.nconf_total             = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI. 
+        self.LOSlist_logged          = []  # List of all LOS that have been logged. LOS logged only at max severity. Needed to ensure that a LOS is logged only once.
+        self.conflist_resospawncheck = []  # List of conflicts that have met the Reso Spawn Check command conditions. These conflicts will not be solved even if CR is on.
+
+        self.nconf_total             = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI.
         self.nLOS_total              = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
-        
+
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
         self.LOShmaxsev   = []
         self.LOSvmaxsev   = []
-        
+
         # Reset Sky log asas parameters
         self.ncfl = 0
         self.ncflCruising = 0
         self.ncflCruisingVS = 0
-        self.ncflVS = 0 
+        self.ncflVS = 0
 
     def toggle(self, flag=None):
         if flag is None:
@@ -473,10 +474,10 @@ class ASAS(DynamicArrays):
 
         # active the switch, if there are acids in the list
         self.swresooff = len(self.resoofflst) > 0
-    
+
     def SetConfAreaFilter(self, flag=None, filtercode=None, shapename=None):
         '''Set the conflict-area-filter switch, the type of filter, and the shape where it should act'''
-        options = ["OPTION1","OPTION2","OPTION3", "OPTION4", "OPTION5"]       
+        options = ["OPTION1","OPTION2","OPTION3", "OPTION4", "OPTION5"]
         if flag is None and filtercode is None and shapename is None:
             return True , "CONFAREAFILTER ON/OFF, FILTERCODE, SHAPENAME" + \
                           "\nAvialable filter codes:" + \
@@ -487,7 +488,7 @@ class ASAS(DynamicArrays):
                           "\n     OPTION5: CPA or 1 aircraft in conflict pair in shapename" + \
                           "\nConflictAreaFilter is currently " + ("ON" if self.swconfareafilt else "OFF") + \
                           "\nFiltercode is currently " + str(self.areafiltercode) + \
-                          "\nShapename  is currently " + str(self.areafiltershape)         
+                          "\nShapename  is currently " + str(self.areafiltershape)
         if not flag:
             self.swconfareafilt  = flag
             self.areafiltercode  = None
@@ -495,23 +496,23 @@ class ASAS(DynamicArrays):
             return True
         else:
             if filtercode not in options:
-                return False, "Filter code not understood. Available Options: " + str(options) 
+                return False, "Filter code not understood. Available Options: " + str(options)
             elif shapename not in areafilter.areas:
                 return False, "Shape does not exist (please create shape first) or incorrectly spelt."
             self.swconfareafilt  = flag
             self.areafiltercode  = filtercode
-            self.areafiltershape = shapename 
+            self.areafiltershape = shapename
             return True
-        
+
     def SetResoSpawnCheck(self, flag=None, factor=None):
-        '''Set the reso-spawn-check flag and factor. 
+        '''Set the reso-spawn-check flag and factor.
         Reso-spawn-check prevents aircraft that are just spawned
-        in a very short term conflict (determined by the factor argument), or 
-        spawned in an intrusion, from performing a resolution. This is good from 
-        a resolution stabilty point of view. These conflicts/intrusions will 
-        continue to be logged, but not resolved. 
+        in a very short term conflict (determined by the factor argument), or
+        spawned in an intrusion, from performing a resolution. This is good from
+        a resolution stabilty point of view. These conflicts/intrusions will
+        continue to be logged, but not resolved.
         '''
-        if flag is None and factor is None: 
+        if flag is None and factor is None:
             return True, "RESOSPAWNCHECK ON/OFF, [LOOK_AHEAD_TIME_FACTOR (>0)]" + \
                          "\nRESOSPAWNCHECK is currently " + ("ON" if self.swspawncheck else "OFF") + \
                          "\nLOOK_AHEAD_TIME_FACTOR is currently " + str(self.spawncheckfactor)
@@ -530,53 +531,53 @@ class ASAS(DynamicArrays):
                 return True, "RESOSPAWNCHECK activated. LOOK_AHEAD_TIME_FACTOR equals " + str(self.spawncheckfactor)
             else:
                 return False, "LOOK_AHEAD_TIME_FACTOR not understood. Check syntax!"
-                
+
     def ConfAreaFilter(self, traf, ownidx, intidx):
-        '''Checks if the conflict between ownship and intruder matches the 
+        '''Checks if the conflict between ownship and intruder matches the
         Conflict-Area-Filter settings'''
-        
-        # Determine CPA for ownship 
+
+        # Determine CPA for ownship
         rngo       = self.tcpa[ownidx,intidx] * traf.gs[ownidx] / nm
         lato, lono = geo.qdrpos(traf.lat[ownidx], traf.lon[ownidx], traf.trk[ownidx], rngo)
         alto       = traf.alt[ownidx] + self.tcpa[ownidx,intidx] * traf.vs[ownidx]
-        
-        # Determine CPA for intruder 
+
+        # Determine CPA for intruder
         rngi       = self.tcpa[intidx,ownidx] * traf.gs[intidx] / nm
         lati, loni = geo.qdrpos(traf.lat[intidx], traf.lon[intidx], traf.trk[intidx], rngi)
-        alti       = traf.alt[intidx] + self.tcpa[intidx,ownidx] * traf.vs[intidx]        
+        alti       = traf.alt[intidx] + self.tcpa[intidx,ownidx] * traf.vs[intidx]
 
         # Check if CPAs are inside selected shape
         cpainsideo = areafilter.checkInside(self.areafiltershape, lato, lono, alto)
         cpainsidei = areafilter.checkInside(self.areafiltershape, lati, loni, alti)
-    
-        # OPTION1: CPA inside selected shape 
-        if self.areafiltercode == "OPTION1":            
+
+        # OPTION1: CPA inside selected shape
+        if self.areafiltercode == "OPTION1":
             inarea = np.where(np.logical_and(cpainsidei,cpainsideo))
-            
+
         # OPTION2: CPA and 1 aircraft inside selected shape
         elif self.areafiltercode == "OPTION2":
             acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
             acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
             inarea    = np.where(np.logical_and(np.logical_and(cpainsidei,cpainsideo), np.logical_or(acinsideo,acinsidei)))
-            
+
         # OPTION3: CPA and both aircraft inside selected shape
         elif self.areafiltercode == "OPTION3":
             acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
             acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
             inarea    = np.where(np.logical_and(np.logical_and(cpainsidei,cpainsideo), np.logical_and(acinsideo,acinsidei)))
-        
+
         # OPTION4: Both aircraft inside selected shape
         elif self.areafiltercode == "OPTION4":
             acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
             acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
             inarea    = np.where(np.logical_and(acinsideo,acinsidei))
-        
+
         # OPTION5: CPA OR 1 aircraft inside selected shape
         elif self.areafiltercode == "OPTION5":
             acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
             acinsidei = areafilter.checkInside(self.areafiltershape, traf.lat[intidx], traf.lon[intidx], traf.alt[intidx])
             inarea    = np.where(np.logical_or(np.logical_or(cpainsidei,cpainsideo), np.logical_or(acinsideo,acinsidei)))
-            
+
         # OPTION6: One aircraft inside selected shape
         elif self.areafiltercode == "OPTION6":
             acinsideo = areafilter.checkInside(self.areafiltershape, traf.lat[ownidx], traf.lon[ownidx], traf.alt[ownidx])
@@ -589,19 +590,19 @@ class ASAS(DynamicArrays):
         rngo   = rngo[inarea]
         lato   = lato[inarea]
         lono   = lono[inarea]
-        alto   = alto[inarea] 
-        
+        alto   = alto[inarea]
+
         return ownidx, intidx, rngo, lato, lono, alto
-    
+
     def APorASAS(self):
-        """ Decide for each aircraft in the active conflict list whether the 
-        ASAS commands should be followed or not, based on if the conflcit pairs 
+        """ Decide for each aircraft in the active conflict list whether the
+        ASAS commands should be followed or not, based on if the conflcit pairs
         passed their CPA. """
-        
+
         # first assume that asas should be turned off. Do the below computations
         # and turn it back on if conflict is not past CPA
         self.active.fill(False)
-    
+
         # Look at all conflicts, also the ones that are solved but CPA is yet to come
         for conflict in self.conflist_active[:]:
             ac1      = conflict[0]
@@ -610,41 +611,41 @@ class ASAS(DynamicArrays):
             if id1 >= 0 and id2 >= 0:
                 # Check if conflict is past CPA
                 d = np.array([self.traf.lon[id2] - self.traf.lon[id1], self.traf.lat[id2] - self.traf.lat[id1]])
-    
+
                 # write velocities as vectors
                 v1 = np.array([self.traf.gseast[id1], self.traf.gsnorth[id1]])
                 v2 = np.array([self.traf.gseast[id2], self.traf.gsnorth[id2]])
-                
+
                 # Compute pastCPA
                 pastCPA = np.dot(d,v2-v1)>0.
-                
+
                 # hLOS:
-                # Aircraft should continue to resolve until there is no horizontal 
+                # Aircraft should continue to resolve until there is no horizontal
                 # LOS. This is particularly relevant when vertical resolutions
-                # are used. 
+                # are used.
                 dx     = (self.traf.lat[id1] - self.traf.lat[id2]) * 111319.
                 dy     = (self.traf.lon[id1] - self.traf.lon[id2]) * 111319.
                 hdist2 = dx**2 + dy**2
                 hLOS   = hdist2 < self.R**2
 
                 # Bouncing conflicts:
-                # If two aircraft are getting in and out of conflict continously, 
-                # then it is a bouncing conflict. ASAS should stay active until 
+                # If two aircraft are getting in and out of conflict continously,
+                # then it is a bouncing conflict. ASAS should stay active until
                 # the bouncing stops.
-                bouncingConflict = (abs(self.traf.trk[id1] - self.traf.trk[id2]) < 15.) & (hdist2<self.Rm**2)         
-                
-                # Decide if conflict is over or not. 
-                # If not over, turn active to true. 
+                bouncingConflict = (abs(self.traf.trk[id1] - self.traf.trk[id2]) < 15.) & (hdist2<self.Rm**2)
+
+                # Decide if conflict is over or not.
+                # If not over, turn active to true.
                 # If over, then initiate recovery
                 if not pastCPA or hLOS or bouncingConflict:
                     # Aircraft haven't passed their CPA: must follow their ASAS
                     self.active[id1] = True
                     self.active[id2] = True
-                
+
                 else:
                     # Waypoint recovery after conflict
-                    # Find the next active waypoint and send the aircraft to that 
-                    # waypoint.             
+                    # Find the next active waypoint and send the aircraft to that
+                    # waypoint.
                     iwpid1 = self.traf.ap.route[id1].findact(self.traf,id1)
                     if iwpid1 != -1: # To avoid problems if there are no waypoints
                         self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
@@ -673,16 +674,16 @@ class ASAS(DynamicArrays):
                                         # recompte flight plan and compute VNAV so that dist2vs
                                         self.traf.ap.route[id2].calcfp()
                                         self.traf.ap.ComputeVNAV(id2, self.traf.ap.route[id2].wptoalt[iwpid2], self.traf.ap.route[id2].wpxtoalt[iwpid2])
-                    
+
                     # If conflict is solved, remove it from conflist_active list
-                    # This is so that if a conflict between this pair of aircraft 
+                    # This is so that if a conflict between this pair of aircraft
                     # occurs again, then that new conflict should be detected, logged
-                    # and solved (if reso is on). The conflict should also be removed 
+                    # and solved (if reso is on). The conflict should also be removed
                     # from conflist_resospwancheck list.
                     self.conflist_active.remove(conflict)
                     if conflict in self.conflist_resospawncheck:
                         self.conflist_resospawncheck.remove(conflict)
-            
+
             # If aircraft id1 cannot be found in traffic because it has finished its
             # flight (and has been deleted), start trajectory recovery for aircraft id2
             # And remove the conflict from the conflist_active list
@@ -701,14 +702,14 @@ class ASAS(DynamicArrays):
                                     # recompte flight plan and compute VNAV so that dist2vs
                                     self.traf.ap.route[id2].calcfp()
                                     self.traf.ap.ComputeVNAV(id2, self.traf.ap.route[id2].wptoalt[iwpid2], self.traf.ap.route[id2].wpxtoalt[iwpid2])
-                 # also remove from active list and resospawn check       
+                 # also remove from active list and resospawn check
                  self.conflist_active.remove(conflict)
                  if conflict in self.conflist_resospawncheck:
                         self.conflist_resospawncheck.remove(conflict)
-    
+
             # If aircraft id2 cannot be found in traffic because it has finished its
             # flight (and has been deleted) start trajectory recovery for aircraft id1
-            # And remove the conflict from the conflist_active list 
+            # And remove the conflict from the conflist_active list
             elif id2 < 0 and id1 >= 0:
                 iwpid1 = self.traf.ap.route[id1].findact(self.traf,id1)
                 if iwpid1 != -1: # To avoid problems if there are no waypoints
@@ -724,18 +725,18 @@ class ASAS(DynamicArrays):
                                     # recompte flight plan and compute VNAV so that dist2vs
                                     self.traf.ap.route[id1].calcfp()
                                     self.traf.ap.ComputeVNAV(id1, self.traf.ap.route[id1].wptoalt[iwpid1], self.traf.ap.route[id1].wpxtoalt[iwpid1])
-                # also remove from active list and resospawn check                     
+                # also remove from active list and resospawn check
                 self.conflist_active.remove(conflict)
                 if conflict in self.conflist_resospawncheck:
                         self.conflist_resospawncheck.remove(conflict)
-            
+
             # if both ids are unknown, then delete this conflict, because both aircraft
-            # have completed their flights (and have been deleted) 
+            # have completed their flights (and have been deleted)
             else:
                 self.conflist_active.remove(conflict)
                 if conflict in self.conflist_resospawncheck:
                         self.conflist_resospawncheck.remove(conflict)
-    
+
     def setConflictDefinition(self, flag=None):
         ''' Activates the alternate conflict definition (intrusion is not a conflict)
             This means that when tinconf < 0, and the conflict turns into a intrusion,
@@ -744,7 +745,7 @@ class ASAS(DynamicArrays):
             return True, "CONFDEF is currently " + ("ON" if self.swconfdef else "OFF")
         self.swconfdef = flag
         return True, "CONFDEF is " + ("ON" if self.swconfdef else "OFF")
-        
+
     def setAfterConfAlt(self, flag=None):
         ''' If switched on, altitude not recovered for cruising aircraft with waypoints  '''
         if flag is None:
@@ -761,21 +762,22 @@ class ASAS(DynamicArrays):
         self.alt[-1] = self.traf.alt[-1]
 
     def update(self, simt):
+        self.simt = simt
         iconf0 = np.array(self.iconf)
 
         # Scheduling: update when dt has passed
         if self.swasas and simt >= self.tasas:
             self.tasas += self.dtasas
-            
+
             # Conflict detection
             self.cd.detect(self, self.traf, simt)
-            
-            # Is conflict active? 
+
+            # Is conflict active?
             self.APorASAS()
-            
+
             # Conflict resolution
             self.cr.resolve(self, self.traf)
-            
+
             # Update ASAS log variables
             asasLogUpdate(self, self.traf)
 
