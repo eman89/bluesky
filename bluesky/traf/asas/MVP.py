@@ -204,7 +204,12 @@ def resolve(asas, traf):
     altCondition           = np.logical_and(timesolveV<asas.dtlookahead, np.abs(dv[2,:])>0.0)
     asasalttemp            = asas.vs*timesolveV + traf.alt
     asas.alt[altCondition] = asasalttemp[altCondition]
-
+    
+    # Prevent ASAS from sending an aircraft to 0ft. if that happens, make a/c fly with ap alt
+    # but with the change in v/s that will solve the conflict
+    asas.alt = np.where(asas.alt<=0.0, traf.apalt, asas.alt)
+    
+    
     # If resolution is limited to the vertical direction, and PROJECT3 prio code is used,
     # then the vertical resolution is set to zero. Such conflicts will be resolved horizontally.
     # Therefore, since ASAS is still active for such aircraft, they should fly with their auto pilot altitudes
@@ -413,6 +418,13 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
             dv1       = dv1 - dv_mvp
             dv2       = dv2 + dv_mvp
         else: # both solve with combined resolutions in the normal way, just like FF2
+            dv_mvp[2] = dv_mvp[2]/2.0
+            dv1 = dv1 - dv_mvp
+            dv2 = dv2 + dv_mvp
+    
+    # 1000FT: Dont resolve if both aircraft are below 1000FT
+    elif priocode == "1000FT":
+        if traf.alt[id1] > 1000.0*ft and traf.alt[id2] > 1000.0*ft:
             dv_mvp[2] = dv_mvp[2]/2.0
             dv1 = dv1 - dv_mvp
             dv2 = dv2 + dv_mvp
