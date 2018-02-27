@@ -1,0 +1,71 @@
+# BlueSky Settings for Project 4
+# L360-DoubleSep-ONh-Coop
+# Area Definitions are 'PCALL'ed from areaDefinition.scn
+
+# Display Settings:
+00:00:00.00>PAN 0.0 0.0
+00:00:00.00>ZOOM 0.07
+00:00:00.00>SYMBOL
+
+# Simulation Speed Settings:
+00:00:00.00>DT 0.05
+00:00:00.00>FF
+
+# Steepness:
+00:00:00.00>STEEPNESS 3000.0
+
+# Conflict Detection and Resolution:
+00:00:00.00>ASAS ON
+00:00:00.00>RESO MVP
+
+# Conflict Resolution Direction (Both off->horiz+vert):
+00:00:00.00>RMETHH ON
+00:00:00.00>RMETHV OFF
+
+# Look Ahead Time
+00:00:00.00>DTLOOK 300.0
+00:00:00.00>DTNOLOOK 1.0
+
+# Separation Minima
+00:00:00.00>ZONER 5.0
+00:00:00.00>ZONEDH 1000.0
+00:00:00.00>RSZONER 5.5
+00:00:00.00>RSZONEDH 1100.0
+
+# Additional ASAS settings:
+00:00:00.00>CONFDEF ON
+00:00:00.00>PRIORULES OFF
+
+# Airspace Concept
+00:00:00.00>CONCEPT L360 4000 1100 8
+
+# After LNAV 
+00:00:00.00>AFTERLNAVTRK ON CURRENT
+
+# Switch On Flight Stats Log:
+00:00:00.00>FLSTLOG ON
+
+# Switch On Snapshot Log:
+00:00:00.00>SNAPLOG ON 15
+
+# Switch On Conflict and Intrusion Logs:
+00:00:00.00>CFLLOG ON
+00:00:00.00>INTLOG ON
+00:00:00.00>INSTLOG ON 15
+
+# Switch ON Summary Logs:
+00:00:00.00>SKYLOG ON 15
+
+# Switch Off Snapshot Log:
+04:00:00.00>SNAPLOG OFF
+
+# Switch Off Conflict and Intrusion Logs:
+04:00:00.00>CFLLOG OFF
+04:00:00.00>INTLOG OFF
+04:00:00.00>INSTLOG OFF
+
+# Switch Off Summary Logs:
+04:00:00.00>SKYLOG OFF
+
+# Switch Off Flight Stats Log:
+04:55:00.00>FLSTLOG OFF
