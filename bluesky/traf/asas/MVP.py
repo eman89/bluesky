@@ -377,7 +377,7 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
             dv2       = dv2 + dv_mvp
 
     # Primary Layers (Cruising aircraft has priority and clmibing/descending solves. All conflicts solved horizontally)
-    elif priocode == "LAY1":
+    elif priocode == "LAY1" or priocode == "CRUISE":
         dv_mvp[2] = 0.0
         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 2 solves conflict horizontally
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
@@ -390,7 +390,7 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
             dv2 = dv2 + dv_mvp
 
     # Secondary Layers (Climbing/descending aircraft has priority and cruising solves. All conflicts solved horizontally)
-    elif priocode ==  "LAY2":
+    elif priocode ==  "LAY2" or priocode == "CLIMB":
         dv_mvp[2] = 0.0
         # If aircraft 1 is cruising, and aircraft 2 is climbing/descending -> aircraft 1 solves conflict horizontally
         if abs(traf.vs[id1])<0.1 and abs(traf.vs[id2]) > 0.1:
