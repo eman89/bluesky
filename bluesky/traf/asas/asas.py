@@ -814,6 +814,7 @@ class ASAS(DynamicArrays):
         
         # compute the bearing and the distance to the destination
         qdr2Dest, dist2Dest = geo.qdrdist(self.traf.lat[idx], self.traf.lon[idx], destlat, destlon)  # [deg][nm])
+        qdr2Dest = qdr2Dest%360.0
         
         # compute distance ratio
         distanceRatio = (distanceAC-self.minDist)/(self.maxDist-self.minDist)
