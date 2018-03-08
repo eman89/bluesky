@@ -231,6 +231,12 @@ def init(sim, traf, scr):
             lambda name, *coords: areafilter.defineArea(scr, name, 'CIRCLE', coords),
             "Define a circle-shaped area"
         ],
+        "CONCEPT": [
+            "CONCEPT [conceptcode, minCruiseAlt, layerHeight, numLayers, minDist, maxDist, margin]",
+            "[txt, float, float, int, float, float, onoff]",
+            traf.asas.setAirspaceConcept,
+            "Set the airspace concept needed for proper trajectory recovery"
+        ],
         "CONFAREAFILTER": [
             "CONFAREAFILTER [ON/OFF, filtercode, shapename]",
             "[onoff, txt, txt]",

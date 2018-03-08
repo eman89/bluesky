@@ -279,6 +279,18 @@ class ASAS(DynamicArrays):
 
         self.nconf_total             = 0   # Number of all conflicts since the simulation has started. Used for display on the GUI.
         self.nLOS_total              = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
+        
+        self.conceptcode    = "UA"                     # Concept code. Anything can be typed here. Corresponding logic will only for UA and layered airspaces. UA = Unstructured airspace. L45 =  layers 45.   
+        self.minCruiseAlt   = 4000.0                   # Minimum cruising altitude [ft]
+        self.layerHeight    = self.dhm + 50.0          # Vertical spacing between layers [ft] 
+        self.numLayers      = 8.0                      # Number of layers / flight levels for cruising aircraft
+        self.minDist        = 200.0                    # Minimum flight distance of aircraft in sector of interest [NM]
+        self.maxDist        = 250.0                    # Maximum flight distance of aircraft in sector of interest [NM]
+        self.recoveryMargin = False                    # Should minor heading differences be excused for layers concept?
+        self.alpha          = 360.0                    # heading range allowed per layer. Only makes sense for layered airspaces [deg] 
+        self.numLayerSets   = 8.0                      # Number of layer sets. Default value is 8 (this assumes alpha=360.0, numLayers=8.0) [-]
+        self.numFLin1Set    = 1.0                      # Number of flight levels/layers in 1 layer set. Default value is 1.0 (this assumes alpha=360.0) [-]
+        self.maxCruiseAlt   = 11700.0                  # Maximum cruising altitude [ft]
 
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
@@ -756,6 +768,34 @@ class ASAS(DynamicArrays):
         self.swafterconfalt = flag
         return True, "AFTERCONFALT is " + ("ON" if self.swafterconfalt else "OFF")
         
+    def setAirspaceConcept(self, conceptcode=None, minCruiseAlt=None, layerHeight=None, numLayers=None, minDist=None, maxDist=None, margin=False):
+        ''' Sets the parameters of the airspace concept'''
+        
+        options = ["UA","L360","L180","L90","L45"]        
+        
+        if conceptcode is None:
+            return True, "CONCEPT is currently " + self.conceptcode + "\nAvailable Options: " + str(options)
+            
+        if conceptcode not in options:
+            return False, "Conceptcode not understood.\nAvailable Options: " + str(options)
+            
+        # redefine default concept variables with new values
+        self.conceptcode    = conceptcode
+        self.minCruiseAlt   = minCruiseAlt if minCruiseAlt is not None else self.minCruiseAlt # [ft]
+        self.layerHeight    = layerHeight if layerHeight is not None else self.layerHeight    # [ft]
+        self.numLayers      = numLayers if numLayers is not None else self.numLayers
+        self.minDist        = minDist if minDist is not None else self.minDist                # [NM]
+        self.maxDist        = maxDist if maxDist is not None else self.maxDist                # [NM]
+        self.recoveryMargin = margin
+        self.maxCruiseAlt   = self.minCruiseAlt + (self.numLayers-1)*self.layerHeight         # [ft]
+        
+        # Computed layered airspace parameters if layered concept 
+        if self.conceptcode[0] == 'L':
+            self.alpha        = float(conceptcode[1:])  # [deg]
+            self.numFLin1Set  = 360.0/self.alpha
+            self.numLayerSets = self.numLayers/self.numFLin1Set
+        
+        return True, "Airsapce Concept is set to " + self.conceptcode
         
     def afterConfAlt(self, idx, iwp):
         ''' Commands the autopilot to not recover pre-conflict altitude during
