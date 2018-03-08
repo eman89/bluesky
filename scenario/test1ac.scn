@@ -1,0 +1,29 @@
+# ##################################################### #
+# Scenario OD Characteristics: 
+# Concept:                 UA
+# Density [ac/10,000NM^2]: 8.340503
+# Num Instantaneous A/C:   133
+# Total Num A/C:           1127
+# Repetition:              1
+# Random Seed:             8
+# ##################################################### #
+
+# PCALL settings and area definition
+00:00:00.00>PCALL areaDefiniton.scn
+00:00:00.00>PCALL Settings-UA-DoubleSep-OFF-Coop
+# 00:00:00.00>PCALL Settings-UA-DoubleSep-ONh-Coop
+# 00:00:00.00>PCALL Settings-UA-DoubleSep-ONv-Coop
+# 00:00:00.00>PCALL Settings-UA-DoubleSep-ONh-Climb
+# 00:00:00.00>PCALL Settings-UA-DoubleSep-ONh-Cruise
+
+
+
+# Origin-Destination Data:
+
+# AC0001 Direct Distance = 226.14 NM
+00:00:13.25>CRE,AC0001,B744,0.37132550,-2.05227801,39.1595011009,0.0,400.00000000
+00:00:13.25>ORIG,AC0001,0.37132550,-2.05227801
+00:00:13.25>DEST,AC0001,3.28736952,0.32639051
+00:00:13.25>ADDWPT,AC0001,0.71641357,-1.77121194,8025.42355347,358.56130780
+00:00:13.25>LNAV,AC0001,ON
+00:00:13.25>VNAV,AC0001,ON

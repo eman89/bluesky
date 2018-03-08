@@ -13,6 +13,9 @@
 00:00:00.00>PCALL areaDefiniton.scn
 00:00:00.00>PCALL Settings-UA-DoubleSep-OFF-Coop
 # 00:00:00.00>PCALL Settings-UA-DoubleSep-ONh-Coop
+# 00:00:00.00>PCALL Settings-UA-DoubleSep-ONh-Climb
+# 00:00:00.00>PCALL Settings-UA-DoubleSep-ONh-Cruise
+# 00:00:00.00>PCALL Settings-UA-DoubleSep-ONv-Coop
 
 # Origin-Destination Data:
 

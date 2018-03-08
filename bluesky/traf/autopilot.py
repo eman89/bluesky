@@ -156,7 +156,7 @@ class Autopilot(DynamicArrays):
             #    40 NM is the distance needed to descend from highest cruise 
             #    altitude of project 3 to arrive at destination perfectly for CROFF
             self.swvnavvs = np.where(self.traf.swlnav, startdescent, dist <= np.maximum(40.0,self.traf.actwp.turndist))
-
+            
             #Recalculate V/S based on current altitude and distance 
             # Dynamic VertSpeed based on time to go. Not needed if you just want to descent with constant VertSpeed
             # t2go2alt = np.maximum(0.,(dist2wp + self.traf.actwp.xtoalt - self.traf.actwp.turndist*nm)) \

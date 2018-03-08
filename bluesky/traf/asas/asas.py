@@ -700,6 +700,10 @@ class ASAS(DynamicArrays):
                         # afterconfalt for id1 (only if activated and not if only horizontal resolutions)
                         if self.swafterconfalt and not self.swresohoriz: 
                             self.afterConfAlt(id1,iwpid1)
+                        # if layered airspace, send id1 to new altitude if required after resolution
+                        if self.isLayers and self.swresohoriz:
+                            self.layersTrajectoryRecovery(id1,iwpid1)
+                    
                     iwpid2 = self.traf.ap.route[id2].findact(self.traf,id2)
                     if iwpid2 != -1: # To avoid problems if there are no waypoints
                         # send aircraft direct to the next active waypoint
@@ -707,6 +711,10 @@ class ASAS(DynamicArrays):
                         # afterconfalt for id2 (only if activated and not if only horizontal resolutions)
                         if self.swafterconfalt and not self.swresohoriz: 
                             self.afterConfAlt(id2,iwpid2)
+                        # if layered airspace, send id2 to new altitude if required after resolution
+                        if self.isLayers and self.swresohoriz:
+                            self.layersTrajectoryRecovery(id2,iwpid2)
+                    
                     # If conflict is solved, remove it from conflist_active list
                     # This is so that if a conflict between this pair of aircraft
                     # occurs again, then that new conflict should be detected, logged
@@ -726,6 +734,10 @@ class ASAS(DynamicArrays):
                      # afterconfalt for id2 (only if activated and not if only horizontal resolutions)
                      if self.swafterconfalt and not self.swresohoriz: 
                          self.afterConfAlt(id2,iwpid2)
+                     # if layered airspace, send id2 to new altitude if required after resolution
+                     if self.isLayers and self.swresohoriz:
+                         self.layersTrajectoryRecovery(id2,iwpid2)
+                 
                  # also remove from active list and resospawn check
                  self.conflist_active.remove(conflict)
                  if conflict in self.conflist_resospawncheck:
@@ -741,6 +753,10 @@ class ASAS(DynamicArrays):
                     # afterconfalt for id1 (only if activated and not if only horizontal resolutions)
                     if self.swafterconfalt and not self.swresohoriz: 
                         self.afterConfAlt(id1,iwpid1)
+                    # if layered airspace, send id1 to new altitude if required after resolution
+                    if self.isLayers and self.swresohoriz:
+                        self.layersTrajectoryRecovery(id1,iwpid1)
+                
                 # also remove from active list and resospawn check
                 self.conflist_active.remove(conflict)
                 if conflict in self.conflist_resospawncheck:
@@ -800,7 +816,7 @@ class ASAS(DynamicArrays):
         return True, "Airsapce Concept is set to " + self.conceptcode
         
         
-    def layersCruisingAltitude(self,idx):
+    def layersCruisingAltitude(self, idx):
         '''Compute the cruising altitude [m] for an aircraft in layered airspaces'''
         
         # lat and lon of aircraft's origin and destination
@@ -829,7 +845,27 @@ class ASAS(DynamicArrays):
         # return the cruising altitude in meters
         return altAC*ft
         
+    def layersTrajectoryRecovery(self, idx, iwp): 
+        '''Commands the autopilot to climb to a new altitude if the aircraft required for layered concepts'''
         
+        # Only calculate new cruising altitude if aircraft is in the climbing or cruising phases
+        # do not send aircraft to new cruising altitude if it is already descending
+        # in layers, there is never vertical conflict resolutions, so all times the vertical speed
+        # is above or equal to zero is climbing or cruising. 
+        if self.traf.vs[idx] >= 0.0: 
+            
+            # compute new altitude based on the recovery heading of the aircraft
+            newAlt = self.layersCruisingAltitude(idx)
+            
+            # set the autopilot to the new cruising altitude
+            self.traf.apalt[idx]  = newAlt
+            self.traf.ap.alt[idx] = newAlt
+            
+            # recompte flight plan and compute VNAV so that dist2vs is updated
+            self.traf.ap.route[idx].calcfp()
+            self.traf.ap.ComputeVNAV(idx, self.traf.ap.route[idx].wptoalt[iwp], self.traf.ap.route[idx].wpxtoalt[iwp])
+            
+            
     def afterConfAlt(self, idx, iwp):
         ''' Commands the autopilot to not recover pre-conflict altitude during
             trajectory recovery after conflict '''
@@ -843,7 +879,7 @@ class ASAS(DynamicArrays):
                 self.traf.apalt[idx] = self.traf.alt[idx]
                 self.traf.ap.alt[idx] = self.traf.alt[idx]
                 
-                # recompte flight plan and compute VNAV so that dist2vs
+                # recompte flight plan and compute VNAV so that dist2vs is updated
                 self.traf.ap.route[idx].calcfp()
                 self.traf.ap.ComputeVNAV(idx, self.traf.ap.route[idx].wptoalt[iwp], self.traf.ap.route[idx].wpxtoalt[iwp])
             
