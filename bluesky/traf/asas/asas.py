@@ -281,6 +281,7 @@ class ASAS(DynamicArrays):
         self.nLOS_total              = 0   # Number of all LOS since the simulation has started. Used for display on the GUI.
         
         self.conceptcode    = "UA"                     # Concept code. Anything can be typed here. Corresponding logic will only for UA and layered airspaces. UA = Unstructured airspace. L45 =  layers 45.   
+        self.isLayers       = False                    # Is the requested concept a layered concept?
         self.minCruiseAlt   = 4000.0                   # Minimum cruising altitude [ft]
         self.layerHeight    = self.dhm + 50.0          # Vertical spacing between layers [ft] 
         self.numLayers      = 8.0                      # Number of layers / flight levels for cruising aircraft
@@ -794,14 +795,45 @@ class ASAS(DynamicArrays):
             self.alpha        = float(conceptcode[1:])  # [deg]
             self.numFLin1Set  = 360.0/self.alpha
             self.numLayerSets = self.numLayers/self.numFLin1Set
+            self.isLayers     = True
         
         return True, "Airsapce Concept is set to " + self.conceptcode
+        
+        
+    def layersCruisingAltitude(self,idx):
+        '''Compute the cruising altitude [m] for an aircraft in layered airspaces'''
+        
+        # lat and lon of aircraft's origin and destination
+        origlat = self.traf.ap.origlat[idx]
+        origlon = self.traf.ap.origlon[idx]
+        destlat = self.traf.ap.destlat[idx]
+        destlon = self.traf.ap.destlon[idx]
+        
+        # Compute distance between origin and destination of aircraft [NM]
+        distanceAC = geo.latlondist(origlat,origlon,destlat,destlon)/nm
+        
+        # compute the bearing and the distance to the destination
+        qdr2Dest, dist2Dest = geo.qdrdist(self.traf.lat[idx], self.traf.lon[idx], destlat, destlon)  # [deg][nm])
+        
+        # compute distance ratio
+        distanceRatio = (distanceAC-self.minDist)/(self.maxDist-self.minDist)
+        
+        # heading ratio
+        headingRatio = qdr2Dest/self.alpha
+        
+        # Use layers altitude equation
+        altAC = self.minCruiseAlt + self.layerHeight*\
+                (np.floor(distanceRatio*self.numLayerSets)*self.numFLin1Set + np.floor(headingRatio))
+        
+        # return the cruising altitude in meters
+        return altAC*ft
+        
         
     def afterConfAlt(self, idx, iwp):
         ''' Commands the autopilot to not recover pre-conflict altitude during
             trajectory recovery after conflict '''
         # a/c has to be in the cruising alt range -> 1219m (=4000ft) and 3567m (=11700ft)    
-        if 1219. <= self.traf.alt[idx] <= 3567.: 
+        if (self.minCruiseAlt-1)*ft <= self.traf.alt[idx] <= (self.maxCruiseAlt+1)*ft: 
             
             # a/c has be in the cruise phase of a flight
             if iwp > 1 and self.traf.ap.swvnavvs[idx] == False: 
