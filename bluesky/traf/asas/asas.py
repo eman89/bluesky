@@ -816,7 +816,7 @@ class ASAS(DynamicArrays):
         return True, "Airsapce Concept is set to " + self.conceptcode
         
         
-    def layersCruisingAltitude(self, idx):
+    def layersCruisingAltitude(self, idx, iwp):
         '''Compute the cruising altitude [m] for an aircraft in layered airspaces'''
         
         # lat and lon of aircraft's origin and destination
@@ -832,38 +832,73 @@ class ASAS(DynamicArrays):
         qdr2Dest, dist2Dest = geo.qdrdist(self.traf.lat[idx], self.traf.lon[idx], destlat, destlon)  # [deg][nm])
         qdr2Dest = qdr2Dest%360.0
         
-        # compute distance ratio
-        distanceRatio = (distanceAC-self.minDist)/(self.maxDist-self.minDist)
+        # determine if ac is cruising
+        inCruisingAlts  = (self.minCruiseAlt-1)*ft <= self.traf.alt[idx] <= (self.maxCruiseAlt+1)*ft
+        inCruisingPhase = iwp > 1 and self.traf.ap.swvnavvs[idx] == False
+        isCruising      = inCruisingAlts and inCruisingPhase
         
-        # heading ratio
-        headingRatio = qdr2Dest/self.alpha
+        # determine if ac is desending to destination
+        isDescending = np.logical_and(self.traf.vs[idx] < 0.0, \
+                                            self.traf.ap.route[idx].wptype[iwp] == self.traf.ap.route[idx].dest)
         
-        # Use layers altitude equation
-        altAC = self.minCruiseAlt + self.layerHeight*\
-                (np.floor(distanceRatio*self.numLayerSets)*self.numFLin1Set + np.floor(headingRatio))
+        # Determine if the aircraft is inside the heading range of the current flight level
+        if self.alpha == 360.0:
+            insideHdgRange = True
+        else:
+            lowerLayerHdg  = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # this line assumes that aircraft was in the right FL before conflict. 
+            upperLayerHdg  = (lowerLayerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
+            lowerLayerHdg  = (lowerLayerHdg - 5.0)%360.0 # lower with margin of 5 deg
+            if lowerLayerHdg < upperLayerHdg:
+                insideHdgRange = lowerLayerHdg <= qdr2Dest <= upperLayerHdg
+            else:
+                insideHdgRange = lowerLayerHdg <= qdr2Dest or qdr2Dest <= upperLayerHdg
+            
+       
+       
+        # Determine the new Cruising altitude. This depends on a number of conditions
+                                                    
+        # if recovery margin is on, and ac is cruising and if the ac is inside  
+        # the current flight level's heading range + 5 deg margin, then keep 
+        # flying in the current altitude
+        if self.recoveryMargin and isCruising and insideHdgRange:
+            newAlt = self.traf.apalt[idx]
         
-        # return the cruising altitude in meters
-        return altAC*ft
+        # if descending, then send ac to the ground!            
+        elif isDescending:
+            newAlt = 0.0
+        
+        # otherwise, it must be climbing, or cruising but with a heading outside 
+        # the heading range of the flight level it is in. Then use the layers 
+        # altitude equation to send it to a new cruising altitude. 
+        else:
+            
+            # compute distance ratio
+            distanceRatio = (distanceAC-self.minDist)/(self.maxDist-self.minDist)
+            
+            # heading ratio
+            headingRatio = qdr2Dest/self.alpha
+            
+            # compute newAlt using layers altitude equation
+            newAlt = self.minCruiseAlt + self.layerHeight*\
+                    (np.floor(distanceRatio*self.numLayerSets)*self.numFLin1Set + np.floor(headingRatio))
+            newAlt = newAlt*ft
+        
+        # return the cruising altitude[m]
+        return newAlt
         
     def layersTrajectoryRecovery(self, idx, iwp): 
         '''Commands the autopilot to climb to a new altitude if the aircraft required for layered concepts'''
         
-        # Only calculate new cruising altitude if aircraft is in the climbing or cruising phases
-        # do not send aircraft to new cruising altitude if it is already descending
-        # in layers, there is never vertical conflict resolutions, so all times the vertical speed
-        # is above or equal to zero is climbing or cruising. 
-        if self.traf.vs[idx] >= 0.0: 
-            
-            # compute new altitude based on the recovery heading of the aircraft
-            newAlt = self.layersCruisingAltitude(idx)
-            
-            # set the autopilot to the new cruising altitude
-            self.traf.apalt[idx]  = newAlt
-            self.traf.ap.alt[idx] = newAlt
-            
-            # recompte flight plan and compute VNAV so that dist2vs is updated
-            self.traf.ap.route[idx].calcfp()
-            self.traf.ap.ComputeVNAV(idx, self.traf.ap.route[idx].wptoalt[iwp], self.traf.ap.route[idx].wpxtoalt[iwp])
+        # compute new altitude based on the recovery heading of the aircraft
+        newAlt = self.layersCruisingAltitude(idx, iwp)
+        
+        # set the autopilot to the new cruising altitude
+        self.traf.apalt[idx]  = newAlt
+        self.traf.ap.alt[idx] = newAlt
+        
+        # recompte flight plan and compute VNAV so that dist2vs is updated
+        self.traf.ap.route[idx].calcfp()
+        self.traf.ap.ComputeVNAV(idx, self.traf.ap.route[idx].wptoalt[iwp], self.traf.ap.route[idx].wpxtoalt[iwp])
             
             
     def afterConfAlt(self, idx, iwp):
