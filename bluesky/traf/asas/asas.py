@@ -845,21 +845,20 @@ class ASAS(DynamicArrays):
         if self.alpha == 360.0:
             insideHdgRange = True
         else:
-            lowerLayerHdg  = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # this line assumes that aircraft was in the right FL before conflict. 
+            lowerLayerHdg  = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # ap.trk contains the original conflict free direction of the aircraft. 
             upperLayerHdg  = (lowerLayerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
             lowerLayerHdg  = (lowerLayerHdg - 5.0)%360.0 # lower with margin of 5 deg
             if lowerLayerHdg < upperLayerHdg:
                 insideHdgRange = lowerLayerHdg <= qdr2Dest <= upperLayerHdg
             else:
                 insideHdgRange = lowerLayerHdg <= qdr2Dest or qdr2Dest <= upperLayerHdg
-            
        
        
         # Determine the new Cruising altitude. This depends on a number of conditions
                                                     
         # if recovery margin is on, and ac is cruising and if the ac is inside  
         # the current flight level's heading range + 5 deg margin, then keep 
-        # flying in the current altitude
+        # flying in the current altitude even if this is slightly wrong.
         if self.recoveryMargin and isCruising and insideHdgRange:
             newAlt = self.traf.apalt[idx]
         
@@ -886,6 +885,7 @@ class ASAS(DynamicArrays):
         # return the cruising altitude[m]
         return newAlt
         
+    
     def layersTrajectoryRecovery(self, idx, iwp): 
         '''Commands the autopilot to climb to a new altitude if the aircraft required for layered concepts'''
         
