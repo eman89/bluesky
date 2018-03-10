@@ -205,16 +205,7 @@ class Autopilot(DynamicArrays):
             # so it needs to be updated.
             self.dist2vs = (self.traf.alt - self.traf.actwp.nextaltco) / self.steepness
             
-#            # determine if ac is desending to destination
-#            iwp = self.traf.ap.route[0].findact(self.traf,0)
-#            isDescending = np.logical_and(self.traf.vs[0] < 0.0, \
-#                                            self.traf.ap.route[0].wptype[iwp] == self.traf.ap.route[0].dest)
-#                                            
-#            if isDescending: 
-#                print "I'm Descending!"
-#            else:
-#                print "I'm climbing or cruising!"
-        
+
         # NOTE!!!: Airplane speed is controlled using TAS. The following code
         # therefore computes the TAS the autopilot wants the airplane to fly
         # with so that the CAS is constant for changes in altitude 

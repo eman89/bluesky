@@ -838,8 +838,10 @@ class ASAS(DynamicArrays):
         isCruising      = inCruisingAlts and inCruisingPhase
         
         # determine if ac is desending to destination
-        isDescending = np.logical_and(self.traf.vs[idx] < 0.0, \
-                                            self.traf.ap.route[idx].wptype[iwp] == self.traf.ap.route[idx].dest)
+        isDestination = self.traf.ap.route[idx].wptype[iwp] == self.traf.ap.route[idx].dest
+        isDescending1 = np.logical_and(self.traf.vs[idx] < 0.0, isDestination)
+        isDescending2 = np.logical_and(self.traf.alt[idx] < 10.0*ft, isDestination)
+        isDescending  = np.logical_or(isDescending1, isDescending2)
         
         # Determine if the aircraft is inside the heading range of the current flight level
         if self.alpha == 360.0:
