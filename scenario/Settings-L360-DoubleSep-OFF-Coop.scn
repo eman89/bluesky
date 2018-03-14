@@ -68,7 +68,7 @@
 04:00:00.00>INSTLOG OFF
 
 # Switch Off TR log:
-00:00:00.00>TRLOG OFF
+04:00:00.00>TRLOG OFF
 
 # Switch Off Summary Logs:
 04:00:00.00>SKYLOG OFF
