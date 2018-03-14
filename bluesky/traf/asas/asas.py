@@ -298,6 +298,9 @@ class ASAS(DynamicArrays):
         self.numLayerSets   = 8.0                      # Number of layer sets. Default value is 8 (this assumes alpha=360.0, numLayers=8.0) [-]
         self.numFLin1Set    = 1.0                      # Number of flight levels/layers in 1 layer set. Default value is 1.0 (this assumes alpha=360.0) [-]
         self.maxCruiseAlt   = 11700.0                  # Maximum cruising altitude [ft]
+        
+        self.swfinder      = False  # switch to activate the CFL finder.         
+        self.cflFinderCase = None   # case name to detect and activate debugger when encountering conflicts between aircraft in desired flight phases (CL-CL, CL-CR, CR-CR, CR-DE, DE-DE)
 
         # For keeping track of locations with most severe intrusions
         self.LOSmaxsev    = []
@@ -486,6 +489,33 @@ class ASAS(DynamicArrays):
         self.swprio = flag
         return True, "Priority is " + ("ON" if self.swprio else "OFF") + \
                      "\nPriority code is : " + str(self.priocode)
+                     
+    def SetConflictFinder(self, flag=None, case=None):
+        '''Set the conflict finder swtich and the case'''
+        options = ["CL-CL", "CL-CR", "CR-CR", "CR-DE", "DE-DE", None]
+        if flag is None:
+            return True, "CFLFINDER [CASE]"  + \
+                         "\nAvailable CASES: " + \
+                         "\n     CL-CL:  Climb   - Climb   conflict " + \
+                         "\n     CL-CR:  Climb   - Cruise  conflict" + \
+                         "\n     CR-CR:  Cruise  - Cruise  conflict" + \
+                         "\n     CR-DE:  Cruise  - Descend conflict" + \
+                         "\n     DE-DE:  Descend - Descend conflict" + \
+                         "\nCFLFINDER is currently " + ("ON" if self.swfinder else "OFF") + \
+                         "\nCFLFINDER case is currently: " + str(self.cflFinderCase) + \
+                         "\nNOTE: CFLFINDER ONLY WORKS WITH MVP ACTIVATED!!!! "
+        if case not in options:
+            return False, "CFLFINDER CASE Not Understood. Available Options: " + str(options)
+        else:
+            self.cflFinderCase = case
+        self.swfinder = flag
+        if self.cr_name != "MVP":
+            self.cflFinderCase = None
+            self.swfinder = False
+            return False, "CFLFINDER REQUIRES MVP TO BE ACTIVATED FIRST!!!" + \
+                          "\nACTIVATE MVP BY TYPING IN 'RESO MVP'"
+        return True, "CFLFINDER is " + ("ON" if self.swfinder else "OFF") + \
+                     "\nCFLFINDER case is : " + str(self.cflFinderCase)
 
     def SetNoreso(self, noresoac=''):
         '''ADD or Remove aircraft that nobody will avoid.

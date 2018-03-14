@@ -225,6 +225,12 @@ def init(sim, traf, scr):
             traf.asas.SetCDmethod,
             "Set conflict detection method"
         ],
+        "CFLFINDER": [
+            "CFLFINDER [ON/OFF CASE]",
+            "[onoff, txt]",
+            traf.asas.SetConflictFinder,
+            "Activate debugger when conflicts between the desired flight phases are found"
+        ],
         "CIRCLE": [
             "CIRCLE name,lat,lon,radius,[top,bottom]",
             "txt,latlon,float,[alt,alt]",

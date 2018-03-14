@@ -6,6 +6,7 @@ Created on Tue Mar 03 16:50:19 2015
 """
 import numpy as np
 from ...tools.aero import ft, kts, fpm
+import pdb
 
 
 def start(asas):
@@ -43,7 +44,11 @@ def resolve(asas, traf):
             # Then use the MVP computed resolution to subtract and add dv_mvp
             # to id1 and id2, respectively
             if id1 > -1 and id2 > -1:
-
+                
+                # call conflictFinder function to analyze specific type of conflicts if activated
+                if asas.swfinder and asas.cflFinderCase is not None:
+                    conflictFinder(asas, traf, id1, id2, asas.cflFinderCase)
+                
                 # Check if this conflict is in conflist_resospawncheck
                 # If so, then there should be no resolution for this conflict
                 # Otherwise, resolve it!
@@ -429,3 +434,80 @@ def prioRules(traf, priocode, dv_mvp, dv1, dv2, id1, id2):
             dv2 = dv2 + dv_mvp
 
     return dv1, dv2
+    
+
+#============================= Conflict Finder ================================
+
+def conflictFinder(asas, traf, id1, id2, case):
+    ''' Activate debugger to analyze simulation for specific conflict cases '''
+    
+    # vertical speed is used a lot. this function. therefore make it local
+    vs1 = traf.vs[id1]
+    vs2 = traf.vs[id2]
+    
+    # determine flight phases of aircraft 1
+    climbing1   = vs1 >= 0.1
+    descending1 = vs1 <= -0.1
+    cruising1   = abs(vs1)<0.1
+    
+    # determine flight phases of aircraft 2
+    climbing2   = vs2 >= 0.1
+    descending2 = vs2 <= -0.1
+    cruising2   = abs(vs2)<0.1
+    
+    # Based on case, determine which conflict type to look for
+    if case == "CL-CL":
+        # Check if conflict is a Climbing-Climbing conflict
+        if climbing1 and climbing2:
+            print
+            print "Climbing-Climbing conflict found:"        
+            print "   - %s and %s" % (traf.id[id1], traf.id[id2])
+            print "   - %i and %i" % (id1, id2)
+            print
+            pdb.set_trace()
+            return
+    
+    elif case == "CL-CR":
+        # Check if conflict is a Climbing-Cruising conflict
+        if (climbing1 and cruising2) or (climbing2 and cruising1):
+            print
+            print "Climbing-Cruising conflict found:"        
+            print "   - %s and %s" % (traf.id[id1], traf.id[id2])
+            print "   - %i and %i" % (id1, id2)
+            print
+            pdb.set_trace()
+            return
+    
+    elif case == "CR-CR":    
+        # Check if conflict is a Cruising-Cruising conflict
+        if (cruising1 and cruising2):
+            print
+            print "Cruising-Cruising conflict found:"        
+            print "   - %s and %s" % (traf.id[id1], traf.id[id2])
+            print "   - %i and %i" % (id1, id2)
+            print
+            pdb.set_trace()
+            return
+    
+    elif case == "CR-DE":
+        # Check if conflict is a Cruising-descending conflict
+        if (cruising1 and descending2) or (cruising2 and descending1):
+            print
+            print "Cruising-Descending conflict found:"        
+            print "   - %s and %s" % (traf.id[id1], traf.id[id2])
+            print "   - %i and %i" % (id1, id2)
+            print
+            pdb.set_trace()
+            return
+    
+    elif case == "DE-DE":
+        # Check if conflict is a Descending-Descending conflict
+        if (descending1 and descending2):
+            print
+            print "Descending-Descending conflict found:"        
+            print "   - %s and %s" % (traf.id[id1], traf.id[id2])
+            print "   - %i and %i" % (id1, id2)
+            print
+            pdb.set_trace()
+            return
+                
