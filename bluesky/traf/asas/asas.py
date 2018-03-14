@@ -698,10 +698,10 @@ class ASAS(DynamicArrays):
                         # send aircraft direct to the next active waypoint
                         self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
                         # afterconfalt for id1 (only if activated and not if only horizontal resolutions)
-                        if self.swafterconfalt and not self.swresohoriz: 
+                        if self.swafterconfalt and not self.swresohoriz and self.cr_name != "OFF": 
                             self.afterConfAlt(id1,iwpid1)
                         # if layered airspace, send id1 to new altitude if required after resolution
-                        if self.isLayers and self.swresohoriz:
+                        if self.isLayers and self.swresohoriz and self.cr_name != "OFF":
                             self.layersTrajectoryRecovery(id1,iwpid1)
                     
                     iwpid2 = self.traf.ap.route[id2].findact(self.traf,id2)
@@ -709,10 +709,10 @@ class ASAS(DynamicArrays):
                         # send aircraft direct to the next active waypoint
                         self.traf.ap.route[id2].direct(self.traf, id2, self.traf.ap.route[id2].wpname[iwpid2])
                         # afterconfalt for id2 (only if activated and not if only horizontal resolutions)
-                        if self.swafterconfalt and not self.swresohoriz: 
+                        if self.swafterconfalt and not self.swresohoriz and self.cr_name != "OFF": 
                             self.afterConfAlt(id2,iwpid2)
                         # if layered airspace, send id2 to new altitude if required after resolution
-                        if self.isLayers and self.swresohoriz:
+                        if self.isLayers and self.swresohoriz and self.cr_name != "OFF":
                             self.layersTrajectoryRecovery(id2,iwpid2)
                     
                     # If conflict is solved, remove it from conflist_active list
@@ -732,10 +732,10 @@ class ASAS(DynamicArrays):
                  if iwpid2 != -1: # To avoid problems if there are no waypoints
                      self.traf.ap.route[id2].direct(self.traf, id2, self.traf.ap.route[id2].wpname[iwpid2])
                      # afterconfalt for id2 (only if activated and not if only horizontal resolutions)
-                     if self.swafterconfalt and not self.swresohoriz: 
+                     if self.swafterconfalt and not self.swresohoriz and self.cr_name != "OFF": 
                          self.afterConfAlt(id2,iwpid2)
                      # if layered airspace, send id2 to new altitude if required after resolution
-                     if self.isLayers and self.swresohoriz:
+                     if self.isLayers and self.swresohoriz and self.cr_name != "OFF":
                          self.layersTrajectoryRecovery(id2,iwpid2)
                  
                  # also remove from active list and resospawn check
@@ -751,10 +751,10 @@ class ASAS(DynamicArrays):
                 if iwpid1 != -1: # To avoid problems if there are no waypoints
                     self.traf.ap.route[id1].direct(self.traf, id1, self.traf.ap.route[id1].wpname[iwpid1])
                     # afterconfalt for id1 (only if activated and not if only horizontal resolutions)
-                    if self.swafterconfalt and not self.swresohoriz: 
+                    if self.swafterconfalt and not self.swresohoriz and self.cr_name != "OFF": 
                         self.afterConfAlt(id1,iwpid1)
                     # if layered airspace, send id1 to new altitude if required after resolution
-                    if self.isLayers and self.swresohoriz:
+                    if self.isLayers and self.swresohoriz and self.cr_name != "OFF":
                         self.layersTrajectoryRecovery(id1,iwpid1)
                 
                 # also remove from active list and resospawn check
@@ -834,19 +834,19 @@ class ASAS(DynamicArrays):
         # needed for layers altitude equation
         distanceAC = geo.latlondist(origlat,origlon,destlat,destlon)/nm
         
-        # compute the bearing and the distance to the destination used for the 'direct' trajectory recovery to the destination
+        # compute the bearing and the distance to the destination from the aircraft's current location
         # needed for layers altitude equation
         qdr2Dest, dist2Dest = geo.qdrdist(self.traf.lat[idx], self.traf.lon[idx], destlat, destlon)  # [deg][nm])
         qdr2Dest = qdr2Dest%360.0
         
         # Determine if the aircraft is inside the recovery heading range of the current flight level
         # Note: for alpha = 360.0 all headings are allowed in each cruising flight level, so there is no
-        #       to change the cruising altitude for layers 360.0 
+        #       need to change altitude after CR no matter what qdr2Dest is
         if self.alpha == 360.0:
             inRecoveryHdgRange = True
         else:
             # Determine the lower heading value of the flight level layer the ac is currently in, or is climbing to. 
-            layerHdg  = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # ap.trk contains the original conflict free direction of the aircraft. 
+            layerHdg  = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # ap.trk contains the pre conflict direction of the aircraft. 
             # Determine the lower and upper heading range taking into consideration an additional 5 deg of recovery margin
             upperRecoveryHdg  = (layerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
             lowerRecoveryHdg  = (layerHdg - 5.0)%360.0 # lower with margin of 5 deg
@@ -860,7 +860,8 @@ class ASAS(DynamicArrays):
         # the current/target flight level's recovery heading range, then keep 
         # flying in the current (or previous target) altitude even if this is slightly wrong.
         if self.recoveryMargin and inRecoveryHdgRange:
-            newAlt = self.traf.ap.alt[idx] # already in [m]. self.traf.ap.alt[idx] is the previously commanded altitude. So just keep flying this if in recovery margin. 
+            # self.traf.ap.alt[idx] is the previously commanded altitude. So just keep flying this if in recovery margin. 
+            newAlt = self.traf.ap.alt[idx] # already in [m]
             
             # print outs for debugging
             print
@@ -908,7 +909,7 @@ class ASAS(DynamicArrays):
         # determine if ac is desending to destination
         isDestination = self.traf.ap.route[idx].wptype[iwp] == self.traf.ap.route[idx].dest
         isDescending1 = np.logical_and(self.traf.vs[idx] < 0.0, isDestination)
-        isDescending2 = np.logical_and(self.traf.alt[idx] < 10.0*ft, isDestination) # to handle aircraft cruising at zero altitude for a few seconds waiting to be deleted when periodic area is called.
+        isDescending2 = np.logical_and(self.traf.alt[idx] < 10.0*ft, isDestination) # to handle aircraft cruising at zero altitude for a few seconds while waiting to be deleted because area function is periodic
         isDescending  = np.logical_or(isDescending1, isDescending2)
         
         # Only ask the auto-pilot to do anything if the aircraft is climbing or cruising
@@ -924,6 +925,8 @@ class ASAS(DynamicArrays):
             
             # Update the TOC waypoint in route with the new altitude and speed
             # Needed before recalculaing the flight-plan in the next step
+            # NOTE. TOC waypoint has index [1] for the type of scenarios used
+            #       the here. Also, wpsd is in CAS since this is taken directly from scn file
             taswp = vcas2tas(self.traf.ap.route[idx].wpspd[1], self.traf.ap.route[idx].wpalt[1])
             caswp = vtas2cas(taswp,newAlt)
             self.traf.ap.route[idx].wpspd[1] = caswp
@@ -931,6 +934,7 @@ class ASAS(DynamicArrays):
             
             # recompute flight plan and compute VNAV so that dist2vs is updated
             # this will ensure that the aircraft starts its descent to the destination at the right time
+            # even though the aircraft has changed its altitude. 
             self.traf.ap.route[idx].calcfp()
             self.traf.ap.ComputeVNAV(idx, self.traf.ap.route[idx].wptoalt[iwp], self.traf.ap.route[idx].wpxtoalt[iwp])
             
@@ -949,6 +953,9 @@ class ASAS(DynamicArrays):
                 self.traf.ap.alt[idx] = self.traf.alt[idx]
                 
                 # Update the TOC waypoint in route with the new altitude and speed
+                # Needed before recalculaing the flight-plan in the next step
+                # NOTE. TOC waypoint has index [1] for the type of scenarios used
+                #       the here. Also, wpsd is in CAS since this is taken directly from scn file
                 taswp = vcas2tas(self.traf.ap.route[idx].wpspd[1], self.traf.ap.route[idx].wpalt[1])
                 caswp = vtas2cas(taswp,self.traf.alt[idx])
                 self.traf.ap.route[idx].wpspd[1] = caswp
@@ -956,6 +963,7 @@ class ASAS(DynamicArrays):
                     
                 # recompute flight plan and compute VNAV so that dist2vs is updated
                 # this will ensure that the aircraft starts its descent to the destination at the right time
+                # even though the aircraft has changed its altitude. 
                 self.traf.ap.route[idx].calcfp()
                 self.traf.ap.ComputeVNAV(idx, self.traf.ap.route[idx].wptoalt[iwp], self.traf.ap.route[idx].wpxtoalt[iwp])
             
@@ -987,6 +995,7 @@ class ASAS(DynamicArrays):
 
             # Update ASAS log variables
             asasLogUpdate(self, self.traf)
+            
 
         # Change labels in interface
         if settings.gui == "pygame":
