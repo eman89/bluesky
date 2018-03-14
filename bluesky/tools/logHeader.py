@@ -290,3 +290,31 @@ def intHeader():
                parameters + "\n"
 
   return lines
+  
+
+def trHeader():
+    parameters = "Simulation Time [s], " + \
+                 "Call sign [-], " + \
+                 "Cruising [bool], " + \
+                 "Pre cfl altitude [m], " + \
+                 "Pre cfl heading [deg], " + \
+                 "Pre cfl layer lower Hdg limit [deg], " + \
+                 "Pre cfl layer upper Hdg limit [deg], " + \
+                 "Layer recovery lower Hdg limit [deg], " + \
+                 "Layer recovery upper Hdg limit [deg], " + \
+                 "Inside pre cfl layer recovery range [bool], " + \
+                 "Post cfl target altitude [m], " + \
+                 "Post cfl target heading [deg], " + \
+                 "Post cfl target layer lower Hdg limit [deg], " + \
+                 "Post cfl target layer upper Hdg limit [deg]"
+                 
+    lines     = "########################################################\n" + \
+                "TR LOG\n" + \
+                "Layers Trajectory Recovery Log\n" + \
+                "This log only makes sense for layered airspace concepts\n" + \
+                "########################################################\n\n" + \
+                "Parameters [Units]:\n" + \
+                parameters + "\n"
+    
+    return lines
+                 

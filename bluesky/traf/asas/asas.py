@@ -62,6 +62,7 @@ class ASAS(DynamicArrays):
         # Create event based ASAS loggers
         self.cfllog = datalog.defineLogger("CFLLOG", logHeader.cflHeader())
         self.intlog = datalog.defineLogger("INTLOG", logHeader.intHeader())
+        self.trlog  = datalog.defineLogger("TRLOG", logHeader.trHeader())
 
         # Create periodic ASAS loggers
         datalog.definePeriodicLogger('INSTLOG', logHeader.instHeader(), settings.instdt)
@@ -90,17 +91,6 @@ class ASAS(DynamicArrays):
         # Register the following parameters for CFL logging
         with datalog.registerLogParameters('CFLLOG', self):
             self.clogid1 = []
-            self.clogspawntimeid1 = []
-            self.clogtinconfid1 = []
-            self.clogtoutconfid1 = []
-            self.clogtcpaid1 = []
-            self.cloglatid1 = []
-            self.cloglonid1 = []
-            self.clogaltid1 = []
-            self.clogtasid1 = []
-            self.clogvsid1 = []
-            self.cloghdgid1 = []
-            self.cloglatcpaid1 = []
             self.clogloncpaid1 = []
             self.clogaltcpaid1 = []
             self.clogasasactiveid1 = []
@@ -207,7 +197,23 @@ class ASAS(DynamicArrays):
             self.instlogasastasid2 = []
             self.instlogasasvsid2 = []
             self.instlogasashdgid2 = []
-
+            
+        # Register the following parameters for TR logging
+        with datalog.registerLogParameters('TRLOG', self):
+            self.trlogid = "bla"
+            self.trlogiscruising = True
+            self.trlogprealt = 0.0
+            self.trlogprehdg = 0.0
+            self.trlogprelaylowerhdg = 0.0
+            self.trlogprelayupperhdg = 0.0
+            self.trlogrecoverylowerhdg = 0.0
+            self.trlogrecoveryupperhdg = 0.0
+            self.trloginrecoveryrange = True
+            self.trlogpostalt = 0.0
+            self.trlogposthdg = 0.0
+            self.trlogpostlaylowerhdg = 0.0
+            self.trlogpostlayupperhdg = 0.0
+            
         # All ASAS variables are initialized in the reset function
         self.reset()
 
@@ -846,7 +852,7 @@ class ASAS(DynamicArrays):
             inRecoveryHdgRange = True
         else:
             # Determine the lower heading value of the flight level layer the ac is currently in, or is climbing to. 
-            layerHdg  = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # ap.trk contains the pre conflict direction of the aircraft. 
+            layerHdg = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # ap.trk contains the pre conflict direction of the aircraft. 
             # Determine the lower and upper heading range taking into consideration an additional 5 deg of recovery margin
             upperRecoveryHdg  = (layerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
             lowerRecoveryHdg  = (layerHdg - 5.0)%360.0 # lower with margin of 5 deg
@@ -855,6 +861,18 @@ class ASAS(DynamicArrays):
                 inRecoveryHdgRange = lowerRecoveryHdg <= qdr2Dest <= upperRecoveryHdg
             else:
                 inRecoveryHdgRange = lowerRecoveryHdg <= qdr2Dest or qdr2Dest <= upperRecoveryHdg
+
+        # Set the values needed for TR logging
+        self.trlogid = self.traf.id[idx]
+        self.trlogiscruising = abs(self.traf.vs[idx])<0.1
+        self.trlogprealt = self.traf.alt[idx]
+        self.trlogprehdg = self.traf.trk[idx]
+        self.trlogprelaylowerhdg = layerHdg%360.0
+        self.trlogprelayupperhdg = (layerHdg + self.alpha)%360.0
+        self.trlogrecoverylowerhdg = lowerRecoveryHdg
+        self.trlogrecoveryupperhdg = upperRecoveryHdg
+        self.trloginrecoveryrange = inRecoveryHdgRange
+        self.trlogposthdg = qdr2Dest
        
         # if recovery margin is on, and if ac is cruising/climbing and if the ac is inside  
         # the current/target flight level's recovery heading range, then keep 
@@ -862,6 +880,11 @@ class ASAS(DynamicArrays):
         if self.recoveryMargin and inRecoveryHdgRange:
             # self.traf.ap.alt[idx] is the previously commanded altitude. So just keep flying this if in recovery margin. 
             newAlt = self.traf.ap.alt[idx] # already in [m]
+
+            # Set the values needed for TR logging
+            self.trlogpostalt = newAlt
+            self.trlogpostlaylowerhdg = layerHdg%360.0
+            self.trlogpostlayupperhdg = (layerHdg + self.alpha)%360.0
             
             # print outs for debugging
             print
@@ -886,6 +909,11 @@ class ASAS(DynamicArrays):
             newAlt = self.minCruiseAlt + self.layerHeight*\
                     (np.floor(distanceRatio*self.numLayerSets)*self.numFLin1Set + np.floor(headingRatio))
             newAlt = newAlt*ft # convert to [m]
+
+            # Set the values needed for TR logging
+            self.trlogpostalt = newAlt
+            self.trlogpostlaylowerhdg = int(qdr2Dest/self.alpha)*self.alpha
+            self.trlogpostlayupperhdg = int(qdr2Dest/self.alpha)*self.alpha + self.alpha
             
             # print outs for debugging
             print
@@ -896,6 +924,9 @@ class ASAS(DynamicArrays):
             print "     New altitude:  %f ft" %(newAlt/ft)
             print "     New altitude hdg range: %i-%i" %(int(int(qdr2Dest/self.alpha)*self.alpha),int(int(qdr2Dest/self.alpha)*self.alpha+self.alpha))
             print
+        
+        # call the TR logger
+        self.trlog.log()
             
         # return the cruising altitude[m]
         return newAlt
