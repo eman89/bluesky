@@ -900,13 +900,17 @@ class ASAS(DynamicArrays):
         # needed for layers altitude equation
         distanceAC = geo.latlondist(origlat,origlon,destlat,destlon)/nm
         
+        # compute the bearing and the distance from origin to destination
+        qdrorig2dest, distorig2dest = geo.qdrdist(origlat, origlon, destlat, destlon)  # [deg][nm])
+        qdrorig2dest = qdrorig2dest%360.0
+        
         # compute the bearing and the distance to the destination from the aircraft's current location
-        # needed for layers altitude equation
+        # needed for layers altitude equation - > i.e, at time of trajectory recovery
         qdr2Dest, dist2Dest = geo.qdrdist(self.traf.lat[idx], self.traf.lon[idx], destlat, destlon)  # [deg][nm])
         qdr2Dest = qdr2Dest%360.0
         
         # Determine the lower heading value of the flight level layer the ac is currently in, or is climbing to. 
-        layerHdg = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # ap.trk contains the pre conflict direction of the aircraft. 
+        layerHdg = int(qdrorig2dest/self.alpha)*self.alpha # [deg] # ap.trk contains the pre conflict direction of the aircraft. 
         # Determine the lower and upper heading range taking into consideration an additional 5 deg of recovery margin
         upperRecoveryHdg  = (layerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
         lowerRecoveryHdg  = (layerHdg - 5.0)%360.0 # lower with margin of 5 deg
@@ -929,7 +933,7 @@ class ASAS(DynamicArrays):
         self.trlogprealt.append(self.traf.alt[idx])
         self.trlogpreapalt.append(self.traf.ap.alt[idx])
         self.trlogprehdg.append(self.traf.trk[idx]%360.0)
-        self.trlogpreaphdg.append(self.traf.ap.trk[idx]%360.0)
+        self.trlogpreaphdg.append(qdrorig2dest)
         self.trlogprelaylowerhdg.append(layerHdg%360.0)
         self.trlogprelayupperhdg.append((layerHdg + self.alpha)%360.0)
         self.trlogrecoverylowerhdg.append(lowerRecoveryHdg)
@@ -956,7 +960,7 @@ class ASAS(DynamicArrays):
             print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
             print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
             print "     New AP altitude:  %f ft" %(newAlt/ft)
-            print "     Old Hdg: %f" %(self.traf.trk[idx]%360.0)            
+            print "     Old AP Hdg: %f" %(qdrorig2dest)            
             print "     New AP Hdg: %f" %(qdr2Dest)
             print
         
@@ -988,10 +992,13 @@ class ASAS(DynamicArrays):
             print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
             print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
             print "     New AP altitude:  %f ft" %(newAlt/ft)
-            print "     Old Hdg: %f" %(self.traf.trk[idx]%360.0)            
+            print "     Old AP Hdg: %f" %(qdrorig2dest)            
             print "     New AP Hdg: %f" %(qdr2Dest)
             print "     New altitude hdg range: %i-%i" %(int(int(qdr2Dest/self.alpha)*self.alpha),int(int(qdr2Dest/self.alpha)*self.alpha+self.alpha))
             print
+            
+            import pdb
+            pdb.set_trace()
             
         # call the TR logger
         self.trlog.log()
