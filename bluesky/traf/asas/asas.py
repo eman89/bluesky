@@ -91,6 +91,17 @@ class ASAS(DynamicArrays):
         # Register the following parameters for CFL logging
         with datalog.registerLogParameters('CFLLOG', self):
             self.clogid1 = []
+            self.clogspawntimeid1 = []
+            self.clogtinconfid1 = []
+            self.clogtoutconfid1 = []
+            self.clogtcpaid1 = []
+            self.cloglatid1 = []
+            self.cloglonid1 = []
+            self.clogaltid1 = []
+            self.clogtasid1 = []
+            self.clogvsid1 = []
+            self.cloghdgid1 = []
+            self.cloglatcpaid1 = []
             self.clogloncpaid1 = []
             self.clogaltcpaid1 = []
             self.clogasasactiveid1 = []
@@ -200,19 +211,21 @@ class ASAS(DynamicArrays):
             
         # Register the following parameters for TR logging
         with datalog.registerLogParameters('TRLOG', self):
-            self.trlogid = "bla"
-            self.trlogiscruising = True
-            self.trlogprealt = 0.0
-            self.trlogprehdg = 0.0
-            self.trlogprelaylowerhdg = 0.0
-            self.trlogprelayupperhdg = 0.0
-            self.trlogrecoverylowerhdg = 0.0
-            self.trlogrecoveryupperhdg = 0.0
-            self.trloginrecoveryrange = True
-            self.trlogpostalt = 0.0
-            self.trlogposthdg = 0.0
-            self.trlogpostlaylowerhdg = 0.0
-            self.trlogpostlayupperhdg = 0.0
+            self.trlogid = []
+            self.trlogiscruising = []
+            self.trlogprealt = []
+            self.trlogpreapalt = []
+            self.trlogprehdg = []
+            self.trlogpreaphdg = []
+            self.trlogprelaylowerhdg = []
+            self.trlogprelayupperhdg = []
+            self.trlogrecoverylowerhdg = []
+            self.trlogrecoveryupperhdg = []
+            self.trloginrecoveryrange = []
+            self.trlogpostalt = []
+            self.trlogposthdg = []
+            self.trlogpostlaylowerhdg = []
+            self.trlogpostlayupperhdg = []
             
         # All ASAS variables are initialized in the reset function
         self.reset()
@@ -858,6 +871,23 @@ class ASAS(DynamicArrays):
            It is also checked if the aircraft is in the recovery heading range of its assigned flight level
            NOTE: This function should only be called for climbing and cruising aircraft.
                  This check should be done outside this function. '''
+                 
+        # TRLOG reset
+        self.trlogid = []
+        self.trlogiscruising = []
+        self.trlogprealt = []
+        self.trlogpreapalt = []
+        self.trlogprehdg = []
+        self.trlogpreaphdg = []
+        self.trlogprelaylowerhdg = []
+        self.trlogprelayupperhdg = []
+        self.trlogrecoverylowerhdg = []
+        self.trlogrecoveryupperhdg = []
+        self.trloginrecoveryrange = []
+        self.trlogpostalt = []
+        self.trlogposthdg = []
+        self.trlogpostlaylowerhdg = []
+        self.trlogpostlayupperhdg = []
         
         # lat and lon of aircraft's origin and destination
         # needed for layers altitude equation
@@ -875,17 +905,18 @@ class ASAS(DynamicArrays):
         qdr2Dest, dist2Dest = geo.qdrdist(self.traf.lat[idx], self.traf.lon[idx], destlat, destlon)  # [deg][nm])
         qdr2Dest = qdr2Dest%360.0
         
+        # Determine the lower heading value of the flight level layer the ac is currently in, or is climbing to. 
+        layerHdg = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # ap.trk contains the pre conflict direction of the aircraft. 
+        # Determine the lower and upper heading range taking into consideration an additional 5 deg of recovery margin
+        upperRecoveryHdg  = (layerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
+        lowerRecoveryHdg  = (layerHdg - 5.0)%360.0 # lower with margin of 5 deg
+        
         # Determine if the aircraft is inside the recovery heading range of the current flight level
         # Note: for alpha = 360.0 all headings are allowed in each cruising flight level, so there is no
         #       need to change altitude after CR no matter what qdr2Dest is
         if self.alpha == 360.0:
             inRecoveryHdgRange = True
         else:
-            # Determine the lower heading value of the flight level layer the ac is currently in, or is climbing to. 
-            layerHdg = int((self.traf.ap.trk[idx]%360.0)/self.alpha)*self.alpha # [deg] # ap.trk contains the pre conflict direction of the aircraft. 
-            # Determine the lower and upper heading range taking into consideration an additional 5 deg of recovery margin
-            upperRecoveryHdg  = (layerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
-            lowerRecoveryHdg  = (layerHdg - 5.0)%360.0 # lower with margin of 5 deg
             # Determine if aicraft bearing to destination is inside recovery heading range for this flight level
             if lowerRecoveryHdg < upperRecoveryHdg:
                 inRecoveryHdgRange = lowerRecoveryHdg <= qdr2Dest <= upperRecoveryHdg
@@ -893,16 +924,18 @@ class ASAS(DynamicArrays):
                 inRecoveryHdgRange = lowerRecoveryHdg <= qdr2Dest or qdr2Dest <= upperRecoveryHdg
 
         # Set the values needed for TR logging
-        self.trlogid = self.traf.id[idx]
-        self.trlogiscruising = abs(self.traf.vs[idx])<0.1
-        self.trlogprealt = self.traf.alt[idx]
-        self.trlogprehdg = self.traf.trk[idx]
-        self.trlogprelaylowerhdg = layerHdg%360.0
-        self.trlogprelayupperhdg = (layerHdg + self.alpha)%360.0
-        self.trlogrecoverylowerhdg = lowerRecoveryHdg
-        self.trlogrecoveryupperhdg = upperRecoveryHdg
-        self.trloginrecoveryrange = inRecoveryHdgRange
-        self.trlogposthdg = qdr2Dest
+        self.trlogid.append(self.traf.id[idx])
+        self.trlogiscruising.append(abs(self.traf.vs[idx])<0.1)
+        self.trlogprealt.append(self.traf.alt[idx])
+        self.trlogpreapalt.append(self.traf.ap.alt[idx])
+        self.trlogprehdg.append(self.traf.trk[idx]%360.0)
+        self.trlogpreaphdg.append(self.traf.ap.trk[idx]%360.0)
+        self.trlogprelaylowerhdg.append(layerHdg%360.0)
+        self.trlogprelayupperhdg.append((layerHdg + self.alpha)%360.0)
+        self.trlogrecoverylowerhdg.append(lowerRecoveryHdg)
+        self.trlogrecoveryupperhdg.append(upperRecoveryHdg)
+        self.trloginrecoveryrange.append(inRecoveryHdgRange)
+        self.trlogposthdg.append(qdr2Dest)
        
         # if recovery margin is on, and if ac is cruising/climbing and if the ac is inside  
         # the current/target flight level's recovery heading range, then keep 
@@ -912,16 +945,19 @@ class ASAS(DynamicArrays):
             newAlt = self.traf.ap.alt[idx] # already in [m]
 
             # Set the values needed for TR logging
-            self.trlogpostalt = newAlt
-            self.trlogpostlaylowerhdg = layerHdg%360.0
-            self.trlogpostlayupperhdg = (layerHdg + self.alpha)%360.0
+            self.trlogpostalt.append(newAlt)
+            self.trlogpostlaylowerhdg.append(layerHdg%360.0)
+            self.trlogpostlayupperhdg.append((layerHdg + self.alpha)%360.0)
             
             # print outs for debugging
             print
             print "%s is staying is within the recovery heading range" %(self.traf.id[idx])
             print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
             print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
-            print "     qdr2Dest: %.2f" %(qdr2Dest)
+            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
+            print "     New AP altitude:  %f ft" %(newAlt/ft)
+            print "     Old Hdg: %f" %(self.traf.trk[idx]%360.0)            
+            print "     New AP Hdg: %f" %(qdr2Dest)
             print
         
         # otherwise, it must be climbing, or cruising but with a bearing to destination that is outside 
@@ -941,20 +977,22 @@ class ASAS(DynamicArrays):
             newAlt = newAlt*ft # convert to [m]
 
             # Set the values needed for TR logging
-            self.trlogpostalt = newAlt
-            self.trlogpostlaylowerhdg = int(qdr2Dest/self.alpha)*self.alpha
-            self.trlogpostlayupperhdg = int(qdr2Dest/self.alpha)*self.alpha + self.alpha
+            self.trlogpostalt.append(newAlt)
+            self.trlogpostlaylowerhdg.append(int(qdr2Dest/self.alpha)*self.alpha)
+            self.trlogpostlayupperhdg.append(int(qdr2Dest/self.alpha)*self.alpha + self.alpha)
             
             # print outs for debugging
             print
             print "%s is CLIMBING/DESCENDING TO NEW CRUISING ALTITUDE" %(self.traf.id[idx])
             print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
             print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
-            print "     qdr2Dest: %.2f" %(qdr2Dest)
-            print "     New altitude:  %f ft" %(newAlt/ft)
+            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
+            print "     New AP altitude:  %f ft" %(newAlt/ft)
+            print "     Old Hdg: %f" %(self.traf.trk[idx]%360.0)            
+            print "     New AP Hdg: %f" %(qdr2Dest)
             print "     New altitude hdg range: %i-%i" %(int(int(qdr2Dest/self.alpha)*self.alpha),int(int(qdr2Dest/self.alpha)*self.alpha+self.alpha))
             print
-        
+            
         # call the TR logger
         self.trlog.log()
             
@@ -969,8 +1007,8 @@ class ASAS(DynamicArrays):
         
         # determine if ac is desending to destination
         isDestination = self.traf.ap.route[idx].wptype[iwp] == self.traf.ap.route[idx].dest
-        isDescending1 = np.logical_and(self.traf.vs[idx] < 0.0, isDestination)
-        isDescending2 = np.logical_and(self.traf.alt[idx] < 10.0*ft, isDestination) # to handle aircraft cruising at zero altitude for a few seconds while waiting to be deleted because area function is periodic
+        isDescending1 = np.logical_and(self.traf.vs[idx] <= -0.1, isDestination)
+        isDescending2 = np.logical_and(self.traf.ap.alt[idx] <= 10.0*ft, isDestination) # to handle aircraft cruising at zero altitude for a few seconds while waiting to be deleted because area function is periodic
         isDescending  = np.logical_or(isDescending1, isDescending2)
         
         # Only ask the auto-pilot to do anything if the aircraft is climbing or cruising

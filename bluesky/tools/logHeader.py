@@ -297,7 +297,9 @@ def trHeader():
                  "Call sign [-], " + \
                  "Cruising [bool], " + \
                  "Pre cfl altitude [m], " + \
+                 "Pre cfl AP altitude [m], " + \
                  "Pre cfl heading [deg], " + \
+                 "Pre cfl AP heading [deg], " + \
                  "Pre cfl layer lower Hdg limit [deg], " + \
                  "Pre cfl layer upper Hdg limit [deg], " + \
                  "Layer recovery lower Hdg limit [deg], " + \
