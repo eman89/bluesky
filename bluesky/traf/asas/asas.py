@@ -910,7 +910,7 @@ class ASAS(DynamicArrays):
         qdr2Dest = qdr2Dest%360.0
         
         # Determine the lower heading value of the flight level layer the ac is currently in, or is climbing to. 
-        layerHdg = int(qdrorig2dest/self.alpha)*self.alpha # [deg] # ap.trk contains the pre conflict direction of the aircraft. 
+        layerHdg = int(qdrorig2dest/self.alpha)*self.alpha # [deg] 
         # Determine the lower and upper heading range taking into consideration an additional 5 deg of recovery margin
         upperRecoveryHdg  = (layerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
         lowerRecoveryHdg  = (layerHdg - 5.0)%360.0 # lower with margin of 5 deg
