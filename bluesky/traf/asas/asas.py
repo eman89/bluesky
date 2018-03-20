@@ -949,16 +949,16 @@ class ASAS(DynamicArrays):
             self.trlogpostlaylowerhdg.append(layerHdg%360.0)
             self.trlogpostlayupperhdg.append((layerHdg + self.alpha)%360.0)
             
-            # print outs for debugging
-            print
-            print "%s is staying is within the recovery heading range" %(self.traf.id[idx])
-            print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
-            print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
-            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
-            print "     New AP altitude:  %f ft" %(newAlt/ft)
-            print "     Old AP Hdg: %f" %(qdrorig2dest)            
-            print "     New AP Hdg: %f" %(qdr2Dest)
-            print
+#            # print outs for debugging
+#            print
+#            print "%s is staying is within the recovery heading range" %(self.traf.id[idx])
+#            print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
+#            print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
+#            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
+#            print "     New AP altitude:  %f ft" %(newAlt/ft)
+#            print "     Old AP Hdg: %f" %(qdrorig2dest)            
+#            print "     New AP Hdg: %f" %(qdr2Dest)
+#            print
         
         # otherwise, it must be climbing, or cruising but with a bearing to destination that is outside 
         # the receovery heading range of the flight level it is in. Then use the layers 
@@ -979,17 +979,17 @@ class ASAS(DynamicArrays):
             postlaylowerhdg = int(qdr2Dest/self.alpha)*self.alpha
             postlayupperhdg = int(qdr2Dest/self.alpha)*self.alpha + self.alpha
 
-            # print outs for debugging
-            print
-            print "%s is CLIMBING/DESCENDING TO NEW CRUISING ALTITUDE" %(self.traf.id[idx])
-            print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
-            print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
-            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
-            print "     New AP altitude:  %f ft" %(newAlt/ft)
-            print "     Old AP Hdg: %f" %(qdrorig2dest)            
-            print "     New AP Hdg: %f" %(qdr2Dest)
-            print "     New altitude hdg range: %i-%i" %(postlaylowerhdg,postlayupperhdg)
-            print
+#            # print outs for debugging
+#            print
+#            print "%s is CLIMBING/DESCENDING TO NEW CRUISING ALTITUDE" %(self.traf.id[idx])
+#            print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
+#            print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
+#            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
+#            print "     New AP altitude:  %f ft" %(newAlt/ft)
+#            print "     Old AP Hdg: %f" %(qdrorig2dest)            
+#            print "     New AP Hdg: %f" %(qdr2Dest)
+#            print "     New altitude hdg range: %i-%i" %(postlaylowerhdg,postlayupperhdg)
+#            print
             
             
             # Set the values needed for TR logging
