@@ -305,7 +305,6 @@ def trHeader():
                  "Layer recovery lower Hdg limit [deg], " + \
                  "Layer recovery upper Hdg limit [deg], " + \
                  "Inside pre cfl layer recovery range [bool], " + \
-                 "Too close to destination [bool], " + \
                  "Post cfl target altitude [m], " + \
                  "Post cfl target heading [deg], " + \
                  "Post cfl target layer lower Hdg limit [deg], " + \

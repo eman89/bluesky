@@ -222,7 +222,6 @@ class ASAS(DynamicArrays):
             self.trlogrecoverylowerhdg = []
             self.trlogrecoveryupperhdg = []
             self.trloginrecoveryrange = []
-            self.trlogtooclose2dest = []
             self.trlogpostalt = []
             self.trlogposthdg = []
             self.trlogpostlaylowerhdg = []
@@ -949,7 +948,6 @@ class ASAS(DynamicArrays):
             self.trlogpostalt.append(newAlt)
             self.trlogpostlaylowerhdg.append(layerHdg%360.0)
             self.trlogpostlayupperhdg.append((layerHdg + self.alpha)%360.0)
-            self.trlogtooclose2dest.append(False)
             
             # print outs for debugging
             print
@@ -980,58 +978,25 @@ class ASAS(DynamicArrays):
             
             postlaylowerhdg = int(qdr2Dest/self.alpha)*self.alpha
             postlayupperhdg = int(qdr2Dest/self.alpha)*self.alpha + self.alpha
-            
-            tooClose = False
-            
-            # There is no point to sending an aircraft to a new alt if it is very close to its
-            # destination and will descend anyway, and if the newalt is above the AP alt. 
-            # If the newalt is below, send it there, since the aircraft will descend later anyway.
-            # After investigating the scenarios used, it is found that the aircraft need 40 NM
-            # to descend to the ground from the highest altitude simulated. Therefore 40 NM is 
-            # as the cut off point 
-            
-            if dist2Dest < 40.0 and newAlt > self.traf.ap.alt[idx]: 
-                newAlt = self.traf.ap.alt[idx] # already in [m]
-            
-                postlaylowerhdg = int(layerHdg%360.0)
-                postlayupperhdg = int((layerHdg + self.alpha)%360.0)
-                
-                tooClose = True
-                
-            
-                
-                # print outs for debugging
-                print
-                print "%s is TOO CLOSE TO DEST, so staying at current AP altitude" %(self.traf.id[idx])
-                print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
-                print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
-                print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
-                print "     New AP altitude:  %f ft" %(newAlt/ft)
-                print "     Old AP Hdg: %f" %(qdrorig2dest)            
-                print "     New AP Hdg: %f" %(qdr2Dest)
-                print "     New altitude hdg range: %i-%i" %(int(int(qdr2Dest/self.alpha)*self.alpha),int(int(qdr2Dest/self.alpha)*self.alpha+self.alpha))
-                print
-                
-            else:
-            
-                # print outs for debugging
-                print
-                print "%s is CLIMBING/DESCENDING TO NEW CRUISING ALTITUDE" %(self.traf.id[idx])
-                print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
-                print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
-                print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
-                print "     New AP altitude:  %f ft" %(newAlt/ft)
-                print "     Old AP Hdg: %f" %(qdrorig2dest)            
-                print "     New AP Hdg: %f" %(qdr2Dest)
-                print "     New altitude hdg range: %i-%i" %(postlaylowerhdg,postlayupperhdg)
-                print
+
+            # print outs for debugging
+            print
+            print "%s is CLIMBING/DESCENDING TO NEW CRUISING ALTITUDE" %(self.traf.id[idx])
+            print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
+            print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
+            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
+            print "     New AP altitude:  %f ft" %(newAlt/ft)
+            print "     Old AP Hdg: %f" %(qdrorig2dest)            
+            print "     New AP Hdg: %f" %(qdr2Dest)
+            print "     New altitude hdg range: %i-%i" %(postlaylowerhdg,postlayupperhdg)
+            print
             
             
             # Set the values needed for TR logging
             self.trlogpostalt.append(newAlt)
             self.trlogpostlaylowerhdg.append(postlaylowerhdg)
             self.trlogpostlayupperhdg.append(postlayupperhdg)
-            self.trlogtooclose2dest.append(tooClose)
+            
             
         # call the TR logger
         self.trlog.log()

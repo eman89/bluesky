@@ -2,8 +2,8 @@
 # Synthetic scenarios
 # Good for checking multi-aircraft conflict resolution
 
-00:00:00.00>SYN SUPER 3
-# 00:00:00.00>SYN SUPER 8
+# 00:00:00.00>SYN SUPER 3
+00:00:00.00>SYN SUPER 8
 # 00:00:00.00>SYN WALL
 
 00:00:00.00>PAN 0. 0. 
@@ -12,12 +12,24 @@
 00:00:00.00>symbol
 
 00:00:00.00>RMETHH ON
-# 00:00:00.00>RMETHH BOTH
+00:00:00.00>RMETHH BOTH
 # 00:00:00.00>RMETHH SPD
 # 00:00:00.00>RMETHH HDG
 
-00:00:00.00>RMETHV ON
-00:00:00.00>RMETHV V/S 
+#00:00:00.00>RMETHV ON
+#00:00:00.00>RMETHV V/S 
+
+# Switch On Conflict and Intrusion Logs:
+00:00:00.00>CFLLOG ON
+00:00:00.00>INTLOG ON
+00:00:00.00>INSTLOG ON 1
+
+
+
+# Switch Off Conflict and Intrusion Logs:
+00:45:00.00>CFLLOG OFF
+00:45:00.00>INTLOG OFF
+00:45:00.00>INSTLOG OFF
 
 
 
