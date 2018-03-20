@@ -204,12 +204,12 @@ def detect(asas, traf, simt):
         # and some variables related to CFLLOG (others updated in asasLogUpdate())
         # and also do RESOSPAWNCHECK
         if combi not in asas.conflist_active and combi2 not in asas.conflist_active:
-            asas.nconf_total = asas.nconf_total + 1    
             # if using alternate conflict definition, then check if conflict 
             # tcpa and tinconf is greater than 0. only log (and resolve) if condition met
             if asas.swconfdef:
                 if asas.tcpa[i,j] >= 0 and  asas.tcpa[j,i] >= 0 and \
                     asas.tinconf[i,j] >= 0 and  asas.tinconf[j,i] >= 0: 
+                        asas.nconf_total = asas.nconf_total + 1   
                         asas.conflist_active.append(combi)
                         # Now get the stuff you need for the CFLLOG variables!
                         asas.clogi.append(i)
@@ -223,6 +223,7 @@ def detect(asas, traf, simt):
                         asas.clogloncpaid2.append(lonj)
                         asas.clogaltcpaid2.append(altj)
             else:
+                asas.nconf_total = asas.nconf_total + 1   
                 asas.conflist_active.append(combi)
                 # Now get the stuff you need for the CFLLOG variables!
                 asas.clogi.append(i)
