@@ -40,8 +40,8 @@ class ADSB(DynamicArrays):
     def SetNoise(self, n):
         self.transnoise = n
         self.truncated  = n
-        self.transerror = [1, 100, 100 * ft]  # [degree,m,m] standard bearing, distance, altitude error
-        self.trunctime  = 0  # [s]
+        self.transerror = [1.5, 250, 100 * ft]  # [degree,m,m] standard bearing, distance, altitude error
+        self.trunctime  = 0.05  # [s]
 
     def create(self):
         super(ADSB, self).create()
