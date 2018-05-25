@@ -11,8 +11,8 @@
 # PCALL settings and area definition
 00:00:00.00>PCALL areaDefiniton.scn
 # 00:00:00.00>PCALL Settings-L45-DoubleSep-OFF-Coop
-# 00:00:00.00>PCALL Settings-L45-DoubleSep-ONh-Coop
-#00:00:00.00>PCALL Settings-L45-DoubleSep-ONh-Climb
+00:00:00.00>PCALL Settings-L45-DoubleSep-ONh-Coop
+# 00:00:00.00>PCALL Settings-L45-DoubleSep-ONh-Climb
 # 00:00:00.00>PCALL Settings-L45-DoubleSep-ONh-Cruise
 
 # Origin-Destination Data:
