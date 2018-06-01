@@ -1011,11 +1011,11 @@ class ASAS(DynamicArrays):
         # Determine the lower and upper heading range [deg]
         lowerHdg, upperHdg = self.layersHeadingRange(idx)
         
-        # Determine the lower and upper heading range. Take into consideration an additional 2.5 deg of recovery margin
+        # Determine the lower and upper heading range. Take into consideration an additional 5.0 deg of recovery margin
         # if recovery margin in activated on each side of the range.
         if self.recoveryMargin:
-            upperRecoveryHdg  = (upperHdg+2.5)%360.0  
-            lowerRecoveryHdg  = (lowerHdg-2.5)%360.0
+            upperRecoveryHdg  = (upperHdg+5.0)%360.0  
+            lowerRecoveryHdg  = (lowerHdg-5.0)%360.0
         else:
             upperRecoveryHdg  = upperHdg%360.0  
             lowerRecoveryHdg  = lowerHdg%360.0
