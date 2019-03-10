@@ -251,7 +251,7 @@ class RadarWidget(QGLWidget):
         self.ssd.bind_attrib(ATTRIB_TRK1, 1, self.achdgbuf)
 
         # ------- Protected Zone -------------------------
-        circlevertices = np.transpose(np.array((1.25 * nm * np.cos(np.linspace(0.0, 2.0 * np.pi, self.vcount_circle)), 1.25 * nm * np.sin(np.linspace(0.0, 2.0 * np.pi, self.vcount_circle))), dtype=np.float32))
+        circlevertices = np.transpose(np.array((2.5 * nm * np.cos(np.linspace(0.0, 2.0 * np.pi, self.vcount_circle)), 2.5 * nm * np.sin(np.linspace(0.0, 2.0 * np.pi, self.vcount_circle))), dtype=np.float32))
         self.protectedzone = RenderObject(gl.GL_LINE_LOOP, vertex=circlevertices)
         self.protectedzone.bind_attrib(ATTRIB_LAT, 1, self.aclatbuf, instance_divisor=1)
         self.protectedzone.bind_attrib(ATTRIB_LON, 1, self.aclonbuf, instance_divisor=1)
