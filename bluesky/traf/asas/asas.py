@@ -863,6 +863,109 @@ class ASAS(DynamicArrays):
             self.isLayers     = True
         
         return True, "Airsapce Concept is set to " + self.conceptcode
+    
+    
+    def layersHeadingRange(self, idx):
+        ''' returns the lower and upper headings [deg] that are allowed for 
+        the layer that an aircrafts autopilot is aiming for '''
+        
+        # The following logic is hard coded for the layers concepts that being tested in 
+        # Project 4. The logic needs to adjusted in the future to make it more generic. 
+        
+        # local variable for ac autopilot alt in ft 
+        apalt = self.traf.ap.alt[idx]/ft
+        
+        # compute the mid points of the layers in ft
+        midAlts = [4550.0, 5650.0, 6750.0, 7850.0, 8950.0, 10050.0, 11150.0]
+        
+        # check each layer 
+        if self.alpha == 360.0:
+            lowerHdg = 0.0
+            upperHdg = 360.0
+
+        # layers 180.0    
+        elif self.alpha == 180.0:
+            if apalt <= midAlts[0]:
+                lowerHdg = 0.0
+                upperHdg = 180.0
+            elif apalt <= midAlts[1]:
+                lowerHdg = 180.0
+                upperHdg = 360.0
+            elif apalt <= midAlts[2]:
+                lowerHdg = 0.0
+                upperHdg = 180.0
+            elif apalt <= midAlts[3]:
+                lowerHdg = 180.0
+                upperHdg = 360.0
+            elif apalt <= midAlts[4]:
+                lowerHdg = 0.0
+                upperHdg = 180.0
+            elif apalt <= midAlts[5]:
+                lowerHdg = 180.0
+                upperHdg = 360.0
+            elif apalt <= midAlts[6]:
+                lowerHdg = 0.0
+                upperHdg = 180.0
+            else:
+                lowerHdg = 180.0
+                upperHdg = 360.0
+                
+        # layers 90.0                        
+        elif self.alpha == 90.0:
+            if apalt <= midAlts[0]:
+                lowerHdg = 0.0
+                upperHdg = 90.0
+            elif apalt <= midAlts[1]:
+                lowerHdg = 90.0
+                upperHdg = 180.0
+            elif apalt <= midAlts[2]:
+                lowerHdg = 180.0
+                upperHdg = 270.0
+            elif apalt <= midAlts[3]:
+                lowerHdg = 270.0
+                upperHdg = 360.0
+            elif apalt <= midAlts[4]:
+                lowerHdg = 0.0
+                upperHdg = 90.0
+            elif apalt <= midAlts[5]:
+                lowerHdg = 90.0
+                upperHdg = 180.0
+            elif apalt <= midAlts[6]:
+                lowerHdg = 180.0
+                upperHdg = 270.0
+            else:
+                lowerHdg = 270.0
+                upperHdg = 360.0
+        
+        # layers 45.0
+        elif self.alpha == 45.0:
+            if apalt <= midAlts[0]:
+                lowerHdg = 0.0
+                upperHdg = 45.0
+            elif apalt <= midAlts[1]:
+                lowerHdg = 45.0
+                upperHdg = 90.0
+            elif apalt <= midAlts[2]:
+                lowerHdg = 90.0
+                upperHdg = 135.0
+            elif apalt <= midAlts[3]:
+                lowerHdg = 135.0
+                upperHdg = 180.0
+            elif apalt <= midAlts[4]:
+                lowerHdg = 180.0
+                upperHdg = 225.0
+            elif apalt <= midAlts[5]:
+                lowerHdg = 225.0
+                upperHdg = 270.0
+            elif apalt <= midAlts[6]:
+                lowerHdg = 270.0
+                upperHdg = 315.0
+            else:
+                lowerHdg = 315.0
+                upperHdg = 360.0
+        
+        return lowerHdg, upperHdg
+        
         
         
     def layersCruisingAltitude(self, idx, iwp):
@@ -905,12 +1008,18 @@ class ASAS(DynamicArrays):
         qdr2Dest, dist2Dest = geo.qdrdist(self.traf.lat[idx], self.traf.lon[idx], destlat, destlon)  # [deg][nm])
         qdr2Dest = qdr2Dest%360.0
         
-        # Determine the lower heading value of the flight level layer the ac is currently in, or is climbing to. 
-        layerHdg = int(qdrorig2dest/self.alpha)*self.alpha # [deg] 
-        # Determine the lower and upper heading range taking into consideration an additional 5 deg of recovery margin
-        upperRecoveryHdg  = (layerHdg + self.alpha + 5.0)%360.0  # upper with a margin of 5 deg
-        lowerRecoveryHdg  = (layerHdg - 5.0)%360.0 # lower with margin of 5 deg
+        # Determine the lower and upper heading range [deg]
+        lowerHdg, upperHdg = self.layersHeadingRange(idx)
         
+        # Determine the lower and upper heading range. Take into consideration an additional 5.0 deg of recovery margin
+        # if recovery margin in activated on each side of the range.
+        if self.recoveryMargin:
+            upperRecoveryHdg  = (upperHdg+5.0)%360.0  
+            lowerRecoveryHdg  = (lowerHdg-5.0)%360.0
+        else:
+            upperRecoveryHdg  = upperHdg%360.0  
+            lowerRecoveryHdg  = lowerHdg%360.0
+	    	
         # Determine if the aircraft is inside the recovery heading range of the current flight level
         # Note: for alpha = 360.0 all headings are allowed in each cruising flight level, so there is no
         #       need to change altitude after CR no matter what qdr2Dest is
@@ -918,10 +1027,11 @@ class ASAS(DynamicArrays):
             inRecoveryHdgRange = True
         else:
             # Determine if aicraft bearing to destination is inside recovery heading range for this flight level
+            # Note: layer definition excludes the upper hedg range. 
             if lowerRecoveryHdg < upperRecoveryHdg:
-                inRecoveryHdgRange = lowerRecoveryHdg <= qdr2Dest <= upperRecoveryHdg
+                inRecoveryHdgRange = lowerRecoveryHdg <= qdr2Dest < upperRecoveryHdg
             else:
-                inRecoveryHdgRange = lowerRecoveryHdg <= qdr2Dest or qdr2Dest <= upperRecoveryHdg
+                inRecoveryHdgRange = lowerRecoveryHdg <= qdr2Dest or qdr2Dest < upperRecoveryHdg
 
         # Set the values needed for TR logging
         self.trlogid.append(self.traf.id[idx])
@@ -929,34 +1039,34 @@ class ASAS(DynamicArrays):
         self.trlogprealt.append(self.traf.alt[idx])
         self.trlogpreapalt.append(self.traf.ap.alt[idx])
         self.trlogprehdg.append(self.traf.trk[idx]%360.0)
-        self.trlogpreaphdg.append(qdrorig2dest)
-        self.trlogprelaylowerhdg.append(layerHdg%360.0)
-        self.trlogprelayupperhdg.append((layerHdg + self.alpha)%360.0)
+        self.trlogpreaphdg.append(qdrorig2dest%360.0)
+        self.trlogprelaylowerhdg.append(lowerHdg%360.0)
+        self.trlogprelayupperhdg.append(upperHdg%360.0)
         self.trlogrecoverylowerhdg.append(lowerRecoveryHdg)
         self.trlogrecoveryupperhdg.append(upperRecoveryHdg)
         self.trloginrecoveryrange.append(inRecoveryHdgRange)
         self.trlogposthdg.append(qdr2Dest)
        
-        # if recovery margin is on, and if ac is cruising/climbing and if the ac is inside  
+        # if ac is cruising/climbing and if the ac is inside  
         # the current/target flight level's recovery heading range, then keep 
         # flying in the current (or previous target) altitude even if this is slightly wrong.
-        if self.recoveryMargin and inRecoveryHdgRange:
+        if inRecoveryHdgRange:
             # self.traf.ap.alt[idx] is the previously commanded altitude. So just keep flying this if in recovery margin. 
             newAlt = self.traf.ap.alt[idx] # already in [m]
 
             # Set the values needed for TR logging
             self.trlogpostalt.append(newAlt)
-            self.trlogpostlaylowerhdg.append(layerHdg%360.0)
-            self.trlogpostlayupperhdg.append((layerHdg + self.alpha)%360.0)
+            self.trlogpostlaylowerhdg.append(lowerHdg%360.0)
+            self.trlogpostlayupperhdg.append(upperHdg%360.0)
             
 #            # print outs for debugging
 #            print
 #            print "%s is staying is within the recovery heading range" %(self.traf.id[idx])
-#            print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
+#            print "     LowerHeading: %i, UpperHeading: %i" %(int(lowerHdg%360.0),int(upperHdg%360.0))
 #            print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
 #            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
 #            print "     New AP altitude:  %f ft" %(newAlt/ft)
-#            print "     Old AP Hdg: %f" %(qdrorig2dest)            
+#            print "     Old AP Hdg: %f" %(qdrorig2dest%360.0)            
 #            print "     New AP Hdg: %f" %(qdr2Dest)
 #            print
         
@@ -982,15 +1092,14 @@ class ASAS(DynamicArrays):
 #            # print outs for debugging
 #            print
 #            print "%s is CLIMBING/DESCENDING TO NEW CRUISING ALTITUDE" %(self.traf.id[idx])
-#            print "     LowerHeading: %i, UpperHeading: %i" %(int(layerHdg%360.0),int((layerHdg + self.alpha)%360.0))
+#            print "     LowerHeading: %i, UpperHeading: %i" %(int(lowerHdg%360.0),int(upperHdg%360.0))
 #            print "     LowerRHdg: %i, UpperRHdg:  %i"   %(lowerRecoveryHdg, upperRecoveryHdg) 
 #            print "     Old AP altitude:  %f ft" %(self.traf.ap.alt[idx]/ft)
 #            print "     New AP altitude:  %f ft" %(newAlt/ft)
-#            print "     Old AP Hdg: %f" %(qdrorig2dest)            
+#            print "     Old AP Hdg: %f" %(qdrorig2dest%360.0)             
 #            print "     New AP Hdg: %f" %(qdr2Dest)
 #            print "     New altitude hdg range: %i-%i" %(postlaylowerhdg,postlayupperhdg)
 #            print
-            
             
             # Set the values needed for TR logging
             self.trlogpostalt.append(newAlt)
